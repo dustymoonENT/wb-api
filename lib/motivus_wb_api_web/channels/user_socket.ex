@@ -17,6 +17,7 @@ defmodule MotivusWbApiWeb.UserSocket do
   # performing token verification on connect.
   @impl true
   def connect(_params, socket, _connect_info) do
+    socket = assign(socket, :user, 1)
     {:ok, socket}
   end
 

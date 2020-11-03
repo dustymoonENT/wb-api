@@ -14,9 +14,22 @@ defmodule MotivusWbApi.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: MotivusWbApi.PubSub},
       # Start the Endpoint (http/https)
-      MotivusWbApiWeb.Endpoint
+      MotivusWbApiWeb.Endpoint,
       # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
       # {MotivusWbApi.Worker, arg}
+      # Queue for Tasks
+      Supervisor.child_spec({MotivusWbApi.QueueTasks, name: MotivusWbApi.QueueTasks}, id: :queue_tasks),
+      # Queue for Nodes
+      Supervisor.child_spec({MotivusWbApi.QueueNodes, name: MotivusWbApi.QueueNodes}, id: :queue_nodes),
+      # Pubsub
+      #{Phoenix.PubSub, name: :my_pubsub},
+      # Listener
+      Supervisor.child_spec({MotivusWbApi.ListenerTasks, name: 
+      MotivusWbApi.ListenerTasks}, id: :listener_tasks),
+      Supervisor.child_spec({MotivusWbApi.ListenerNodes, name:
+      MotivusWbApi.ListenerNodes}, id: :listener_nodes),
+      Supervisor.child_spec({MotivusWbApi.ListenerMatches, name:
+      MotivusWbApi.ListenerMatches}, id: :listener_matches),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
