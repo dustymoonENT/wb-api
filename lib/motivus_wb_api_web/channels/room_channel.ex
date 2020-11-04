@@ -12,6 +12,11 @@ defmodule MotivusWbApiWeb.RoomChannel do
   def join("room:" <> _private_room_id, _params, _socket) do
     {:error, %{reason: "unauthorized"}}
   end
+#  def handle_in(_, %{ref: ref, topic: "phoenix", event: "heartbeat"}, state, socket) do
+#    IO.inspect("llego el heartbeat") 
+#    {:noreply, socket}
+#  end
+
   def handle_in("new_msg", %{"body" => body, "type" => type, "ref" => ref, "client_id" => client_id}, socket) do
     case type do
       "work" ->
