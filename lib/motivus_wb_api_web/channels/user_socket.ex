@@ -2,7 +2,9 @@ defmodule MotivusWbApiWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "room:*", MotivusWbApiWeb.RoomChannel
+  channel "room:worker:*", MotivusWbApiWeb.WorkerChannel
+  channel "room:client:*", MotivusWbApiWeb.ClientChannel
+
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -17,6 +19,7 @@ defmodule MotivusWbApiWeb.UserSocket do
   # performing token verification on connect.
   @impl true
   def connect(_params, socket, _connect_info) do
+    socket = assign(socket, :user, 1)
     {:ok, socket}
   end
 

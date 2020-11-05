@@ -5,7 +5,8 @@ config :motivus_wb_api, MotivusWbApi.Repo,
   username: "postgres",
   password: "postgres",
   database: "motivus_wb_api_dev",
-  hostname: "localhost",
+  hostname: "db",
+  port: 5432,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
