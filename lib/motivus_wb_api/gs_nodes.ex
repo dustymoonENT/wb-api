@@ -17,6 +17,14 @@ defmodule MotivusWbApi.QueueNodes do
     GenServer.call(pid, :pop)
   end
 
+  def drop(pid, id) do
+    GenServer.cast(pid,{:drop,id})
+  end
+
+  def list(pid) do
+    GenServer.call(pid, :list)
+  end
+
   # Callbacks
 
   @impl true
@@ -32,6 +40,11 @@ defmodule MotivusWbApi.QueueNodes do
     rescue
       MatchError -> {:reply, :error, []}
     end
+  end
+
+  @impl true
+  def handle_call(:list, _from, elements) do
+    {:reply, elements,elements}
   end
 
   @impl true
@@ -53,4 +66,12 @@ defmodule MotivusWbApi.QueueNodes do
             {:noreply, [element] ++ state}
         end
   end
+
+  @impl true
+  def handle_cast({:drop, id}, state) do
+    element = %{id: id}
+    {:noreply, state -- [element]}
+  end
+
+
 end
