@@ -38,7 +38,7 @@ defmodule MotivusWbApi.QueueProcessing do
   def handle_call({:drop, key}, _from, map) do
     case Map.has_key?(map, key) do
       true -> {:reply, Map.fetch(map, key), Map.drop(map, [key])}
-      false -> {:reply, :error, map}
+      false -> {:reply, {:error, "No key"}, map}
     end
   end
 end

@@ -13,11 +13,23 @@ defmodule MotivusWbApi.ListenerNodes do
 
   # Callbacks
 
-  def handle_info({_topic, _name, data}, state) do
+  def handle_info({"new_node", _name, data}, state) do
     IO.inspect(label: "new node")
     MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)
     # Condicionado al la correcta ejecución del push
     PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :hola, %{}})
+    {:noreply, state}
+  end
+
+  def handle_info({"dead_node", _name, %{id: id}}, state) do
+    IO.inspect(label: "dead node")
+    MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
+    {status, task} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
+    case status do
+        :ok ->
+            PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"new_task", :hola, task})
+        _ ->
+    end
     {:noreply, state}
   end
 
