@@ -14,7 +14,9 @@ defmodule MotivusWbApi.Scheduler do
         IO.inspect("Nodes queue is empty")
 
       [data_node, data_task] ->
-        IO.inspect(label: "Es un match")
+        IO.inspect(label: "Es un match") 
+        MotivusWbApi.QueueProcessing.put(MotivusWbApi.QueueProcessing, data_node[:id],data_task)
+        IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing))
         dispatch(data_node, data_task)
     end
   end

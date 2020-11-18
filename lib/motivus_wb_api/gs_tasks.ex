@@ -24,6 +24,10 @@ defmodule MotivusWbApi.QueueTasks do
   def handle_call(:pop, _from, elements) do
     try do
       [head | tail] = elements
+      IO.inspect("INICIA POP A LA TASK")  
+      IO.inspect(["ELEMENT", elements])  
+      IO.inspect(["HEAD",head])  
+      IO.inspect(["TAIL",tail])  
       {:reply, head, tail}
     rescue
       MatchError -> {:reply, :error, []}
@@ -35,3 +39,4 @@ defmodule MotivusWbApi.QueueTasks do
     {:noreply, [element | state]}
   end
 end
+

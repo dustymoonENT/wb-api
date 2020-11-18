@@ -21,6 +21,8 @@ defmodule MotivusWbApi.Application do
       Supervisor.child_spec({MotivusWbApi.QueueTasks, name: MotivusWbApi.QueueTasks}, id: :queue_tasks),
       # Queue for Nodes
       Supervisor.child_spec({MotivusWbApi.QueueNodes, name: MotivusWbApi.QueueNodes}, id: :queue_nodes),
+	  # Queue for Processing task
+      Supervisor.child_spec({MotivusWbApi.QueueProcessing, name: MotivusWbApi.QueueProcessing}, id: :queue_processing),
       # Pubsub
       #{Phoenix.PubSub, name: :my_pubsub},
       # Listener

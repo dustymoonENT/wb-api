@@ -31,7 +31,10 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     IO.inspect(reason)
     IO.inspect(socket.topic)
     [_, id] = socket.topic |> String.split("room:worker:")
-    MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes,id)
+    MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
+    {:ok,task} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
+    IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing)) 
+    PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"new_task", :hola, task})
 
   end
 end
