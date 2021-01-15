@@ -50,5 +50,13 @@ defmodule MotivusWbApiWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+
+  def match_origin(conn) do
+    conn.req_headers
+    |> Enum.filter(&match?({"origin", _}, &1))
+    |> Enum.map(fn {_, origin} -> origin end)
+  end
+
+  plug CORSPlug
   plug MotivusWbApiWeb.Router
 end

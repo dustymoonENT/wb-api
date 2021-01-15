@@ -19,6 +19,12 @@ defmodule MotivusWbApiWeb.Router do
     get "/", PageController, :index
   end
 
+  scope "/api", MotivusWbApiWeb do
+    pipe_through :api
+
+    get "/user/processing_preferences", PageController, :processing_preferences
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", MotivusWbApiWeb do
   #   pipe_through :api
