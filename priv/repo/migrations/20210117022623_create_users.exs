@@ -7,7 +7,7 @@ defmodule MotivusWbApi.Repo.Migrations.CreateUsers do
       add :mail, :string
       add :avatar, :string
       add :provider, :string
-      add :uuid, :uuid
+      add :uuid, :uuid, null: false
       add :is_guest, :boolean, default: false, null: false
       add :last_sign_in, :utc_datetime
 

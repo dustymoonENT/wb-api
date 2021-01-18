@@ -19,11 +19,22 @@ defmodule MotivusWbApi.ListenerTasks do
     task =
       %Task{
         type: data[:body]["run_type"],
-        params: %{data: data[:body]["params"]}
+        params: %{data: data[:body]["params"]},
+        date_in: DateTime.truncate(DateTime.utc_now(), :second),
+        attempts: 0,
+        processing_base_time: data[:body]["processing_base_time"],
+        flops: data[:body]["flops"]
       }
       |> Repo.insert!()
 
     data = Map.put(data, :task_id, task.id)
+    IO.inspect(data)
+    MotivusWbApi.QueueTasks.push(MotivusWbApi.QueueTasks, data)
+    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :hola, %{}})
+    {:noreply, state}
+  end
+
+  def handle_info({"retry_task", _name, data}, state) do
     IO.inspect(data)
     MotivusWbApi.QueueTasks.push(MotivusWbApi.QueueTasks, data)
     PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :hola, %{}})

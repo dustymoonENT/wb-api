@@ -31,7 +31,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
           MotivusWbApi.PubSub,
           "completed",
           {"task_completed", :hola,
-           %{body: body, type: type, ref: ref, client_id: client_id, id: id}}
+           %{body: body, type: type, ref: ref, client_id: client_id, id: id, task_id: task_id}}
         )
 
       _ ->

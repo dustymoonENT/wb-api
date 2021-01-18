@@ -8,7 +8,7 @@ defmodule MotivusWbApi.ListenerNodes do
 
   def init(_) do
     {:ok, {Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "nodes")}}
-     |> IO.inspect(label: "Subscribed to nodes PubSub")
+    |> IO.inspect(label: "Subscribed to nodes PubSub")
   end
 
   # Callbacks
@@ -25,11 +25,15 @@ defmodule MotivusWbApi.ListenerNodes do
     IO.inspect(label: "dead node")
     MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
     {status, task} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
+
     case status do
-        :ok ->
-            PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"new_task", :hola, task})
-        _ ->
+      :ok ->
+        PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"retry_task", :hola, task})
+
+      _ ->
+        nil
     end
+
     {:noreply, state}
   end
 
