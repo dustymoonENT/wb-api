@@ -10,6 +10,7 @@ defmodule MotivusWbApi.Repo.Migrations.CreateUsers do
       add :uuid, :uuid, null: false
       add :is_guest, :boolean, default: false, null: false
       add :last_sign_in, :utc_datetime
+      add :ranking, :integer
 
       timestamps()
     end

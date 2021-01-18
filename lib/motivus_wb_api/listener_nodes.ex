@@ -20,7 +20,7 @@ defmodule MotivusWbApi.ListenerNodes do
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> data[:id],
       "new_msg_stats",
-      %{uid: 1, body: Stats.get_user_stats(1), type: "stats"}
+      %{uid: 1, body: Stats.get_user_stats(2), type: "stats"}
     )
 
     MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)

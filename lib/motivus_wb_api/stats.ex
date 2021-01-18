@@ -7,8 +7,10 @@ defmodule MotivusWbApi.Stats do
   alias MotivusWbApi.Repo
 
   alias MotivusWbApi.Processing.Task
+  alias MotivusWbApi.Users.User
 
   def get_user_stats(user_id) do
+    user = Repo.get_by(User, id: user_id)
     query = from t in Task, where: not is_nil(t.date_out) and t.user_id == ^user_id
     user_tasks = Repo.all(query)
     quantity = Enum.count(user_tasks)
@@ -20,12 +22,31 @@ defmodule MotivusWbApi.Stats do
         DateTime.diff(x.date_out, x.date_last_dispatch) + acc
       end)
 
-    %{
+    payload = %{
       quantity: quantity,
       base_time: user_base_time,
       flops: user_flops,
-      elapsed_time: user_elapsed_time
+      elapsed_time: user_elapsed_time,
+      ranking: user.ranking
     }
+
+    IO.inspect(payload)
+    payload
+  end
+
+  def get_users_ranking() do
+    query = """
+      WITH asd AS 
+    (SELECT user_id, sum(flops) as flops FROM "tasks" group by user_id),
+    r AS
+    (SELECT user_id as id, flops, RANK() OVER (ORDER BY flops desc) as rank from asd)
+    update users
+    set ranking = rank
+    FROM r
+    where users.id = r.id
+    """
+
+    Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [])
   end
 
   @doc """

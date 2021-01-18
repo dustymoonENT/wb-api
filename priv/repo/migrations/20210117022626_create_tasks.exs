@@ -8,7 +8,7 @@ defmodule MotivusWbApi.Repo.Migrations.CreateTasks do
       add :date_in, :utc_datetime
       add :date_last_dispatch, :utc_datetime
       add :date_out, :utc_datetime
-      add :attempts, :integer
+      add :attempts, :integer, default: 0
       add :flops, :float
       add :processing_base_time, :integer
       add :user_id, references(:users, on_delete: :nothing)
