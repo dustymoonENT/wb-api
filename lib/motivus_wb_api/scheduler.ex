@@ -1,4 +1,5 @@
 defmodule MotivusWbApi.Scheduler do
+  alias Phoenix.PubSub
 
   def match() do
     case [MotivusWbApi.QueueNodes.pop(MotivusWbApi.QueueNodes), MotivusWbApi.QueueTasks.pop(MotivusWbApi.QueueTasks)] do
@@ -14,21 +15,12 @@ defmodule MotivusWbApi.Scheduler do
         IO.inspect("Nodes queue is empty")
 
       [data_node, data_task] ->
-        IO.inspect(label: "Es un match")
+        IO.inspect(label: "Es un match") 
         dispatch(data_node, data_task)
     end
   end
 
   def dispatch(data_node, data_task) do
-    #id = data_task[:id] 
-    #payload = get(http://ruta_a_api_de_negocio/tareas/<id>)
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> data_node[:id],
-      "new_msg",
-      data_task
-    )
-    #IO.inspect(label: "Scheduling task on a node")
-    #IO.inspect(node: data_node)
-    #IO.inspect(task: data_task)
+    PubSub.broadcast(MotivusWbApi.PubSub, "dispatch", {"new_dispatch", :hola, %{data_node: data_node, data_task: data_task}})
   end
 end

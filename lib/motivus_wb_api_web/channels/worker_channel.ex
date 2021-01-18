@@ -26,15 +26,13 @@ defmodule MotivusWbApiWeb.WorkerChannel do
       "response" ->
         IO.inspect(task_id: task_id)
         [_, id] = socket.topic |> String.split("room:worker:")
-        IO.inspect(respuesta: client_id)
 
-        MotivusWbApiWeb.Endpoint.broadcast!(
-          "room:client:" <> client_id,
-          "new_msg",
-          %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id}
+        PubSub.broadcast(
+          MotivusWbApi.PubSub,
+          "completed",
+          {"task_completed", :hola,
+           %{body: body, type: type, ref: ref, client_id: client_id, id: id}}
         )
-
-        PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: id}})
 
       _ ->
         nil
@@ -47,6 +45,10 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     IO.inspect(reason)
     IO.inspect(socket.topic)
     [_, id] = socket.topic |> String.split("room:worker:")
-    MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
+    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"dead_node", :hola, %{id: id}})
+    # MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
+    # {:ok,task} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
+    # IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing)) 
+    # PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"new_task", :hola, task})
   end
 end
