@@ -2,8 +2,8 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   use Phoenix.Channel
   alias Phoenix.PubSub
 
-  def join("room:worker:" <> _ts, _message, socket) do
-    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: _ts}})
+  def join("room:worker:" <> ts, _message, socket) do
+    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: ts}})
     {:ok, socket}
   end
 

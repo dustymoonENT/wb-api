@@ -4,6 +4,7 @@ defmodule MotivusWbApi.ListenerCompleted do
   import Ecto.Changeset
   alias MotivusWbApi.Repo
   alias MotivusWbApi.Processing.Task
+  alias MotivusWbApi.Stats
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
@@ -38,6 +39,15 @@ defmodule MotivusWbApi.ListenerCompleted do
     MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
     IO.inspect(label: "DESPUES")
     IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing))
+
+    # send user stats
+
+    MotivusWbApiWeb.Endpoint.broadcast!(
+      "room:worker:" <> id,
+      "new_msg_stats",
+      %{uid: 1, body: Stats.get_user_stats(1), type: "stats", ref: ref, client_id: client_id}
+    )
+
     {:noreply, state}
   end
 
