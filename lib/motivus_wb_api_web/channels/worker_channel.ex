@@ -15,13 +15,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     case type do
       "response" ->
           [_, id] = socket.topic |> String.split("room:worker:")
-          IO.inspect(respuesta: client_id)
-          MotivusWbApiWeb.Endpoint.broadcast!(
-            "room:client:" <> client_id, 
-            "new_msg", 
-            %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id}
-          )
-          PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: id}})
+          PubSub.broadcast(MotivusWbApi.PubSub, "completed", {"task_completed", :hola, %{body: body, type: type, ref: ref, client_id: client_id, id: id}})
       _ ->
     end
     {:noreply, socket}

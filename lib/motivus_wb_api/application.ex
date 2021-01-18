@@ -34,6 +34,8 @@ defmodule MotivusWbApi.Application do
       MotivusWbApi.ListenerMatches}, id: :listener_matches),
       Supervisor.child_spec({MotivusWbApi.ListenerDispatch, name:
       MotivusWbApi.ListenerDispatch}, id: :listener_dispatch),
+      Supervisor.child_spec({MotivusWbApi.ListenerCompleted, name:
+      MotivusWbApi.ListenerCompleted}, id: :listener_completed),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
