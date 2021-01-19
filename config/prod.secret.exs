@@ -18,7 +18,9 @@ config :motivus_wb_api, MotivusWbApi.Repo,
   database: System.get_env("DB_NAME"),
   hostname: System.get_env("DB_HOST"),
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-  port: 5432
+  port: 5432,
+  queue_target: 30000,
+  queue_interval: 30000
 
 secret_key_base =
   System.get_env("SECRET_KEY_BASE") ||
