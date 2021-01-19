@@ -70,5 +70,6 @@ class MotivusWbApiStack(core.Stack):
                     'DB_HOST': db.db_instance_endpoint_address
                 }),
             memory_limit_mib=1024,
+            health_check_grace_period=60*5,
             public_load_balancer=True,  # Default is False
         )
