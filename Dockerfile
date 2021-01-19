@@ -9,6 +9,6 @@ COPY . /app
 WORKDIR /app
 EXPOSE 4000
 RUN mix deps.get --only prod
-RUN MIX_ENV=prod mix do compile
+#RUN MIX_ENV=prod mix do compile
 
 CMD ["./prod_run.sh"]
