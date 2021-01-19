@@ -23,6 +23,9 @@ defmodule MotivusWbApiWeb.Router do
     pipe_through :api
 
     get "/user/processing_preferences", PageController, :processing_preferences
+
+    resources "/user", Users.UserController, as: :users_user
+    resources "/tasks", Processing.TaskController, as: :processing_task
   end
 
   # Other scopes may use custom stacks.
