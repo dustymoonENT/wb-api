@@ -62,8 +62,16 @@ workflows:
     jobs:
       - test
       - cdk-deploy:
+          filters:
+            branches:
+              only:
+                - main
           requires:
             - test
       - ecs-update-service:
+          filters:
+            branches:
+              only:
+                - main
           requires:
             - cdk-deploy
