@@ -24,7 +24,7 @@ defmodule MotivusWbApi.ListenerCompleted do
       ) do
     IO.inspect(label: "new completed")
 
-    Repo.get_by(Task, id: task_id, user_id: 2)
+    Repo.get_by(Task, id: task_id, user_id: 1)
     |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second)})
     |> Repo.update()
 
