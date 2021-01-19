@@ -2,10 +2,10 @@
 set -e
 
 # Update mix client
-mix local.hex --force
+#mix local.hex --force
 
 # Ensure the app's dependencies are installed
-mix deps.get
+#mix deps.get
 # Potentially Set up the database
 mix ecto.create
 mix ecto.migrate

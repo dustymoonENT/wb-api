@@ -9,3 +9,10 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+#
+#
+alias MotivusWbApi.Users
+{:ok, user} = Users.create_user(%{name: "guest", mail: "guest@motivus.cl", is_guest: true, uuid: "076c6703-0d9c-422e-971c-dfc482785229"})
+{:ok, user} = Users.create_user(%{name: "guest", mail: "guest@motivus.cl", is_guest: true, uuid: "076c6703-0d9c-422e-971c-dfc482785230"})
+{:ok, user} = Users.create_user(%{name: "guest", mail: "guest@motivus.cl", is_guest: true, uuid: "076c6703-0d9c-422e-971c-dfc482785231"})
+{:ok, user} = Users.create_user(%{name: "guest", mail: "guest@motivus.cl", is_guest: true, uuid: "076c6703-0d9c-422e-971c-dfc482785232"})
