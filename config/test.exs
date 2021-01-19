@@ -9,7 +9,7 @@ config :motivus_wb_api, MotivusWbApi.Repo,
   username: "postgres",
   password: "postgres",
   database: "motivus_wb_api_test#{System.get_env("MIX_TEST_PARTITION")}",
-  hostname: "db",
+  hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
 # We don't run a server during test. If one is required,
