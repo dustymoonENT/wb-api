@@ -49,7 +49,8 @@ class MotivusWbApiStack(core.Stack):
                                       instance_type=aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE2,
                                                                             aws_ec2.InstanceSize.MICRO),
                                       storage_type=aws_rds.StorageType.GP2,
-
+                                      security_groups=[security_group],
+                                      instance_identifier=title,
                                       vpc=vpc)
 
         cluster = aws_ecs.Cluster(self, f'{title}-cluster', vpc=vpc, cluster_name=f'{title}-cluster')
