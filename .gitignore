@@ -28,3 +28,5 @@ motivus_wb_api-*.tar
 /priv/static/
 
 /.idea/
+
+.env

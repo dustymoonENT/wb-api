@@ -20,7 +20,14 @@ defmodule MotivusWbApi.MixProject do
   def application do
     [
       mod: {MotivusWbApi.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [
+        :logger,
+        :runtime_tools,
+        :ueberauth,
+        :ueberauth_github,
+        :ueberauth_google,
+        :ueberauth_facebook
+      ]
     ]
   end
 
@@ -45,7 +52,11 @@ defmodule MotivusWbApi.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:cors_plug, "~> 2.0"}
+      {:cors_plug, "~> 2.0"},
+      {:guardian, "~> 2.0"},
+      {:ueberauth_github, "~> 0.7"},
+      {:ueberauth_google, "~> 0.10"},
+      {:ueberauth_facebook, "~> 0.8"}
     ]
   end
 

@@ -13,16 +13,30 @@ defmodule MotivusWbApiWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug MotivusWbApi.Users.Pipeline
+  end
+
   scope "/", MotivusWbApiWeb do
     pipe_through :browser
 
     get "/", PageController, :index
   end
 
+  scope "/auth", MotivusWbApiWeb do
+    pipe_through([:api])
+
+    get("/:provider", AuthController, :request)
+    get("/:provider/callback", AuthController, :callback)
+    post("/:provider/callback", AuthController, :callback)
+    # post("/logout", AuthController, :delete)
+  end
+
   scope "/api", MotivusWbApiWeb do
-    pipe_through :api
+    pipe_through([:api, :auth])
 
     get "/user/processing_preferences", PageController, :processing_preferences
+    get "/user", PageController, :get_user
   end
 
   # Other scopes may use custom stacks.
