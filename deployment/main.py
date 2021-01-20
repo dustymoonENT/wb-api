@@ -6,7 +6,8 @@ from aws_cdk import (
     aws_ecs_patterns,
     aws_ecr,
     aws_rds,
-    aws_secretsmanager
+    aws_secretsmanager,
+    aws_route53
 )
 from aws_cdk.core import Duration
 
