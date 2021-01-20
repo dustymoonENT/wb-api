@@ -92,5 +92,7 @@ class MotivusWbApiStack(core.Stack):
             memory_limit_mib=2048,
             health_check_grace_period=core.Duration.minutes(15),
             public_load_balancer=True,  # Default is False
-            certificate=certificate
+            certificate=certificate,
+            domain_name=domain_name,
+            domain_zone=hosted_zone
         )
