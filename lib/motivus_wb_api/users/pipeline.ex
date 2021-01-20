@@ -1,6 +1,6 @@
 defmodule MotivusWbApi.Users.Pipeline do
   use Guardian.Plug.Pipeline,
-    otp_app: :dairylink_api,
+    otp_app: :motivus_wb_api,
     error_handler: MotivusWbApi.Users.ErrorHandler,
     module: MotivusWbApi.Users.Guardian
 
