@@ -33,6 +33,10 @@ class MotivusWbApiStack(core.Stack):
 
         creds = aws_rds.Credentials.from_password("motivus_admin", db_password.secret_value)
 
+        security_group = aws_ec2.SecurityGroup(self, f'{title}-security-group', vpc=vpc)
+
+        security_group.add_ingress_rule(aws_ec2.Peer.ipv4('0.0.0.0/0'), aws_ec2.Port.tcp(5432))
+
         database_name = "motivus_wb_api"
         db = aws_rds.DatabaseInstance(self, f'{title}-db',
                                       engine=aws_rds.DatabaseInstanceEngine.POSTGRES,
@@ -45,6 +49,7 @@ class MotivusWbApiStack(core.Stack):
                                       instance_type=aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE2,
                                                                             aws_ec2.InstanceSize.MICRO),
                                       storage_type=aws_rds.StorageType.GP2,
+
                                       vpc=vpc)
 
         cluster = aws_ecs.Cluster(self, f'{title}-cluster', vpc=vpc, cluster_name=f'{title}-cluster')

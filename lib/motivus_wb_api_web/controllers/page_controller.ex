@@ -15,4 +15,10 @@ defmodule MotivusWbApiWeb.PageController do
     # )
     |> json(%{"processing_allowed" => true})
   end
+
+  def get_user(conn, _params) do
+    user = Guardian.Plug.current_resource(conn)
+
+    json(conn, %{"user" => user})
+  end
 end
