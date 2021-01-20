@@ -33,6 +33,20 @@ class MotivusWbApiStack(core.Stack):
 
         creds = aws_rds.Credentials.from_password("motivus_admin", db_password.secret_value)
 
+        zone_name = 'motivus.cl'
+
+        zone_id = 'Z1ZCWA0FF51E6H'
+
+        hosted_zone = aws_route53.HostedZone.from_hosted_zone_attributes(
+            self, f'{title}-hosted-zone', zone_name=zone_name, hosted_zone_id=zone_id
+        )
+
+        domain_name = 'waterbear.api.motivus.cl'
+
+        certificate = aws_certificatemanager.DnsValidatedCertificate(
+            self, f'{title}-domain-certificate', domain_name=domain_name, hosted_zone=hosted_zone
+        )
+
         security_group = aws_ec2.SecurityGroup(self, f'{title}-security-group', vpc=vpc)
 
         security_group.add_ingress_rule(aws_ec2.Peer.ipv4('0.0.0.0/0'), aws_ec2.Port.tcp(5432))
@@ -78,4 +92,7 @@ class MotivusWbApiStack(core.Stack):
             memory_limit_mib=2048,
             health_check_grace_period=core.Duration.minutes(15),
             public_load_balancer=True,  # Default is False
+            certificate=certificate,
+            domain_name=domain_name,
+            domain_zone=hosted_zone
         )
