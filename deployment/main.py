@@ -7,7 +7,8 @@ from aws_cdk import (
     aws_ecr,
     aws_rds,
     aws_secretsmanager,
-    aws_route53
+    aws_route53,
+    aws_certificatemanager
 )
 from aws_cdk.core import Duration
 
@@ -88,7 +89,13 @@ class MotivusWbApiStack(core.Stack):
                     'MIX_ENV': 'prod',
                     'DB_USER': 'motivus_admin',
                     'DB_NAME': database_name,
-                    'DB_HOST': db.db_instance_endpoint_address
+                    'DB_HOST': db.db_instance_endpoint_address,
+                    'GITHUB_CLIENT_ID': os.environ['GITHUB_CLIENT_ID'],
+                    'GITHUB_CLIENT_SECRET': os.environ['GITHUB_CLIENT_SECRET'],
+                    'GOOGLE_CLIENT_ID': os.environ['GOOGLE_CLIENT_ID'],
+                    'GOOGLE_CLIENT_SECRET': os.environ['GOOGLE_CLIENT_SECRET'],
+                    'FACEBOOK_CLIENT_ID': os.environ['FACEBOOK_CLIENT_ID'],
+                    'FACEBOOK_CLIENT_SECRET': os.environ['FACEBOOK_CLIENT_SECRET'],
                 }),
             memory_limit_mib=2048,
             health_check_grace_period=core.Duration.minutes(15),

@@ -1,5 +1,6 @@
 defmodule MotivusWbApiWeb.PageController do
   use MotivusWbApiWeb, :controller
+  alias MotivusWbApi.Users
 
   def index(conn, _params) do
     render(conn, "index.html")
@@ -18,6 +19,13 @@ defmodule MotivusWbApiWeb.PageController do
 
   def get_user(conn, _params) do
     user = Guardian.Plug.current_resource(conn)
+
+    json(conn, %{"user" => user})
+  end
+
+  def create_guest(conn, _params) do
+    {:ok, user} =
+      Users.create_user(%{uuid: Ecto.UUID.bingenerate(), is_guest: true, name: "guest"})
 
     json(conn, %{"user" => user})
   end
