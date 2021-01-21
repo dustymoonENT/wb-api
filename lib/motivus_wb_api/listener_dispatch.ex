@@ -1,7 +1,6 @@
 defmodule MotivusWbApi.ListenerDispatch do
   use GenServer
   import Ecto.Changeset
-  alias Phoenix.PubSub
   alias MotivusWbApi.Repo
   alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Users.User
@@ -22,7 +21,7 @@ defmodule MotivusWbApi.ListenerDispatch do
 
     task = Repo.get_by(Task, id: data_task[:task_id])
     # user = Repo.get_by(User, id: data_node[:id])
-    user = Repo.get_by(User, id: 1)
+    user = Repo.get_by!(User, uuid: data_node[:id])
 
     task
     |> change(%{

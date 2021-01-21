@@ -3,6 +3,7 @@ defmodule MotivusWbApi.ListenerCompleted do
   alias Phoenix.PubSub
   import Ecto.Changeset
   alias MotivusWbApi.Repo
+  alias MotivusWbApi.Users
   alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Stats
 
@@ -24,7 +25,9 @@ defmodule MotivusWbApi.ListenerCompleted do
       ) do
     IO.inspect(label: "new completed")
 
-    Repo.get_by(Task, id: task_id, user_id: 1)
+    user = Repo.get_by!(Users.User, uuid: id)
+
+    Repo.get_by(Task, id: task_id, user_id: user.id)
     |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second)})
     |> Repo.update()
 
@@ -45,7 +48,13 @@ defmodule MotivusWbApi.ListenerCompleted do
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> id,
       "new_msg_stats",
-      %{uid: 1, body: Stats.get_user_stats(1), type: "stats", ref: ref, client_id: client_id}
+      %{
+        uid: 1,
+        body: Stats.get_user_stats(user.id),
+        type: "stats",
+        ref: ref,
+        client_id: client_id
+      }
     )
 
     {:noreply, state}
