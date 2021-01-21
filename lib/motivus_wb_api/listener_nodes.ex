@@ -2,6 +2,8 @@ defmodule MotivusWbApi.ListenerNodes do
   use GenServer
   alias Phoenix.PubSub
   alias MotivusWbApi.Stats
+  alias MotivusWbApi.Users
+  alias MotivusWbApi.Repo
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
@@ -17,10 +19,12 @@ defmodule MotivusWbApi.ListenerNodes do
   def handle_info({"new_node", _name, data}, state) do
     IO.inspect(label: "new node")
 
+    user = Repo.get_by!(Users.User, uuid: data[:id])
+
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> data[:id],
       "new_msg_stats",
-      %{uid: 1, body: Stats.get_user_stats(1), type: "stats"}
+      %{uid: 1, body: Stats.get_user_stats(user.id), type: "stats"}
     )
 
     MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)

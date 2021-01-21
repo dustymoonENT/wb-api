@@ -33,10 +33,12 @@ defmodule MotivusWbApiWeb.Router do
   end
 
   scope "/api", MotivusWbApiWeb do
-    pipe_through([:api, :auth])
+    pipe_through([:api])
 
     # get "/user/processing_preferences", PageController, :processing_preferences
-    # get "/user", PageController, :get_user
+    post "/users/guest", PageController, :create_guest
+
+    pipe_through([:auth])
 
     resources "/user", Users.UserController, as: :users_user
     resources "/tasks", Processing.TaskController, as: :processing_task
