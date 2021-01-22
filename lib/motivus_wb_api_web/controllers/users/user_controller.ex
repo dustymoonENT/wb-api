@@ -40,4 +40,25 @@ defmodule MotivusWbApiWeb.Users.UserController do
       send_resp(conn, :no_content, "")
     end
   end
+
+  def get(conn, _params) do
+    user = Guardian.Plug.current_resource(conn)
+
+    render(conn, "show.json", user: user)
+  end
+
+  def create_guest(conn, _params) do
+    with {:ok, %User{} = user} <-
+           Users.create_user(%{uuid: Ecto.UUID.bingenerate(), is_guest: true, name: "guest"}) do
+      token =
+        conn
+        |> Guardian.Plug.sign_in(%{id: user.id}, %{})
+        |> Guardian.Plug.current_token()
+
+      conn
+      |> put_status(:created)
+      |> put_resp_header("location", Routes.users_user_path(conn, :show, user))
+      |> render("show.json", user: user)
+    end
+  end
 end
