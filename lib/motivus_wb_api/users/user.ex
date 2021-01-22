@@ -19,6 +19,6 @@ defmodule MotivusWbApi.Users.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:name, :mail, :avatar, :provider, :uuid, :is_guest, :last_sign_in])
-    |> validate_required([:name, :mail, :avatar, :provider, :uuid, :is_guest, :last_sign_in])
+    |> validate_required([:name, :mail, :uuid, :is_guest, :last_sign_in])
   end
 end

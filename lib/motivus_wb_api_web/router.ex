@@ -26,6 +26,8 @@ defmodule MotivusWbApiWeb.Router do
   scope "/auth", MotivusWbApiWeb do
     pipe_through([:api])
 
+    post "/guest", AuthController, :create_guest
+
     get("/:provider", AuthController, :request)
     get("/:provider/callback", AuthController, :callback)
     post("/:provider/callback", AuthController, :callback)
@@ -35,8 +37,9 @@ defmodule MotivusWbApiWeb.Router do
   scope "/api", MotivusWbApiWeb do
     pipe_through([:api, :auth])
 
-    get "/user/processing_preferences", PageController, :processing_preferences
-    get "/user", PageController, :get_user
+    get "/user", Users.UserController, :get
+    resources "/users", Users.UserController, as: :users_user
+    resources "/tasks", Processing.TaskController, as: :processing_task
   end
 
   # Other scopes may use custom stacks.
