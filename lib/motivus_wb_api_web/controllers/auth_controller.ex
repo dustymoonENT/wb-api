@@ -6,12 +6,9 @@ defmodule MotivusWbApiWeb.AuthController do
   use MotivusWbApiWeb, :controller
   plug(Ueberauth)
 
-  alias Ueberauth.Strategy.Helpers
   alias MotivusWbApi.Users.Guardian
-
-  def request(conn, _params) do
-    render(conn, "request.html", callback_url: Helpers.callback_url(conn))
-  end
+  alias MotivusWbApi.Users
+  alias MotivusWbApi.Users.User
 
   def delete(conn, _params) do
     conn
@@ -25,12 +22,12 @@ defmodule MotivusWbApiWeb.AuthController do
     |> json(%{"error" => fails})
   end
 
-  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
+  def callback(%{assigns: %{ueberauth_auth: auth}} = conn, params) do
     case UserFromAuth.find_or_create(auth) do
       {:ok, user} ->
         conn
         |> Guardian.Plug.sign_in(%{id: user.id}, %{})
-        |> redirect_to_spa()
+        |> send_token(params)
 
       {:error, reason} ->
         conn
@@ -39,11 +36,33 @@ defmodule MotivusWbApiWeb.AuthController do
     end
   end
 
-  defp redirect_to_spa(conn) do
+  def send_token(conn, _params) do
     token = Guardian.Plug.current_token(conn)
 
-    redirect(conn,
-      external: System.get_env("SPA_REDIRECT_URI", "http://motivus.cl/auth") <> "?token=" <> token
-    )
+    conn
+    |> fetch_session()
+    |> fetch_flash()
+    |> Phoenix.Controller.render("success.html", %{
+      token: token,
+      origin: Application.get_env(:motivus_wb_api, :spa_origin)
+    })
+  end
+
+  def create_guest(conn, _params) do
+    {:ok, user} =
+      Users.create_user(%{
+        uuid: Ecto.UUID.bingenerate(),
+        is_guest: true,
+        name: "guest",
+        mail: "nomail",
+        last_sign_in: DateTime.utc_now()
+      })
+
+    token =
+      conn
+      |> Guardian.Plug.sign_in(%{id: user.id}, %{})
+      |> Guardian.Plug.current_token()
+
+    json(conn, %{"token" => token})
   end
 end
