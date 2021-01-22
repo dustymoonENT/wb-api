@@ -18,18 +18,39 @@ defmodule MotivusWbApi.Application do
       # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
       # {MotivusWbApi.Worker, arg}
       # Queue for Tasks
-      Supervisor.child_spec({MotivusWbApi.QueueTasks, name: MotivusWbApi.QueueTasks}, id: :queue_tasks),
+      Supervisor.child_spec({MotivusWbApi.QueueTasks, name: MotivusWbApi.QueueTasks},
+        id: :queue_tasks
+      ),
       # Queue for Nodes
-      Supervisor.child_spec({MotivusWbApi.QueueNodes, name: MotivusWbApi.QueueNodes}, id: :queue_nodes),
+      Supervisor.child_spec({MotivusWbApi.QueueNodes, name: MotivusWbApi.QueueNodes},
+        id: :queue_nodes
+      ),
+      # Queue for Processing task
+      Supervisor.child_spec({MotivusWbApi.QueueProcessing, name: MotivusWbApi.QueueProcessing},
+        id: :queue_processing
+      ),
       # Pubsub
-      #{Phoenix.PubSub, name: :my_pubsub},
+      # {Phoenix.PubSub, name: :my_pubsub},
       # Listener
-      Supervisor.child_spec({MotivusWbApi.ListenerTasks, name: 
-      MotivusWbApi.ListenerTasks}, id: :listener_tasks),
-      Supervisor.child_spec({MotivusWbApi.ListenerNodes, name:
-      MotivusWbApi.ListenerNodes}, id: :listener_nodes),
-      Supervisor.child_spec({MotivusWbApi.ListenerMatches, name:
-      MotivusWbApi.ListenerMatches}, id: :listener_matches),
+      Supervisor.child_spec({MotivusWbApi.ListenerTasks, name: MotivusWbApi.ListenerTasks},
+        id: :listener_tasks
+      ),
+      Supervisor.child_spec({MotivusWbApi.ListenerNodes, name: MotivusWbApi.ListenerNodes},
+        id: :listener_nodes
+      ),
+      Supervisor.child_spec({MotivusWbApi.ListenerMatches, name: MotivusWbApi.ListenerMatches},
+        id: :listener_matches
+      ),
+      Supervisor.child_spec({MotivusWbApi.ListenerDispatch, name: MotivusWbApi.ListenerDispatch},
+        id: :listener_dispatch
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.ListenerCompleted, name: MotivusWbApi.ListenerCompleted},
+        id: :listener_completed
+      ),
+      Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
+        id: cron_config_1_ranking()[:id]
+      )
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -43,5 +64,15 @@ defmodule MotivusWbApi.Application do
   def config_change(changed, _new, removed) do
     MotivusWbApiWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp cron_config_1_ranking do
+    %{
+      app_id: 1,
+      worker: :worker_cron_1_ranking,
+      work: :ranking,
+      loop_time: 30_000,
+      id: :cron_1_ranking
+    }
   end
 end

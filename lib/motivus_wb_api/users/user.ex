@@ -11,6 +11,7 @@ defmodule MotivusWbApi.Users.User do
     field :name, :string
     field :provider, :string
     field :uuid, Ecto.UUID
+    field :ranking, :integer
 
     timestamps()
   end

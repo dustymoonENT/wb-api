@@ -3,19 +3,24 @@ services:
     app:
         build:
             context: .
-            dockerfile: dev.Dockerfile
+            dockerfile: Dockerfile
         ports:
             - "4000:4000"
         volumes:
             - ./:/app
-        env_file: .env
+        #env_file: .env
         environment:
+            - MIX_ENV=prod
+            - SECRET_KEY_BASE=mjdiowjdojewo
+            - DB_PASSWORD=postgres
+            - DB_NAME=motivus_wb_api_dev
+            - DB_USER=postgres
             - DB_HOST=db
-        command: ["./run.sh"]
+        command: ["./prod_run.sh"]
     db:
         image: postgres:12
-        ports:
-          - "5432:5432"
+        expose:
+            - "5432"
         environment:
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=motivus_wb_api_dev
