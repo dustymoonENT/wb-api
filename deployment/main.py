@@ -5,6 +5,7 @@ from aws_cdk import (
     aws_ecs,
     aws_ecs_patterns,
     aws_ecr,
+    aws_iam,
     aws_rds,
     aws_secretsmanager,
     aws_route53,
@@ -73,7 +74,7 @@ class MotivusWbApiStack(core.Stack):
 
         registry = aws_ecs.EcrImage(repository=repository, tag='latest')
 
-        aws_ecs_patterns.ApplicationLoadBalancedFargateService(
+        service = aws_ecs_patterns.ApplicationLoadBalancedFargateService(
             self,
             f'{title}-fargate-service',
             cluster=cluster,  # Required
@@ -103,4 +104,8 @@ class MotivusWbApiStack(core.Stack):
             certificate=certificate,
             domain_name=domain_name,
             domain_zone=hosted_zone
+        )
+        task_role = service.task_definition.task_role
+        task_role.add_to_principal_policy(
+            aws_iam.PolicyStatement(resources=list('*'), actions=list('cloudwatch:PutMetricData'))
         )
