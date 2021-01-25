@@ -107,5 +107,5 @@ class MotivusWbApiStack(core.Stack):
         )
         task_role = service.task_definition.task_role
         task_role.add_to_principal_policy(
-            aws_iam.PolicyStatement(resources=list('*'), actions=list('cloudwatch:PutMetricData'))
+            aws_iam.PolicyStatement(resources=['*'], actions=['cloudwatch:PutMetricData'])
         )
