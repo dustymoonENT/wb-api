@@ -4,13 +4,12 @@ defmodule MotivusWbApi.Application do
   @moduledoc false
 
   use Application
+  alias Telemetry.Metrics
 
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
       MotivusWbApi.Repo,
-      # Start the Telemetry supervisor
-      MotivusWbApiWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: MotivusWbApi.PubSub},
       # Start the Endpoint (http/https)
@@ -50,7 +49,11 @@ defmodule MotivusWbApi.Application do
       ),
       Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
         id: cron_config_1_ranking()[:id]
-      )
+      ),
+      {TelemetryMetricsCloudwatch, [metrics: metrics(), push_interval: 10_000]},
+      # {TelemetryMetricsPrometheus, [metrics: metrics()]},
+      # Start the Telemetry supervisor
+      MotivusWbApiWeb.Telemetry
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -74,5 +77,13 @@ defmodule MotivusWbApi.Application do
       loop_time: 30_000,
       id: :cron_1_ranking
     }
+  end
+
+  defp metrics do
+    [
+      Metrics.last_value("nodes.queue.total"),
+      Metrics.last_value("tasks.queue.total"),
+      Metrics.last_value("processing.queue.total")
+    ]
   end
 end
