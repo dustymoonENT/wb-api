@@ -67,7 +67,7 @@ class MotivusWbApiStack(core.Stack):
                                                                             aws_ec2.InstanceSize.MICRO),
                                       storage_type=aws_rds.StorageType.GP2,
                                       security_groups=[security_group],
-                                      instance_identifier=title,
+                                      instance_identifier=f'{title}-db-identifier',
                                       publicly_accessible=True,
                                       vpc=vpc)
 
