@@ -50,7 +50,8 @@ defmodule MotivusWbApi.Application do
       Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
         id: cron_config_1_ranking()[:id]
       ),
-      {TelemetryMetricsCloudwatch, [metrics: metrics(), push_interval: 10_000]},
+      {TelemetryMetricsCloudwatch,
+       [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
       # {TelemetryMetricsPrometheus, [metrics: metrics()]},
       # Start the Telemetry supervisor
       MotivusWbApiWeb.Telemetry
