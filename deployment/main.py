@@ -68,7 +68,7 @@ class MotivusWbApiStack(core.Stack):
                                       storage_type=aws_rds.StorageType.GP2,
                                       security_groups=[security_group],
                                       instance_identifier=f'{title}-db-identifier',
-                                      publicly_accessible=True,
+                                      vpc_placement=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PUBLIC),
                                       vpc=vpc)
 
         cluster = aws_ecs.Cluster(self, f'{title}-cluster', vpc=vpc, cluster_name=f'{title}-cluster')
