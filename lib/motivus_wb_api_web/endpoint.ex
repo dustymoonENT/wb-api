@@ -11,7 +11,7 @@ defmodule MotivusWbApiWeb.Endpoint do
   ]
 
   socket "/socket", MotivusWbApiWeb.UserSocket,
-    websocket: [timeout: 10_000],
+    websocket: [timeout: 10_000, check_origin: false],
     longpoll: false
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]

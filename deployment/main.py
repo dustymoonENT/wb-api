@@ -68,6 +68,7 @@ class MotivusWbApiStack(core.Stack):
                                       storage_type=aws_rds.StorageType.GP2,
                                       security_groups=[security_group],
                                       instance_identifier=title,
+                                      publicly_accessible=True,
                                       vpc=vpc)
 
         cluster = aws_ecs.Cluster(self, f'{title}-cluster', vpc=vpc, cluster_name=f'{title}-cluster')
@@ -107,5 +108,5 @@ class MotivusWbApiStack(core.Stack):
         )
         task_role = service.task_definition.task_role
         task_role.add_to_principal_policy(
-            aws_iam.PolicyStatement(resources=list('*'), actions=list('cloudwatch:PutMetricData'))
+            aws_iam.PolicyStatement(resources=['*'], actions=['cloudwatch:PutMetricData'])
         )
