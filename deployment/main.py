@@ -55,7 +55,7 @@ class MotivusWbApiStack(core.Stack):
         security_group.add_ingress_rule(aws_ec2.Peer.ipv4('0.0.0.0/0'), aws_ec2.Port.tcp(5432))
 
         database_name = "motivus_wb_api"
-        db = aws_rds.DatabaseInstance(self, f'{title}-db',
+        db = aws_rds.DatabaseInstance(self, f'{title}-db-prod',
                                       engine=aws_rds.DatabaseInstanceEngine.POSTGRES,
                                       preferred_backup_window="05:00-06:00",
                                       backup_retention=Duration.days(7),
@@ -67,7 +67,7 @@ class MotivusWbApiStack(core.Stack):
                                                                             aws_ec2.InstanceSize.MICRO),
                                       storage_type=aws_rds.StorageType.GP2,
                                       security_groups=[security_group],
-                                      instance_identifier=f'{title}-db-identifier',
+                                      instance_identifier=f'{title}-db-prod',
                                       vpc_placement=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PUBLIC),
                                       vpc=vpc)
 
