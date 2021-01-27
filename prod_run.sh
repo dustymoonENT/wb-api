@@ -10,4 +10,4 @@ set -e
 mix ecto.create
 mix ecto.migrate
 echo " Launching Phoenix web server..."
-mix phx.server
+mix phx.server --no-compile

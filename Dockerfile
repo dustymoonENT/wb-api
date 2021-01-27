@@ -8,7 +8,5 @@ RUN wget -q https://github.com/phoenixframework/archives/raw/master/phx_new.ez &
 COPY . /app
 WORKDIR /app
 EXPOSE 80
-RUN mix deps.get --only prod
-#RUN MIX_ENV=prod mix do compile
-
+RUN mix do deps.get, deps.compile, compile
 CMD ["./prod_run.sh"]

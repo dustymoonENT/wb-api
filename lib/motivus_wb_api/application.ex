@@ -7,6 +7,8 @@ defmodule MotivusWbApi.Application do
   alias Telemetry.Metrics
 
   def start(_type, _args) do
+    Confex.resolve_env!(:motivus_wb_api)
+
     children = [
       # Start the Ecto repository
       MotivusWbApi.Repo,
