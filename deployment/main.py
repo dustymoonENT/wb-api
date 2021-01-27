@@ -99,7 +99,8 @@ class MotivusWbApiStack(core.Stack):
                     'FACEBOOK_CLIENT_ID': os.environ['FACEBOOK_CLIENT_ID'],
                     'FACEBOOK_CLIENT_SECRET': os.environ['FACEBOOK_CLIENT_SECRET'],
                 }),
-            memory_limit_mib=2048,
+            memory_limit_mib=8192,
+            cpu=4096,
             health_check_grace_period=core.Duration.minutes(15),
             public_load_balancer=True,  # Default is False
             certificate=certificate,
