@@ -101,7 +101,7 @@ class MotivusWbApiStack(core.Stack):
                 }),
             memory_limit_mib=8192,
             cpu=4096,
-            health_check_grace_period=core.Duration.minutes(15),
+            health_check_grace_period=core.Duration.minutes(5),
             public_load_balancer=True,  # Default is False
             certificate=certificate,
             domain_name=domain_name,

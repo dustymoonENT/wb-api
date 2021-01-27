@@ -30,6 +30,5 @@ defmodule MotivusWbApiWeb.ClientChannel do
 
   def terminate(reason, socket) do
     IO.inspect("desde Clientchanel")
-    IO.inspect(socket.topic)
   end
 end

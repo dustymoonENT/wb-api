@@ -29,9 +29,6 @@ defmodule MotivusWbApi.QueueTasks do
     try do
       [head | tail] = elements
       IO.inspect("INICIA POP A LA TASK")
-      IO.inspect(["ELEMENT", elements])
-      IO.inspect(["HEAD", head])
-      IO.inspect(["TAIL", tail])
       {:reply, head, tail}
     rescue
       MatchError -> {:reply, :error, []}

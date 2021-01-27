@@ -24,7 +24,6 @@ defmodule MotivusWbApiWeb.WorkerChannel do
       ) do
     case type do
       "response" ->
-        IO.inspect(task_id: task_id)
         [_, id] = socket.topic |> String.split("room:worker:")
 
         PubSub.broadcast(
@@ -42,8 +41,6 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   end
 
   def terminate(reason, socket) do
-    IO.inspect(reason)
-    IO.inspect(socket.topic)
     [_, id] = socket.topic |> String.split("room:worker:")
     PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"dead_node", :hola, %{id: id}})
     # MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)

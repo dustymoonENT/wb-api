@@ -38,10 +38,8 @@ defmodule MotivusWbApi.ListenerCompleted do
     )
 
     PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: id}})
-    IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing))
     MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
     IO.inspect(label: "DESPUES")
-    IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing))
 
     # send user stats
 
