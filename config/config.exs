@@ -22,7 +22,9 @@ config :motivus_wb_api, MotivusWbApi.Users.Guardian,
   issuer: "motivus_wb_api",
   secret_key: "+3LwaCzii9+KPeqbfDIAPfPOlKZGUAwKeI9v8bGiL4VzC+99MaetabswT6HoBvi1"
 
-config :motivus_wb_api, spa_origin: System.get_env("SPA_ORIGIN", "https://motivus.cl")
+config :motivus_wb_api,
+  spa_origin: System.get_env("SPA_ORIGIN", "https://motivus.cl"),
+  spa_alias_origin: System.get_env("SPA_ALIAS_ORIGIN", "https://www.motivus.cl")
 
 config :ueberauth, Ueberauth,
   providers: [
