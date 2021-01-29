@@ -35,7 +35,7 @@ defmodule MotivusWbApi.ListenerDispatch do
 
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> data_node[:id],
-      "new_msg",
+      "input",
       data_task
     )
 

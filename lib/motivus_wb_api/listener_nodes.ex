@@ -23,7 +23,7 @@ defmodule MotivusWbApi.ListenerNodes do
 
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> data[:id],
-      "new_msg_stats",
+      "stats",
       %{uid: 1, body: Stats.get_user_stats(user.id), type: "stats"}
     )
 

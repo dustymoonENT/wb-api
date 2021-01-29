@@ -12,7 +12,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   end
 
   def handle_in(
-        "new_msg",
+        "result",
         %{
           "body" => body,
           "type" => type,

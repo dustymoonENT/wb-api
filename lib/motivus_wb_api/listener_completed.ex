@@ -41,20 +41,6 @@ defmodule MotivusWbApi.ListenerCompleted do
     MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
     IO.inspect(label: "DESPUES")
 
-    # send user stats
-
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> id,
-      "new_msg_stats",
-      %{
-        uid: 1,
-        body: Stats.get_user_stats(user.id),
-        type: "stats",
-        ref: ref,
-        client_id: client_id
-      }
-    )
-
     {:noreply, state}
   end
 
