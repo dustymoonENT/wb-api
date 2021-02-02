@@ -1,9 +1,9 @@
 defmodule MotivusWbApi.ListenerNodes do
   use GenServer
   alias Phoenix.PubSub
-  alias MotivusWbApi.Stats
   alias MotivusWbApi.Users
   alias MotivusWbApi.Repo
+  alias MotivusWbApi.Stats
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
@@ -16,16 +16,20 @@ defmodule MotivusWbApi.ListenerNodes do
 
   # Callbacks
 
-  def handle_info({"new_node", _name, data}, state) do
-    IO.inspect(label: "new node")
-
-    user = Repo.get_by!(Users.User, uuid: data[:id])
+  def handle_info({"new_channel", _, data}, state) do
+    user = Repo.get_by!(Users.User, uuid: data.uuid)
 
     MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> data[:id],
+      "room:worker:" <> data.uuid,
       "stats",
       %{uid: 1, body: Stats.get_user_stats(user.id), type: "stats"}
     )
+
+    {:noreply, state}
+  end
+
+  def handle_info({"new_node", _name, data}, state) do
+    IO.inspect(label: "new node")
 
     MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)
     # Condicionado al la correcta ejecución del push
@@ -36,11 +40,14 @@ defmodule MotivusWbApi.ListenerNodes do
   def handle_info({"dead_node", _name, %{id: id}}, state) do
     IO.inspect(label: "dead node")
     MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
-    {status, task} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
+    {status, tasks} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
 
     case status do
       :ok ->
-        PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"retry_task", :hola, task})
+        tasks
+        |> Enum.map(fn {_tid, t} ->
+          PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"retry_task", :hola, t})
+        end)
 
       _ ->
         nil
