@@ -2,8 +2,13 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   use Phoenix.Channel
   alias Phoenix.PubSub
 
-  def join("room:worker:" <> ts, _message, socket) do
-    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: ts}})
+  def join("room:worker:" <> uuid, _message, socket) do
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "nodes",
+      {"new_channel", :hola, %{uuid: uuid}}
+    )
+
     {:ok, socket}
   end
 
@@ -18,7 +23,8 @@ defmodule MotivusWbApiWeb.WorkerChannel do
           "type" => type,
           "ref" => ref,
           "client_id" => client_id,
-          "task_id" => task_id
+          "task_id" => task_id,
+          "tid" => tid
         },
         socket
       ) do
@@ -30,13 +36,27 @@ defmodule MotivusWbApiWeb.WorkerChannel do
           MotivusWbApi.PubSub,
           "completed",
           {"task_completed", :hola,
-           %{body: body, type: type, ref: ref, client_id: client_id, id: id, task_id: task_id}}
+           %{
+             body: body,
+             type: type,
+             ref: ref,
+             client_id: client_id,
+             id: id,
+             task_id: task_id,
+             tid: tid
+           }}
         )
 
       _ ->
         nil
     end
 
+    {:noreply, socket}
+  end
+
+  def handle_in("input_request", %{"tid" => tid}, socket) do
+    [_, uuid] = socket.topic |> String.split("room:worker:")
+    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: uuid, tid: tid}})
     {:noreply, socket}
   end
 
