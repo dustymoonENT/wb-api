@@ -1,3 +1,4 @@
 <script charset="utf-8">
   window.opener.postMessage({ success: true, token: "<%= @token %>" }, "<%= @origin %>")
+  window.opener.postMessage({ success: true, token: "<%= @token %>" }, "<%= @origin2 %>")
 </script>

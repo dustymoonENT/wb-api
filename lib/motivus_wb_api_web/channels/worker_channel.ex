@@ -2,8 +2,13 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   use Phoenix.Channel
   alias Phoenix.PubSub
 
-  def join("room:worker:" <> ts, _message, socket) do
-    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: ts}})
+  def join("room:worker:" <> uuid, _message, socket) do
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "nodes",
+      {"new_channel", :hola, %{uuid: uuid}}
+    )
+
     {:ok, socket}
   end
 
@@ -12,26 +17,34 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   end
 
   def handle_in(
-        "new_msg",
+        "result",
         %{
           "body" => body,
           "type" => type,
           "ref" => ref,
           "client_id" => client_id,
-          "task_id" => task_id
+          "task_id" => task_id,
+          "tid" => tid
         },
         socket
       ) do
     case type do
       "response" ->
-        IO.inspect(task_id: task_id)
         [_, id] = socket.topic |> String.split("room:worker:")
 
         PubSub.broadcast(
           MotivusWbApi.PubSub,
           "completed",
           {"task_completed", :hola,
-           %{body: body, type: type, ref: ref, client_id: client_id, id: id, task_id: task_id}}
+           %{
+             body: body,
+             type: type,
+             ref: ref,
+             client_id: client_id,
+             id: id,
+             task_id: task_id,
+             tid: tid
+           }}
         )
 
       _ ->
@@ -41,9 +54,13 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     {:noreply, socket}
   end
 
+  def handle_in("input_request", %{"tid" => tid}, socket) do
+    [_, uuid] = socket.topic |> String.split("room:worker:")
+    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: uuid, tid: tid}})
+    {:noreply, socket}
+  end
+
   def terminate(reason, socket) do
-    IO.inspect(reason)
-    IO.inspect(socket.topic)
     [_, id] = socket.topic |> String.split("room:worker:")
     PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"dead_node", :hola, %{id: id}})
     # MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)

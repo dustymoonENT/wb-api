@@ -55,7 +55,7 @@ class MotivusWbApiStack(core.Stack):
         security_group.add_ingress_rule(aws_ec2.Peer.ipv4('0.0.0.0/0'), aws_ec2.Port.tcp(5432))
 
         database_name = "motivus_wb_api"
-        db = aws_rds.DatabaseInstance(self, f'{title}-db',
+        db = aws_rds.DatabaseInstance(self, f'{title}-db-prod',
                                       engine=aws_rds.DatabaseInstanceEngine.POSTGRES,
                                       preferred_backup_window="05:00-06:00",
                                       backup_retention=Duration.days(7),
@@ -63,12 +63,12 @@ class MotivusWbApiStack(core.Stack):
                                       deletion_protection=True,
                                       database_name=database_name,
                                       credentials=creds,
-                                      instance_type=aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE2,
-                                                                            aws_ec2.InstanceSize.MICRO),
+                                      instance_type=aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE3,
+                                                                            aws_ec2.InstanceSize.MEDIUM),
                                       storage_type=aws_rds.StorageType.GP2,
                                       security_groups=[security_group],
-                                      instance_identifier=title,
-                                      publicly_accessible=True,
+                                      instance_identifier=f'{title}-db-prod',
+                                      vpc_placement=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PUBLIC),
                                       vpc=vpc)
 
         cluster = aws_ecs.Cluster(self, f'{title}-cluster', vpc=vpc, cluster_name=f'{title}-cluster')
@@ -99,8 +99,9 @@ class MotivusWbApiStack(core.Stack):
                     'FACEBOOK_CLIENT_ID': os.environ['FACEBOOK_CLIENT_ID'],
                     'FACEBOOK_CLIENT_SECRET': os.environ['FACEBOOK_CLIENT_SECRET'],
                 }),
-            memory_limit_mib=2048,
-            health_check_grace_period=core.Duration.minutes(15),
+            memory_limit_mib=8192,
+            cpu=4096,
+            health_check_grace_period=core.Duration.minutes(5),
             public_load_balancer=True,  # Default is False
             certificate=certificate,
             domain_name=domain_name,

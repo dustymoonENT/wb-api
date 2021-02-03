@@ -44,7 +44,8 @@ defmodule MotivusWbApiWeb.AuthController do
     |> fetch_flash()
     |> Phoenix.Controller.render("success.html", %{
       token: token,
-      origin: Application.get_env(:motivus_wb_api, :spa_origin)
+      origin: Application.get_env(:motivus_wb_api, :spa_origin),
+      origin2: Application.get_env(:motivus_wb_api, :spa_alias_origin)
     })
   end
 

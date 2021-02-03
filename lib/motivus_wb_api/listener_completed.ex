@@ -20,12 +20,22 @@ defmodule MotivusWbApi.ListenerCompleted do
 
   def handle_info(
         {_topic, _name,
-         %{body: body, type: type, ref: ref, client_id: client_id, id: id, task_id: task_id}},
+         %{
+           body: body,
+           type: type,
+           ref: ref,
+           client_id: client_id,
+           id: id,
+           task_id: task_id,
+           tid: tid
+         }},
         state
       ) do
     IO.inspect(label: "new completed")
 
     user = Repo.get_by!(Users.User, uuid: id)
+
+    MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id, tid)
 
     Repo.get_by(Task, id: task_id, user_id: user.id)
     |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second)})
@@ -37,25 +47,13 @@ defmodule MotivusWbApi.ListenerCompleted do
       %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id}
     )
 
-    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: id}})
-    IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing))
-    MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
-    IO.inspect(label: "DESPUES")
-    IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing))
-
-    # send user stats
-
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> id,
-      "new_msg_stats",
-      %{
-        uid: 1,
-        body: Stats.get_user_stats(user.id),
-        type: "stats",
-        ref: ref,
-        client_id: client_id
-      }
+      "stats",
+      %{uid: 1, body: Stats.get_user_stats(user.id), type: "stats"}
     )
+
+    IO.inspect(label: "DESPUES")
 
     {:noreply, state}
   end

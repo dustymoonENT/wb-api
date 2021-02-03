@@ -30,7 +30,6 @@ defmodule MotivusWbApi.Stats do
       ranking: user.ranking
     }
 
-    IO.inspect(payload)
     payload
   end
 
