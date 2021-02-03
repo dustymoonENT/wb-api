@@ -2,6 +2,7 @@ defmodule MotivusWbApi.CronAbstraction do
   use GenServer
   alias MotivusWbApi.Stats
 
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: args[:id])
   end
@@ -15,7 +16,8 @@ defmodule MotivusWbApi.CronAbstraction do
   def handle_info(:ranking, args) do
     # Do the desired work here
     IO.inspect("calculando ranking")
-    Stats.get_users_ranking()
+    Stats.set_users_ranking()
+    Stats.get_current_season()
     schedule_work(args)
     {:noreply, args}
   end

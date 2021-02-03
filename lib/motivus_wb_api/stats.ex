@@ -8,6 +8,8 @@ defmodule MotivusWbApi.Stats do
 
   alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Users.User
+  alias MotivusWbApi.CurrentSeasonRanking
+  alias MotivusWbApi.Season
 
   def get_user_stats(user_id) do
     user = Repo.get_by(User, id: user_id)
@@ -33,7 +35,7 @@ defmodule MotivusWbApi.Stats do
     payload
   end
 
-  def get_users_ranking() do
+  def set_users_ranking() do
     query = """
       WITH asd AS 
     (SELECT user_id, sum(flops) as flops FROM "tasks" group by user_id),
@@ -46,6 +48,13 @@ defmodule MotivusWbApi.Stats do
     """
 
     Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [])
+  end
+
+  def get_current_season() do
+#    current_timestamp = DateTime.utc_now()
+#    query = from s in Season, where current_timestamp > s.start_date and current_timestamp < s.end_date
+#    season = Repo.get_by(query)
+#    season
   end
 
   @doc """
