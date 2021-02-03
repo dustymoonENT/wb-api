@@ -64,6 +64,13 @@ defmodule MotivusWbApi.RankingTest do
       season = season_fixture()
       assert %Ecto.Changeset{} = Ranking.change_season(season)
     end
+
+    test "get_current_season/1 " do
+      assert {:ok, %Season{} = season} = Ranking.create_season(%{end_date: "2010-04-24T14:00:00Z", name: "SEASON_TEST", start_date: "2010-04-17T14:00:00Z"})
+      date = DateTime.from_naive!(~N[2010-04-20T14:00:00Z], "Etc/UTC")
+      season = MotivusWbApi.Stats.get_current_season(date)
+      assert season.name == "SEASON_TEST"
+    end
   end
 
   describe "current_season_ranking" do

@@ -9,7 +9,7 @@ defmodule MotivusWbApi.Stats do
   alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Users.User
   alias MotivusWbApi.CurrentSeasonRanking
-  alias MotivusWbApi.Season
+  alias MotivusWbApi.Ranking.Season
 
   def get_user_stats(user_id) do
     user = Repo.get_by(User, id: user_id)
@@ -50,11 +50,10 @@ defmodule MotivusWbApi.Stats do
     Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [])
   end
 
-  def get_current_season() do
-#    current_timestamp = DateTime.utc_now()
-#    query = from s in Season, where current_timestamp > s.start_date and current_timestamp < s.end_date
-#    season = Repo.get_by(query)
-#    season
+  def get_current_season(current_timestamp) do
+    query = from s in Season, where: ^current_timestamp > s.start_date and ^current_timestamp < s.end_date
+    season = Repo.one(query)
+    season
   end
 
   @doc """
