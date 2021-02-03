@@ -15,7 +15,7 @@ defmodule MotivusWbApiWeb.Ranking.SeasonController do
     with {:ok, %Season{} = season} <- Ranking.create_season(season_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.ranking_season_path(conn, :show, season))
+      |> put_resp_header("location", Routes.season_path(conn, :show, season))
       |> render("show.json", season: season)
     end
   end
