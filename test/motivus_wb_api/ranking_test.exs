@@ -2,6 +2,11 @@ defmodule MotivusWbApi.RankingTest do
   use MotivusWbApi.DataCase
 
   alias MotivusWbApi.Ranking
+  alias MotivusWbApi.Users
+  alias MotivusWbApi.Users.User
+  alias MotivusWbApi.Processing
+  alias MotivusWbApi.Processing.Task
+  alias MotivusWbApi.Ranking.CurrentSeasonRanking
 
   describe "seasons" do
     alias MotivusWbApi.Ranking.Season
@@ -70,6 +75,25 @@ defmodule MotivusWbApi.RankingTest do
       date = DateTime.from_naive!(~N[2010-04-20T14:00:00Z], "Etc/UTC")
       season = MotivusWbApi.Stats.get_current_season(date)
       assert season.name == "SEASON_TEST"
+    end
+
+    test "set_ranking/1" do
+      assert {:ok, %Season{} = season} = Ranking.create_season(%{end_date: "2010-04-24T14:00:00Z", name: "SEASON_TEST", start_date: "2010-04-17T14:00:00Z"})
+      {:ok, %User{} = user1} = Users.create_user(%{avatar: "some avatar", is_guest: true, last_sign_in: "2010-04-17T14:00:00Z", mail: "some mail", name: "some name", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"})
+      {:ok, %User{} = user2} = Users.create_user(%{avatar: "some avatar", is_guest: true, last_sign_in: "2010-04-17T14:00:00Z", mail: "some mail", name: "some name", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"})
+      {:ok, %User{} = user3} = Users.create_user(%{avatar: "some avatar", is_guest: true, last_sign_in: "2010-04-17T14:00:00Z", mail: "some mail", name: "some name", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"})
+
+      {:ok, %Task{} = task1} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-17T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user1.id})
+      {:ok, %Task{} = task2} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-17T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user1.id})
+      {:ok, %Task{} = task3} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-17T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user2.id})
+      {:ok, %Task{} = task4} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-17T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user2.id})
+      {:ok, %Task{} = task5} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-17T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user2.id})
+
+      date = DateTime.from_naive!(~N[2010-04-20T14:00:00Z], "Etc/UTC")
+      set_ranking = MotivusWbApi.Stats.set_ranking(date)
+      query = Repo.all(CurrentSeasonRanking)
+      IO.puts("asdasd")
+      IO.inspect(query)
     end
   end
 

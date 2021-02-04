@@ -20,9 +20,13 @@ defmodule MotivusWbApi.Stats do
     user_flops = Enum.reduce(user_tasks, 0, fn x, acc -> x.flops + acc end)
 
     user_elapsed_time =
-      Enum.reduce(user_tasks, 0, fn x, acc ->
-        DateTime.diff(x.date_out, x.date_last_dispatch) + acc
-      end)
+      Enum.reduce(
+        user_tasks,
+        0,
+        fn x, acc ->
+          DateTime.diff(x.date_out, x.date_last_dispatch) + acc
+        end
+      )
 
     payload = %{
       quantity: quantity,
@@ -54,6 +58,27 @@ defmodule MotivusWbApi.Stats do
     query = from s in Season, where: ^current_timestamp > s.start_date and ^current_timestamp < s.end_date
     season = Repo.one(query)
     season
+  end
+
+  def set_ranking(current_timestamp) do
+    Repo.delete_all(CurrentSeasonRanking)
+    current_season = get_current_season(current_timestamp)
+
+    query = """
+    WITH total_tasks AS
+    (SELECT user_id, count(id) AS total_tasks, SUM(date_out - date_last_dispatch) AS elapsed_time FROM tasks group by user_id),
+    ranking_tasks AS
+    (SELECT user_id, total_tasks, elapsed_time, RANK() OVER(ORDER BY total_tasks DESC) AS total_tasks_rank,
+    RANK() OVER(ORDER BY elapsed_time DESC) AS elapsed_time_rank FROM total_tasks)
+    INSERT INTO current_season_ranking(processing_ranking, elapsed_time_ranking, user_id, seasons, inserted_at, updated_at)
+    SELECT total_tasks_rank, elapsed_time_rank, user_id, #{current_season}, current_timestamp, current_timestamp
+    FROM ranking_tasks
+    """
+
+    Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [])
+
+
+
   end
 
   @doc """

@@ -17,7 +17,7 @@ defmodule MotivusWbApi.CronAbstraction do
     # Do the desired work here
     IO.inspect("calculando ranking")
     Stats.set_users_ranking()
-    Stats.get_current_season()
+    Stats.set_ranking(DateTime.utc_now())
     schedule_work(args)
     {:noreply, args}
   end
