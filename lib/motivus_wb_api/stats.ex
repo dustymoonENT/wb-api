@@ -8,7 +8,7 @@ defmodule MotivusWbApi.Stats do
 
   alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Users.User
-  alias MotivusWbApi.CurrentSeasonRanking
+  alias MotivusWbApi.Ranking.CurrentSeasonRanking
   alias MotivusWbApi.Ranking.Season
 
   def get_user_stats(user_id) do
@@ -71,7 +71,7 @@ defmodule MotivusWbApi.Stats do
     (SELECT user_id, total_tasks, elapsed_time, RANK() OVER(ORDER BY total_tasks DESC) AS total_tasks_rank,
     RANK() OVER(ORDER BY elapsed_time DESC) AS elapsed_time_rank FROM total_tasks)
     INSERT INTO current_season_ranking(processing_ranking, elapsed_time_ranking, user_id, seasons, inserted_at, updated_at)
-    SELECT total_tasks_rank, elapsed_time_rank, user_id, #{current_season}, current_timestamp, current_timestamp
+    SELECT total_tasks_rank, elapsed_time_rank, user_id, #{current_season.id}, current_timestamp, current_timestamp
     FROM ranking_tasks
     """
 
