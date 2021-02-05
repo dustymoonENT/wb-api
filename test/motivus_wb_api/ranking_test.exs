@@ -91,17 +91,13 @@ defmodule MotivusWbApi.RankingTest do
 
       date = DateTime.from_naive!(~N[2010-04-20T14:00:00Z], "Etc/UTC")
       MotivusWbApi.Stats.set_ranking(date)
-      rank = Repo.all(CurrentSeasonRanking)
-      assert length(rank) == 2
-      user=Enum.at(rank, 0)
-      u1=user1.id
-      u2=user2.id
-      case user.user_id do
-        ^u1 -> assert user.elapsed_time_ranking == 2
-               assert user.processing_ranking == 2
-        ^u2 -> assert user.elapsed_time_ranking == 1
-               assert user.processing_ranking == 1
-      end
+
+      [u1 ,u2]= Repo.all(from q in CurrentSeasonRanking, order_by: q.user_id)
+      assert u1.processing_ranking == 2
+      assert u1.elapsed_time_ranking == 2
+      assert u2.processing_ranking == 1
+      assert u2.elapsed_time_ranking == 1
+
     end
   end
 
