@@ -30,3 +30,5 @@ motivus_wb_api-*.tar
 /.idea/
 
 .env
+
+*.iml

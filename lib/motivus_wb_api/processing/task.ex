@@ -19,7 +19,7 @@ defmodule MotivusWbApi.Processing.Task do
   @doc false
   def changeset(task, attrs) do
     task
-    |> cast(attrs, [:type, :params, :date_in, :date_last_dispatch, :date_out, :attempts, :flops, :processing_base_time])
+    |> cast(attrs, [:type, :params, :date_in, :date_last_dispatch, :date_out, :attempts, :flops, :processing_base_time, :user_id])
     |> validate_required([:type, :params, :date_in, :date_last_dispatch, :date_out, :attempts, :flops, :processing_base_time])
   end
 end

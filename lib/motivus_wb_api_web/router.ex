@@ -40,6 +40,8 @@ defmodule MotivusWbApiWeb.Router do
 
     # get "/user/processing_preferences", PageController, :processing_preferences
     post "/users/guest", PageController, :create_guest
+    resources "/seasons", Ranking.SeasonController
+    resources "/current_season_ranking", Ranking.CurrentSeasonRankingController
 
     pipe_through([:auth])
 
