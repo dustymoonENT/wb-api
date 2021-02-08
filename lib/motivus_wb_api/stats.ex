@@ -65,21 +65,23 @@ defmodule MotivusWbApi.Stats do
     current_season = get_current_season(current_timestamp)
 
     query = """
-    WITH total_tasks AS
-    (SELECT user_id, count(id) AS total_tasks, SUM(date_out - date_last_dispatch) AS elapsed_time FROM tasks group by user_id),
+    WITH total_flop AS
+    (SELECT user_id, SUM(flop) AS total_flop, SUM(date_out - date_last_dispatch) AS elapsed_time
+    FROM tasks
+    WHERE date_out > $1 AND date_out < $2 AND is_valid
+    GROUP BY user_id),
     ranking_tasks AS
-    (SELECT user_id, total_tasks, elapsed_time, RANK() OVER(ORDER BY total_tasks DESC) AS total_tasks_rank,
-    RANK() OVER(ORDER BY elapsed_time DESC) AS elapsed_time_rank FROM total_tasks)
+    (SELECT user_id, total_flop, elapsed_time, RANK() OVER(ORDER BY total_flop DESC) AS total_flop_rank,
+    RANK() OVER(ORDER BY elapsed_time DESC) AS elapsed_time_rank FROM total_flop)
     INSERT INTO current_season_ranking(processing_ranking, elapsed_time_ranking, user_id, seasons, inserted_at, updated_at)
-    SELECT total_tasks_rank, elapsed_time_rank, user_id, #{current_season.id}, current_timestamp, current_timestamp
+    SELECT total_flop_rank, elapsed_time_rank, user_id, #{current_season.id}, current_timestamp, current_timestamp
     FROM ranking_tasks
     """
 
-    Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [])
-
-
+    Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [current_season.start_date, current_season.end_date])
 
   end
+
 
   @doc """
   Returns the list of tasks.
