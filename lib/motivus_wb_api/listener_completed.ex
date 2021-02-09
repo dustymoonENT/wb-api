@@ -44,7 +44,7 @@ defmodule MotivusWbApi.ListenerCompleted do
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:client:" <> client_id,
       "new_msg",
-      %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id}
+      %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id, task_id: task_id}
     )
 
     MotivusWbApiWeb.Endpoint.broadcast!(

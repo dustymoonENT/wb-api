@@ -28,6 +28,29 @@ defmodule MotivusWbApiWeb.ClientChannel do
     {:noreply, socket}
   end
 
+  def handle_in(
+        "set_validation",
+        %{"body" => body, "type" => type, "ref" => ref, "client_id" => client_id, "task_id" => task_id},
+        socket
+      ) do
+    case type do
+      "valid" ->
+        [_, id] = socket.topic |> String.split("room:client:")
+        payload = %{body: body, task_id: task_id}
+        PubSub.broadcast(MotivusWbApi.PubSub, "validation", {"set_validation", :hola, payload})
+
+      _ ->
+        nil
+    end
+
+    {:noreply, socket}
+  end
+
+
+
+
+  ## agregar manejo de validated
+
   def terminate(reason, socket) do
     IO.inspect("desde Clientchanel")
   end
