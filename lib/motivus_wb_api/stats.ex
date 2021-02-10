@@ -14,8 +14,6 @@ defmodule MotivusWbApi.Stats do
   def get_user_stats(user_id) do
     current_season = get_current_season(DateTime.utc_now())
 
-    IO.inspect(current_season)
-
     user = Repo.get_by(User, id: user_id)
 
     if current_season do

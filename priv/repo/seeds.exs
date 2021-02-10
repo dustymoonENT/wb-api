@@ -60,15 +60,17 @@ if Mix.env() in [:dev] do
     Processing.create_task(
       %{
         attempts: 1,
-        date_in: "2010-04-17T14:00:00Z",
-        date_last_dispatch: "2010-04-17T14:00:00Z",
-        date_out: "2010-04-17T14:04:00Z",
+        date_in: "2021-02-09T14:00:00Z",
+        date_last_dispatch: "2021-02-09T14:20:00Z",
+        date_out: "2021-02-09T14:30:00Z",
         flops: 120.5,
         params: %{},
         processing_base_time: 240,
         type: "some type",
         user_id: user1.id,
-        flop: 10.0
+        flop: 10.0,
+        result: %{},
+        is_valid: true
       }
     )
 
@@ -76,15 +78,17 @@ if Mix.env() in [:dev] do
     Processing.create_task(
       %{
         attempts: 1,
-        date_in: "2010-04-17T14:00:00Z",
-        date_last_dispatch: "2010-04-17T14:00:00Z",
-        date_out: "2010-04-17T14:04:00Z",
+        date_in: "2021-02-09T14:00:00Z",
+        date_last_dispatch: "2021-02-09T14:20:00Z",
+        date_out: "2021-02-09T14:30:00Z",
         flops: 120.5,
         params: %{},
         processing_base_time: 240,
         type: "some type",
         user_id: user1.id,
-        flop: 10.0
+        flop: 10.0,
+        result: %{},
+        is_valid: true
       }
     )
 
@@ -92,15 +96,17 @@ if Mix.env() in [:dev] do
     Processing.create_task(
       %{
         attempts: 1,
-        date_in: "2010-04-17T14:00:00Z",
-        date_last_dispatch: "2010-04-17T14:00:00Z",
-        date_out: "2010-04-17T14:04:00Z",
+        date_in: "2021-02-09T14:00:00Z",
+        date_last_dispatch: "2021-02-09T14:20:00Z",
+        date_out: "2021-02-09T14:30:00Z",
         flops: 120.5,
         params: %{},
         processing_base_time: 240,
         type: "some type",
         user_id: user1.id,
-        flop: 10.0
+        flop: 10.0,
+        result: %{},
+        is_valid: true
       }
     )
 
@@ -108,15 +114,17 @@ if Mix.env() in [:dev] do
     Processing.create_task(
       %{
         attempts: 1,
-        date_in: "2010-04-17T14:00:00Z",
-        date_last_dispatch: "2010-04-17T14:00:00Z",
-        date_out: "2010-04-17T14:04:00Z",
+        date_in: "2021-02-09T14:00:00Z",
+        date_last_dispatch: "2021-02-09T14:20:00Z",
+        date_out: "2021-02-09T14:30:00Z",
         flops: 120.5,
         params: %{},
         processing_base_time: 240,
         type: "some type",
         user_id: user2.id,
-        flop: 10.0
+        flop: 10.0,
+        result: %{},
+        is_valid: true
       }
     )
 
@@ -124,15 +132,17 @@ if Mix.env() in [:dev] do
     Processing.create_task(
       %{
         attempts: 1,
-        date_in: "2010-04-17T14:00:00Z",
-        date_last_dispatch: "2010-04-17T14:00:00Z",
-        date_out: "2010-04-17T14:04:00Z",
+        date_in: "2021-02-09T14:00:00Z",
+        date_last_dispatch: "2021-02-09T14:20:00Z",
+        date_out: "2021-02-09T14:30:00Z",
         flops: 120.5,
         params: %{},
         processing_base_time: 240,
         type: "some type",
         user_id: user2.id,
-        flop: 10.0
+        flop: 10.0,
+        result: %{},
+        is_valid: true
       }
     )
 
