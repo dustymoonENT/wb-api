@@ -71,37 +71,357 @@ defmodule MotivusWbApi.RankingTest do
     end
 
     test "get_current_season/1 " do
-      assert {:ok, %Season{} = season} = Ranking.create_season(%{end_date: "2010-04-24T14:00:00Z", name: "SEASON_TEST", start_date: "2010-04-17T14:00:00Z"})
+      assert {:ok, %Season{} = season} = Ranking.create_season(
+               %{end_date: "2010-04-24T14:00:00Z", name: "SEASON_TEST", start_date: "2010-04-17T14:00:00Z"}
+             )
       date = DateTime.from_naive!(~N[2010-04-20T14:00:00Z], "Etc/UTC")
       season = MotivusWbApi.Stats.get_current_season(date)
       assert season.name == "SEASON_TEST"
     end
 
-    test "set_ranking/1" do
-      assert {:ok, %Season{} = season} = Ranking.create_season(%{end_date: "2010-04-24T14:00:00Z", name: "SEASON_TEST", start_date: "2010-04-17T14:00:00Z"})
-      {:ok, %User{} = user1} = Users.create_user(%{avatar: "some avatar", is_guest: true, last_sign_in: "2010-04-17T14:00:00Z", mail: "some mail", name: "user1", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"})
-      {:ok, %User{} = user2} = Users.create_user(%{avatar: "some avatar", is_guest: true, last_sign_in: "2010-04-17T14:00:00Z", mail: "some mail", name: "user2", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"})
-      {:ok, %User{} = user3} = Users.create_user(%{avatar: "some avatar", is_guest: true, last_sign_in: "2010-04-17T14:00:00Z", mail: "some mail", name: "user3", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"})
-
-      {:ok, %Task{} = task1} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-16T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user1.id})
-      {:ok, %Task{} = task2} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-16T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user1.id})
-      {:ok, %Task{} = task3} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-16T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user2.id})
-      {:ok, %Task{} = task4} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-16T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user2.id})
-      {:ok, %Task{} = task5} = Processing.create_task(%{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-16T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user2.id})
-
+    test "get_current_season/1 without season " do
       date = DateTime.from_naive!(~N[2010-04-20T14:00:00Z], "Etc/UTC")
+      season = MotivusWbApi.Stats.get_current_season(date)
+      assert season == nil
+    end
+
+    test "set_ranking/1" do
+      assert {:ok, %Season{} = season} = Ranking.create_season(
+               %{start_date: "2021-01-28T14:00:00Z", end_date: "2021-02-05T14:00:00Z", name: "SEASON_TEST"}
+             )
+      {:ok, %User{} = user1} = Users.create_user(
+        %{
+          avatar: "some avatar",
+          is_guest: true,
+          last_sign_in: "2010-04-17T14:00:00Z",
+          mail: "some mail",
+          name: "user1",
+          provider: "some provider",
+          uuid: "7488a646-e31f-11e4-aace-600308960662"
+        }
+      )
+      {:ok, %User{} = user2} = Users.create_user(
+        %{
+          avatar: "some avatar",
+          is_guest: true,
+          last_sign_in: "2010-04-17T14:00:00Z",
+          mail: "some mail",
+          name: "user2",
+          provider: "some provider",
+          uuid: "7488a646-e31f-11e4-aace-600308960662"
+        }
+      )
+      {:ok, %User{} = user3} = Users.create_user(
+        %{
+          avatar: "some avatar",
+          is_guest: true,
+          last_sign_in: "2010-04-17T14:00:00Z",
+          mail: "some mail",
+          name: "user3",
+          provider: "some provider",
+          uuid: "7488a646-e31f-11e4-aace-600308960662"
+        }
+      )
+
+      {:ok, %Task{} = task1} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:00:00Z",
+          date_last_dispatch: "2021-01-28T14:00:00Z",
+          date_out: "2021-02-01T14:00:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user1.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task2} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:00:00Z",
+          date_last_dispatch: "2021-01-28T14:00:00Z",
+          date_out: "2021-02-01T14:00:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user1.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task3} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:00:00Z",
+          date_last_dispatch: "2021-01-28T14:00:00Z",
+          date_out: "2021-02-01T14:00:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user2.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task4} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:00:00Z",
+          date_last_dispatch: "2021-01-28T14:00:00Z",
+          date_out: "2021-02-01T14:00:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user2.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task5} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:00:00Z",
+          date_last_dispatch: "2021-01-28T14:00:00Z",
+          date_out: "2021-02-01T14:00:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user2.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+
+      date = DateTime.from_naive!(~N[2021-02-04T14:00:00Z], "Etc/UTC")
       MotivusWbApi.Stats.set_ranking(date)
-      rank = Repo.all(CurrentSeasonRanking)
-      assert length(rank) == 2
-      user=Enum.at(rank, 0)
-      u1=user1.id
-      u2=user2.id
-      case user.user_id do
-        ^u1 -> assert user.elapsed_time_ranking == 2
-               assert user.processing_ranking == 2
-        ^u2 -> assert user.elapsed_time_ranking == 1
-               assert user.processing_ranking == 1
-      end
+      [u1, u2] = Repo.all(from q in CurrentSeasonRanking, order_by: q.user_id)
+      assert u1.processing_ranking == 2
+      assert u1.elapsed_time_ranking == 2
+      assert u2.processing_ranking == 1
+      assert u2.elapsed_time_ranking == 1
+
+    end
+
+    test "get_user_stats/1 with current season" do
+      {:ok, %Season{} = season} = Ranking.create_season(
+        %{start_date: "2021-01-28T14:00:00Z", end_date: "2021-02-11T14:00:00Z", name: "SEASON_TEST"}
+      )
+      {:ok, %User{} = user} = Users.create_user(
+        %{
+          avatar: "some avatar",
+          is_guest: true,
+          last_sign_in: "2021-01-28T14:30:00Z",
+          mail: "some mail",
+          name: "user",
+          provider: "some provider",
+          uuid: "7488a646-e31f-11e4-aace-600308960662"
+        }
+      )
+      {:ok, %Task{} = task1} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:30:00Z",
+          date_last_dispatch: "2021-01-28T14:40:00Z",
+          date_out: "2021-01-28T14:50:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task2} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:30:00Z",
+          date_last_dispatch: "2021-01-28T14:40:00Z",
+          date_out: "2021-01-28T14:50:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task3} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:30:00Z",
+          date_last_dispatch: "2021-01-28T14:40:00Z",
+          date_out: "2021-01-28T14:50:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+
+      date = DateTime.from_naive!(~N[2021-02-09T14:00:00Z], "Etc/UTC")
+      MotivusWbApi.Stats.set_ranking(date)
+
+      stats = MotivusWbApi.Stats.get_user_stats(user.id, season)
+      assert stats == %{
+               base_time: 126,
+               elapsed_time: 1800,
+               elapsed_time_ranking: 1,
+               processing_ranking: 1,
+               season: %{end_date: ~U[2021-02-11 14:00:00Z], name: "SEASON_TEST", start_date: ~U[2021-01-28 14:00:00Z]},
+               task_quantity: 3
+             }
+    end
+    test "get_user_stats/1 without current season" do
+      {:ok, %Season{} = season} = Ranking.create_season(
+        %{start_date: "2021-04-28T14:00:00Z", end_date: "2021-05-10T14:00:00Z", name: "SEASON_TEST"}
+      )
+      {:ok, %User{} = user} = Users.create_user(
+        %{
+          avatar: "some avatar",
+          is_guest: true,
+          last_sign_in: "2021-01-28T14:30:00Z",
+          mail: "some mail",
+          name: "user",
+          provider: "some provider",
+          uuid: "7488a646-e31f-11e4-aace-600308960662"
+        }
+      )
+      {:ok, %Task{} = task1} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:30:00Z",
+          date_last_dispatch: "2021-01-28T14:40:00Z",
+          date_out: "2021-01-28T14:50:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task2} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:30:00Z",
+          date_last_dispatch: "2021-01-28T14:40:00Z",
+          date_out: "2021-01-28T14:50:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+      {:ok, %Task{} = task3} = Processing.create_task(
+        %{
+          attempts: 42,
+          date_in: "2021-01-28T14:30:00Z",
+          date_last_dispatch: "2021-01-28T14:40:00Z",
+          date_out: "2021-01-28T14:50:00Z",
+          flops: 120.5,
+          params: %{},
+          processing_base_time: 42,
+          type: "some type",
+          user_id: user.id,
+          flop: 10.0,
+          result: %{},
+          is_valid: true
+        }
+      )
+
+      date = DateTime.from_naive!(~N[2021-02-09T14:00:00Z], "Etc/UTC")
+      MotivusWbApi.Stats.set_ranking(date)
+
+      stats = MotivusWbApi.Stats.get_user_stats(user.id, season)
+      assert stats == %{
+               base_time: nil,
+               elapsed_time: nil,
+               elapsed_time_ranking: nil,
+               processing_ranking: nil,
+               season: %{end_date: nil, name: nil, start_date: nil},
+               task_quantity: nil
+             }
+    end
+    test "get_user_stats/1 with current season and no tasks" do
+      {:ok, %Season{} = season} = Ranking.create_season(
+        %{start_date: "2021-01-28T14:00:00Z", end_date: "2021-02-11T14:00:00Z", name: "SEASON_TEST"}
+      )
+      {:ok, %User{} = user} = Users.create_user(
+        %{
+          avatar: "some avatar",
+          is_guest: true,
+          last_sign_in: "2021-01-28T14:30:00Z",
+          mail: "some mail",
+          name: "user",
+          provider: "some provider",
+          uuid: "7488a646-e31f-11e4-aace-600308960662"
+        }
+      )
+
+      date = DateTime.from_naive!(~N[2021-02-09T14:00:00Z], "Etc/UTC")
+      MotivusWbApi.Stats.set_ranking(date)
+
+      stats = MotivusWbApi.Stats.get_user_stats(user.id, season)
+      assert stats == %{
+               base_time: nil,
+               elapsed_time: nil,
+               elapsed_time_ranking: nil,
+               processing_ranking: nil,
+               season:  %{end_date: nil, name: nil, start_date: nil},
+               task_quantity: nil
+             }
+    end
+    test "get_user_stats/1 without season and no tasks" do
+      {:ok, %User{} = user} = Users.create_user(
+        %{
+          avatar: "some avatar",
+          is_guest: true,
+          last_sign_in: "2021-01-28T14:30:00Z",
+          mail: "some mail",
+          name: "user",
+          provider: "some provider",
+          uuid: "7488a646-e31f-11e4-aace-600308960662"
+        }
+      )
+
+      date = DateTime.from_naive!(~N[2021-02-09T14:00:00Z], "Etc/UTC")
+      MotivusWbApi.Stats.set_ranking(date)
+
+      stats = MotivusWbApi.Stats.get_user_stats(user.id, nil)
+      assert stats == %{
+               base_time: nil,
+               elapsed_time: nil,
+               elapsed_time_ranking: nil,
+               processing_ranking: nil,
+               season:  %{end_date: nil, name: nil, start_date: nil},
+               task_quantity: nil
+             }
     end
   end
 
@@ -132,7 +452,9 @@ defmodule MotivusWbApi.RankingTest do
     end
 
     test "create_current_season_ranking/1 with valid data creates a current_season_ranking" do
-      assert {:ok, %CurrentSeasonRanking{} = current_season_ranking} = Ranking.create_current_season_ranking(@valid_attrs)
+      assert {:ok, %CurrentSeasonRanking{} = current_season_ranking} = Ranking.create_current_season_ranking(
+               @valid_attrs
+             )
       assert current_season_ranking.elapsed_time_ranking == 42
       assert current_season_ranking.processing_ranking == 42
     end
@@ -143,7 +465,10 @@ defmodule MotivusWbApi.RankingTest do
 
     test "update_current_season_ranking/2 with valid data updates the current_season_ranking" do
       current_season_ranking = current_season_ranking_fixture()
-      assert {:ok, %CurrentSeasonRanking{} = current_season_ranking} = Ranking.update_current_season_ranking(current_season_ranking, @update_attrs)
+      assert {:ok, %CurrentSeasonRanking{} = current_season_ranking} = Ranking.update_current_season_ranking(
+               current_season_ranking,
+               @update_attrs
+             )
       assert current_season_ranking.elapsed_time_ranking == 43
       assert current_season_ranking.processing_ranking == 43
     end

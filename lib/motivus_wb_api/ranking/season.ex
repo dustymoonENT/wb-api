@@ -2,6 +2,7 @@ defmodule MotivusWbApi.Ranking.Season do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, except: [:__meta__]}
   schema "seasons" do
     field :end_date, :utc_datetime
     field :name, :string

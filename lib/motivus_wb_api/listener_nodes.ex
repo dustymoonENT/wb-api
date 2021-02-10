@@ -18,11 +18,11 @@ defmodule MotivusWbApi.ListenerNodes do
 
   def handle_info({"new_channel", _, data}, state) do
     user = Repo.get_by!(Users.User, uuid: data.uuid)
-
+    current_season = Stats.get_current_season(Datetime.utc_now())
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> data.uuid,
       "stats",
-      %{uid: 1, body: Stats.get_user_stats(user.id), type: "stats"}
+      %{uid: 1, body: Stats.get_user_stats(user.id, current_season), type: "stats"}
     )
 
     {:noreply, state}

@@ -16,7 +16,6 @@ defmodule MotivusWbApi.CronAbstraction do
   def handle_info(:ranking, args) do
     # Do the desired work here
     IO.inspect("calculando ranking")
-    Stats.set_users_ranking()
     Stats.set_ranking(DateTime.utc_now())
     schedule_work(args)
     {:noreply, args}
