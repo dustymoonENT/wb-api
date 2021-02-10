@@ -38,7 +38,11 @@ defmodule MotivusWbApi.Stats do
         elapsed_time: user_elapsed_time,
         elapsed_time_ranking: user_ranking.elapsed_time_ranking,
         processing_ranking: user_ranking.processing_ranking,
-        season: current_season
+        season: %{
+          name: current_season.name,
+          start_date: current_season.start_date,
+          end_date: current_season.end_date
+        }
       }
       payload
     else
@@ -48,7 +52,11 @@ defmodule MotivusWbApi.Stats do
         elapsed_time: nil,
         elapsed_time_ranking: nil,
         processing_ranking: nil,
-        season: nil
+        season: %{
+          name: nil,
+          start_date: nil,
+          end_date: nil
+        }
       }
       payload
     end

@@ -287,7 +287,7 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: 1800,
                elapsed_time_ranking: 1,
                processing_ranking: 1,
-               season: "SEASON_TEST",
+               season: %{end_date: ~U[2021-02-11 14:00:00Z], name: "SEASON_TEST", start_date: ~U[2021-01-28 14:00:00Z]},
                task_quantity: 3
              }
     end
