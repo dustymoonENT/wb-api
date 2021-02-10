@@ -11,14 +11,16 @@ defmodule MotivusWbApi.Stats do
   alias MotivusWbApi.Ranking.CurrentSeasonRanking
   alias MotivusWbApi.Ranking.Season
 
-  def get_user_stats(user_id) do
-    current_season = get_current_season(DateTime.utc_now())
-
+  def get_user_stats(user_id, current_season) do
     user = Repo.get_by(User, id: user_id)
+    ranking = from c in CurrentSeasonRanking, where: c.user_id == ^user_id
+    user_ranking = Repo.one(ranking)
 
-    if current_season do
-      query = from t in Task, where: not is_nil(t.date_out) and t.user_id == ^user_id
-        and t.date_out > ^current_season.start_date and t.date_out < ^current_season.end_date
+    if current_season && user_ranking do
+      query = from t in Task,
+                   where: not is_nil(t.date_out) and t.user_id == ^user_id
+                          and t.date_out > ^current_season.start_date and t.date_out < ^current_season.end_date
+                   and t.is_valid == true
       user_tasks = Repo.all(query)
       quantity = Enum.count(user_tasks)
       user_base_time = Enum.reduce(user_tasks, 0, fn x, acc -> x.processing_base_time + acc end)
@@ -30,8 +32,6 @@ defmodule MotivusWbApi.Stats do
             DateTime.diff(x.date_out, x.date_last_dispatch) + acc
           end
         )
-      ranking = from c in CurrentSeasonRanking, where: c.user_id == ^user_id
-      user_ranking = Repo.one(ranking)
       payload = %{
         task_quantity: quantity,
         base_time: user_base_time,
@@ -42,22 +42,10 @@ defmodule MotivusWbApi.Stats do
       }
       payload
     else
-      query = from t in Task, where: not is_nil(t.date_out) and t.user_id == ^user_id
-      user_tasks = Repo.all(query)
-      quantity = Enum.count(user_tasks)
-      user_base_time = Enum.reduce(user_tasks, 0, fn x, acc -> x.processing_base_time + acc end)
-      user_elapsed_time =
-        Enum.reduce(
-          user_tasks,
-          0,
-          fn x, acc ->
-            DateTime.diff(x.date_out, x.date_last_dispatch) + acc
-          end
-        )
       payload = %{
-        task_quantity: quantity,
-        base_time: user_base_time,
-        elapsed_time: user_elapsed_time,
+        task_quantity: nil,
+        base_time: nil,
+        elapsed_time: nil,
         elapsed_time_ranking: nil,
         processing_ranking: nil,
         season: nil

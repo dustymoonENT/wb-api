@@ -46,11 +46,11 @@ defmodule MotivusWbApi.ListenerCompleted do
       "new_msg",
       %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id, task_id: task_id}
     )
-
+    current_season = Stats.get_current_season(Datetime.utc_now())
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> id,
       "stats",
-      %{uid: 1, body: Stats.get_user_stats(user.id), type: "stats"}
+      %{uid: 1, body: Stats.get_user_stats(user.id, current_season), type: "stats"}
     )
 
     IO.inspect(label: "DESPUES")

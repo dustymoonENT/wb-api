@@ -4,7 +4,7 @@ defmodule MotivusWbApi.Repo.Migrations.AddFlopField do
     alter table(:tasks) do
       add :flop, :float
       add :result, :map
-      add :is_valid, :boolean, default: false
+      add :is_valid, :boolean
     end
   end
 end
