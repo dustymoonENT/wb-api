@@ -91,13 +91,27 @@ defmodule MotivusWbApi.RankingTest do
 
       date = DateTime.from_naive!(~N[2021-02-04T14:00:00Z], "Etc/UTC")
       MotivusWbApi.Stats.set_ranking(date)
-
       [u1 ,u2]= Repo.all(from q in CurrentSeasonRanking, order_by: q.user_id)
       assert u1.processing_ranking == 2
       assert u1.elapsed_time_ranking == 2
       assert u2.processing_ranking == 1
       assert u2.elapsed_time_ranking == 1
 
+    end
+
+    test "get_user_stats/1" do
+#      assert {:ok, %Season{} = season} = Ranking.create_season(%{start_date: "2021-01-28T14:00:00Z", end_date: "2021-02-10T14:00:00Z", name: "SEASON_TEST"})
+      assert {:ok, %Season{} = season} = Ranking.create_season(%{start_date: "2021-04-28T14:00:00Z", end_date: "2021-05-10T14:00:00Z", name: "SEASON_TEST"})
+      {:ok, %User{} = user} = Users.create_user(%{avatar: "some avatar", is_guest: true, last_sign_in: "2021-01-28T14:30:00Z", mail: "some mail", name: "user", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"})
+      {:ok, %Task{} = task1} = Processing.create_task(%{attempts: 42, date_in: "2021-01-28T14:30:00Z", date_last_dispatch: "2021-01-28T14:40:00Z", date_out: "2021-01-28T14:50:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user.id, flop: 10.0, result: %{}, is_valid: true})
+      {:ok, %Task{} = task2} = Processing.create_task(%{attempts: 42, date_in: "2021-01-28T14:30:00Z", date_last_dispatch: "2021-01-28T14:40:00Z", date_out: "2021-01-28T14:50:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user.id, flop: 10.0, result: %{}, is_valid: true})
+      {:ok, %Task{} = task3} = Processing.create_task(%{attempts: 42, date_in: "2021-01-28T14:30:00Z", date_last_dispatch: "2021-01-28T14:40:00Z", date_out: "2021-01-28T14:50:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", user_id: user.id, flop: 10.0, result: %{}, is_valid: true})
+
+      date = DateTime.from_naive!(~N[2021-02-09T14:00:00Z], "Etc/UTC")
+      MotivusWbApi.Stats.set_ranking(date)
+
+      stats = MotivusWbApi.Stats.get_user_stats(user.id)
+      IO.inspect(stats)
     end
   end
 

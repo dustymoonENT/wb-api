@@ -154,3 +154,14 @@ if Mix.env() in [:dev] do
       }
     )
 end
+
+# if Mix.env() in [:prod] do
+  #{:ok, season_one} =
+  #  Ranking.create_season(
+  #    %{
+#      start_date: "2021-01-28T23:00:00Z"
+#      end_date: "2021-02-05T23:00:00Z",
+#      name: "Season 1",
+  #    }
+  #  )
+# end
