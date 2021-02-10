@@ -364,7 +364,7 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: nil,
                elapsed_time_ranking: nil,
                processing_ranking: nil,
-               season: nil,
+               season: %{end_date: nil, name: nil, start_date: nil},
                task_quantity: nil
              }
     end
@@ -393,7 +393,7 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: nil,
                elapsed_time_ranking: nil,
                processing_ranking: nil,
-               season: nil,
+               season:  %{end_date: nil, name: nil, start_date: nil},
                task_quantity: nil
              }
     end
@@ -419,7 +419,7 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: nil,
                elapsed_time_ranking: nil,
                processing_ranking: nil,
-               season: nil,
+               season:  %{end_date: nil, name: nil, start_date: nil},
                task_quantity: nil
              }
     end
