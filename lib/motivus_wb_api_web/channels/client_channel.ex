@@ -36,7 +36,7 @@ defmodule MotivusWbApiWeb.ClientChannel do
     case type do
       "validation" ->
         [_, id] = socket.topic |> String.split("room:client:")
-        payload = %{body: body, task_id: task_id}
+        payload = %{body: body, task_id: task_id, client_id: id}
         PubSub.broadcast(MotivusWbApi.PubSub, "validation", {"set_validation", :hola, payload})
 
       _ ->
