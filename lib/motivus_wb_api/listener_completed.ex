@@ -38,7 +38,7 @@ defmodule MotivusWbApi.ListenerCompleted do
     MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id, tid)
 
     Repo.get_by(Task, id: task_id, user_id: user.id)
-    |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second)})
+    |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second), result: body})
     |> Repo.update()
 
     MotivusWbApiWeb.Endpoint.broadcast!(

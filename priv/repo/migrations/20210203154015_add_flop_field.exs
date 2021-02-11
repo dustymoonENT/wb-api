@@ -5,6 +5,7 @@ defmodule MotivusWbApi.Repo.Migrations.AddFlopField do
       add :flop, :float
       add :result, :map
       add :is_valid, :boolean
+      add :client_id, :string
     end
   end
 end

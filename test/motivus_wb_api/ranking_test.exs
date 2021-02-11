@@ -136,7 +136,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user1.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task2} = Processing.create_task(
@@ -152,7 +153,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user1.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task3} = Processing.create_task(
@@ -168,7 +170,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user2.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task4} = Processing.create_task(
@@ -184,7 +187,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user2.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task5} = Processing.create_task(
@@ -200,7 +204,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user2.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
 
@@ -242,7 +247,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task2} = Processing.create_task(
@@ -258,7 +264,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task3} = Processing.create_task(
@@ -274,7 +281,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
 
@@ -287,7 +295,11 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: 1800,
                elapsed_time_ranking: 1,
                processing_ranking: 1,
-               season: %{end_date: ~U[2021-02-11 14:00:00Z], name: "SEASON_TEST", start_date: ~U[2021-01-28 14:00:00Z]},
+               season: %{
+                 end_date: ~U[2021-02-11 14:00:00Z],
+                 name: "SEASON_TEST",
+                 start_date: ~U[2021-01-28 14:00:00Z]
+               },
                task_quantity: 3
              }
     end
@@ -319,7 +331,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task2} = Processing.create_task(
@@ -335,7 +348,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
       {:ok, %Task{} = task3} = Processing.create_task(
@@ -351,7 +365,8 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user.id,
           flop: 10.0,
           result: %{},
-          is_valid: true
+          is_valid: true,
+          client_id: "1"
         }
       )
 
@@ -364,7 +379,11 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: nil,
                elapsed_time_ranking: nil,
                processing_ranking: nil,
-               season: %{end_date: nil, name: nil, start_date: nil},
+               season: %{
+                 end_date: nil,
+                 name: nil,
+                 start_date: nil
+               },
                task_quantity: nil
              }
     end
@@ -393,7 +412,11 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: nil,
                elapsed_time_ranking: nil,
                processing_ranking: nil,
-               season:  %{end_date: nil, name: nil, start_date: nil},
+               season: %{
+                 end_date: nil,
+                 name: nil,
+                 start_date: nil
+               },
                task_quantity: nil
              }
     end
@@ -419,7 +442,11 @@ defmodule MotivusWbApi.RankingTest do
                elapsed_time: nil,
                elapsed_time_ranking: nil,
                processing_ranking: nil,
-               season:  %{end_date: nil, name: nil, start_date: nil},
+               season: %{
+                 end_date: nil,
+                 name: nil,
+                 start_date: nil
+               },
                task_quantity: nil
              }
     end

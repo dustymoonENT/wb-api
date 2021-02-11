@@ -21,13 +21,14 @@ defmodule MotivusWbApi.ListenerValidation do
         {"set_validation", _name,
          %{
            body: body,
-           task_id: task_id
+           task_id: task_id,
+           client_id: client_id
          }},
         state
       ) do
     IO.inspect(label: "new validation")
 
-    Repo.get_by(Task, id: task_id)
+    Repo.get_by(Task, [id: task_id, client_id: client_id])
     |> change(%{is_valid: body["is_valid"]})
     |> Repo.update()
 

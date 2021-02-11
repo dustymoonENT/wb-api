@@ -24,7 +24,8 @@ defmodule MotivusWbApi.ListenerTasks do
         attempts: 0,
         processing_base_time: data[:body]["processing_base_time"],
         flops: data[:body]["flops"],
-        flop: data[:body]["flop"]
+        flop: data[:body]["flop"],
+        client_id: data[:client_id]
       }
       |> Repo.insert!()
 

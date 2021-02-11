@@ -81,7 +81,7 @@ defmodule MotivusWbApi.Application do
       app_id: 1,
       worker: :worker_cron_1_ranking,
       work: :ranking,
-      loop_time: 30_000,
+      loop_time: 600_000,
       id: :cron_1_ranking
     }
   end

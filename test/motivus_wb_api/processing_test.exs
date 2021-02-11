@@ -6,9 +6,48 @@ defmodule MotivusWbApi.ProcessingTest do
   describe "tasks" do
     alias MotivusWbApi.Processing.Task
 
-    @valid_attrs %{attempts: 42, date_in: "2010-04-17T14:00:00Z", date_last_dispatch: "2010-04-17T14:00:00Z", date_out: "2010-04-17T14:00:00Z", flops: 120.5, params: %{}, processing_base_time: 42, type: "some type", flop: 10.0, result: %{}, is_valid: true}
-    @update_attrs %{attempts: 43, date_in: "2011-05-18T15:01:01Z", date_last_dispatch: "2011-05-18T15:01:01Z", date_out: "2011-05-18T15:01:01Z", flops: 456.7, params: %{}, processing_base_time: 43, type: "some updated type", flop: 10.0, result: %{}, is_valid: false}
-    @invalid_attrs %{attempts: nil, date_in: nil, date_last_dispatch: nil, date_out: nil, flops: nil, params: nil, processing_base_time: nil, type: nil, flop: nil, result: nil, is_valid: nil}
+    @valid_attrs %{
+      attempts: 42,
+      date_in: "2010-04-17T14:00:00Z",
+      date_last_dispatch: "2010-04-17T14:00:00Z",
+      date_out: "2010-04-17T14:00:00Z",
+      flops: 120.5,
+      params: %{},
+      processing_base_time: 42,
+      type: "some type",
+      flop: 10.0,
+      result: %{},
+      is_valid: true,
+      client_id: "1"
+    }
+    @update_attrs %{
+      attempts: 43,
+      date_in: "2011-05-18T15:01:01Z",
+      date_last_dispatch: "2011-05-18T15:01:01Z",
+      date_out: "2011-05-18T15:01:01Z",
+      flops: 456.7,
+      params: %{},
+      processing_base_time: 43,
+      type: "some updated type",
+      flop: 10.0,
+      result: %{},
+      is_valid: false,
+      client_id: "2"
+    }
+    @invalid_attrs %{
+      attempts: nil,
+      date_in: nil,
+      date_last_dispatch: nil,
+      date_out: nil,
+      flops: nil,
+      params: nil,
+      processing_base_time: nil,
+      type: nil,
+      flop: nil,
+      result: nil,
+      is_valid: nil,
+      client_id: nil
+    }
 
     def task_fixture(attrs \\ %{}) do
       {:ok, task} =
