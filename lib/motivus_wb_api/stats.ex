@@ -72,21 +72,6 @@ defmodule MotivusWbApi.Stats do
     end
   end
 
-  def set_users_ranking() do
-    query = """
-      WITH asd AS 
-    (SELECT user_id, sum(flops) as flops FROM "tasks" group by user_id),
-    r AS
-    (SELECT user_id as id, flops, RANK() OVER (ORDER BY flops desc) as rank from asd)
-    update users
-    set ranking = rank
-    FROM r
-    where users.id = r.id
-    """
-
-    Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [])
-  end
-
   def get_current_season(current_timestamp) do
     query =
       from s in Season,
@@ -104,7 +89,8 @@ defmodule MotivusWbApi.Stats do
       query = """
       WITH total_flop AS
       (SELECT user_id, SUM(flop) AS total_flop, SUM(date_out - date_last_dispatch) AS elapsed_time
-      FROM tasks
+      FROM tasks 
+      INNER JOIN users u ON u.id = user_id AND NOT u.black_listed 
       WHERE date_out > $1 AND date_out < $2 AND is_valid
       GROUP BY user_id),
       ranking_tasks AS
