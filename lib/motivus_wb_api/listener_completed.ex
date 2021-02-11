@@ -46,7 +46,7 @@ defmodule MotivusWbApi.ListenerCompleted do
       "new_msg",
       %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id, task_id: task_id}
     )
-    current_season = Stats.get_current_season(Datetime.utc_now())
+    current_season = Stats.get_current_season(DateTime.utc_now())
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> id,
       "stats",

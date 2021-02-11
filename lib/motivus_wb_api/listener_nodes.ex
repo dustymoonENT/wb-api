@@ -18,7 +18,7 @@ defmodule MotivusWbApi.ListenerNodes do
 
   def handle_info({"new_channel", _, data}, state) do
     user = Repo.get_by!(Users.User, uuid: data.uuid)
-    current_season = Stats.get_current_season(Datetime.utc_now())
+    current_season = Stats.get_current_season(DateTime.utc_now())
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> data.uuid,
       "stats",
