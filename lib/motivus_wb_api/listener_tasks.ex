@@ -23,7 +23,9 @@ defmodule MotivusWbApi.ListenerTasks do
         date_in: DateTime.truncate(DateTime.utc_now(), :second),
         attempts: 0,
         processing_base_time: data[:body]["processing_base_time"],
-        flops: data[:body]["flops"]
+        flops: data[:body]["flops"],
+        flop: data[:body]["flop"],
+        client_id: data[:client_id]
       }
       |> Repo.insert!()
 

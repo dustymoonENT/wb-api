@@ -17,8 +17,18 @@ defmodule MotivusWbApi.QueueNodes do
     GenServer.call(pid, :pop)
   end
 
+  @doc """
+  Drops all threads belonging to a node
+  """
   def drop(pid, id) do
-    GenServer.cast(pid,{:drop,id})
+    GenServer.cast(pid, {:drop, id})
+  end
+
+  @doc """
+  Drops a single thread belonging to a node
+  """
+  def drop(pid, id, tid) do
+    GenServer.cast(pid, {:drop, id, tid})
   end
 
   def list(pid) do
@@ -44,34 +54,39 @@ defmodule MotivusWbApi.QueueNodes do
 
   @impl true
   def handle_call(:list, _from, elements) do
-    {:reply, elements,elements}
+    {:reply, elements, elements}
   end
 
   @impl true
   def handle_cast({:push, element}, state) do
     case length(state) do
-          0 -> 
-            {:noreply, [element]}
-          _ -> 
-            {:noreply, state ++ [element]}
-        end
+      0 ->
+        {:noreply, [element]}
+
+      _ ->
+        {:noreply, state ++ [element]}
+    end
   end
 
   @impl true
   def handle_cast({:push_top, element}, state) do
     case length(state) do
-          0 -> 
-            {:noreply, [element]}
-          _ -> 
-            {:noreply, [element] ++ state}
-        end
+      0 ->
+        {:noreply, [element]}
+
+      _ ->
+        {:noreply, [element] ++ state}
+    end
   end
 
   @impl true
   def handle_cast({:drop, id}, state) do
-    element = %{id: id}
-    {:noreply, state -- [element]}
+    {:noreply, Enum.filter(state, fn e -> e.id != id end)}
   end
 
-
+  @impl true
+  def handle_cast({:drop, id, tid}, state) do
+    element = %{id: id, tid: tid}
+    {:noreply, state -- [element]}
+  end
 end

@@ -49,6 +49,10 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.ListenerCompleted, name: MotivusWbApi.ListenerCompleted},
         id: :listener_completed
       ),
+      Supervisor.child_spec(
+        {MotivusWbApi.ListenerValidation, name: MotivusWbApi.ListenerValidation},
+        id: :listener_validation
+      ),
       Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
         id: cron_config_1_ranking()[:id]
       ),
@@ -77,7 +81,7 @@ defmodule MotivusWbApi.Application do
       app_id: 1,
       worker: :worker_cron_1_ranking,
       work: :ranking,
-      loop_time: 30_000,
+      loop_time: 600_000,
       id: :cron_1_ranking
     }
   end
