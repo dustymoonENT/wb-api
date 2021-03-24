@@ -12,6 +12,11 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     {:ok, socket}
   end
 
+
+  def join("room:private", _message, socket) do
+    {:ok, socket}
+  end
+
   def join("room:" <> _private_room_id, _params, _socket) do
     {:error, %{reason: "unauthorized"}}
   end
