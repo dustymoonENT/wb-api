@@ -4,7 +4,7 @@ defmodule MotivusWbApiWeb.UserSocket do
   ## Channels
   channel "room:worker:*", MotivusWbApiWeb.WorkerChannel
   channel "room:client:*", MotivusWbApiWeb.ClientChannel
-
+  channel "room:private:*", MotivusWbApiWeb.PrivateChannel
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
   # verification, you can put default assigns into
