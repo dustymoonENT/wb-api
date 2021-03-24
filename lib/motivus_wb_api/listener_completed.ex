@@ -37,8 +37,9 @@ defmodule MotivusWbApi.ListenerCompleted do
 
     MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id, tid)
 
+    result = %{time: Enum.at(body,0), flops: Enum.at(body,1), rvs: Enum.at(body,2)}
     Repo.get_by(Task, id: task_id, user_id: user.id)
-    |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second), result: body})
+    |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second), result: result})
     |> Repo.update()
 
     MotivusWbApiWeb.Endpoint.broadcast!(
@@ -46,7 +47,7 @@ defmodule MotivusWbApi.ListenerCompleted do
       "new_msg",
       %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id, task_id: task_id}
     )
-    current_season = Stats.get_current_season(Datetime.utc_now())
+    current_season = Stats.get_current_season(DateTime.utc_now())
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> id,
       "stats",

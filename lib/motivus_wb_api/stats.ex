@@ -16,69 +16,67 @@ defmodule MotivusWbApi.Stats do
     ranking = from c in CurrentSeasonRanking, where: c.user_id == ^user_id
     user_ranking = Repo.one(ranking)
 
-    if current_season && user_ranking do
-      query = from t in Task,
-                   where: not is_nil(t.date_out) and t.user_id == ^user_id
-                          and t.date_out > ^current_season.start_date and t.date_out < ^current_season.end_date
-                   and t.is_valid == true
-      user_tasks = Repo.all(query)
-      quantity = Enum.count(user_tasks)
-      user_base_time = Enum.reduce(user_tasks, 0, fn x, acc -> x.processing_base_time + acc end)
-      user_elapsed_time =
-        Enum.reduce(
-          user_tasks,
-          0,
-          fn x, acc ->
-            DateTime.diff(x.date_out, x.date_last_dispatch) + acc
-          end
-        )
-      payload = %{
-        task_quantity: quantity,
-        base_time: user_base_time,
-        elapsed_time: user_elapsed_time,
-        elapsed_time_ranking: user_ranking.elapsed_time_ranking,
-        processing_ranking: user_ranking.processing_ranking,
-        season: %{
-          name: current_season.name,
-          start_date: current_season.start_date,
-          end_date: current_season.end_date
+    season_stats = {current_season, user_ranking}
+
+    case season_stats do
+      {nil, nil} ->
+        %{
+          task_quantity: nil,
+          base_time: nil,
+          elapsed_time: nil,
+          elapsed_time_ranking: nil,
+          processing_ranking: nil,
+          flop: nil,
+          season: %{
+            name: nil,
+            start_date: nil,
+            end_date: nil
+          }
         }
-      }
-      payload
-    else
-      payload = %{
-        task_quantity: nil,
-        base_time: nil,
-        elapsed_time: nil,
-        elapsed_time_ranking: nil,
-        processing_ranking: nil,
-        season: %{
-          name: nil,
-          start_date: nil,
-          end_date: nil
+
+      {_cs, ur} ->
+        query =
+          from t in Task,
+            where:
+              not is_nil(t.date_out) and t.user_id == ^user_id and
+                t.date_out > ^current_season.start_date and t.date_out < ^current_season.end_date and
+                t.is_valid == true
+
+        user_tasks = Repo.all(query)
+        quantity = Enum.count(user_tasks)
+        user_base_time = Enum.reduce(user_tasks, 0, fn x, acc -> x.processing_base_time + acc end)
+        flop = Enum.reduce(user_tasks, 0, fn x, acc -> x.flop + acc end)
+
+        user_elapsed_time =
+          Enum.reduce(
+            user_tasks,
+            0,
+            fn x, acc ->
+              DateTime.diff(x.date_out, x.date_last_dispatch) + acc
+            end
+          )
+
+        %{
+          task_quantity: quantity,
+          base_time: user_base_time,
+          elapsed_time: user_elapsed_time,
+          elapsed_time_ranking: ur && user_ranking.elapsed_time_ranking,
+          processing_ranking: ur && user_ranking.processing_ranking,
+          flop: flop,
+          season: %{
+            name: current_season.name,
+            start_date: current_season.start_date,
+            end_date: current_season.end_date
+          }
         }
-      }
-      payload
     end
   end
 
-  def set_users_ranking() do
-    query = """
-      WITH asd AS 
-    (SELECT user_id, sum(flops) as flops FROM "tasks" group by user_id),
-    r AS
-    (SELECT user_id as id, flops, RANK() OVER (ORDER BY flops desc) as rank from asd)
-    update users
-    set ranking = rank
-    FROM r
-    where users.id = r.id
-    """
-
-    Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [])
-  end
-
   def get_current_season(current_timestamp) do
-    query = from s in Season, where: ^current_timestamp > s.start_date and ^current_timestamp < s.end_date
+    query =
+      from s in Season,
+        where: ^current_timestamp > s.start_date and ^current_timestamp < s.end_date
+
     season = Repo.one(query)
     season
   end
@@ -91,7 +89,8 @@ defmodule MotivusWbApi.Stats do
       query = """
       WITH total_flop AS
       (SELECT user_id, SUM(flop) AS total_flop, SUM(date_out - date_last_dispatch) AS elapsed_time
-      FROM tasks
+      FROM tasks 
+      INNER JOIN users u ON u.id = user_id AND NOT u.black_listed 
       WHERE date_out > $1 AND date_out < $2 AND is_valid
       GROUP BY user_id),
       ranking_tasks AS
@@ -102,7 +101,10 @@ defmodule MotivusWbApi.Stats do
       FROM ranking_tasks
       """
 
-      Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [current_season.start_date, current_season.end_date])
+      Ecto.Adapters.SQL.query!(MotivusWbApi.Repo, query, [
+        current_season.start_date,
+        current_season.end_date
+      ])
     end
   end
 

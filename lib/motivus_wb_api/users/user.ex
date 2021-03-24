@@ -12,6 +12,7 @@ defmodule MotivusWbApi.Users.User do
     field :provider, :string
     field :uuid, Ecto.UUID
     field :ranking, :integer
+    field :black_listed, :boolean, default: false
 
     timestamps()
   end
@@ -19,7 +20,16 @@ defmodule MotivusWbApi.Users.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:name, :mail, :avatar, :provider, :uuid, :is_guest, :last_sign_in])
+    |> cast(attrs, [
+      :name,
+      :mail,
+      :avatar,
+      :provider,
+      :uuid,
+      :is_guest,
+      :last_sign_in,
+      :black_listed
+    ])
     |> validate_required([:name, :mail, :uuid, :is_guest])
   end
 end
