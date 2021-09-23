@@ -19,23 +19,24 @@ defmodule MotivusWbApi.ListenerCompleted do
   # Callbacks
 
   def handle_info(
-        {_topic, _name,
+        {"task_completed", _name,
          %{
            body: body,
            type: type,
            ref: ref,
            client_id: client_id,
-           id: id,
+           channel_id: channel_id,
            task_id: task_id,
            tid: tid
          }},
         state
       ) do
     IO.inspect(label: "new completed")
+    [user_uuid, _] = channel_id |> String.split(":")
 
-    user = Repo.get_by!(Users.User, uuid: id)
+    user = Repo.get_by!(Users.User, uuid: user_uuid)
 
-    MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id, tid)
+    MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, channel_id, tid)
 
     result = body
     # result = %{time: Enum.at(body,0), flops: Enum.at(body,1), rvs: Enum.at(body,2)}
@@ -52,12 +53,10 @@ defmodule MotivusWbApi.ListenerCompleted do
     current_season = Stats.get_current_season(DateTime.utc_now())
 
     MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> id,
+      "room:worker:" <> channel_id,
       "stats",
       %{uid: 1, body: Stats.get_user_stats(user.id, current_season), type: "stats"}
     )
-
-    IO.inspect(label: "DESPUES")
 
     {:noreply, state}
   end

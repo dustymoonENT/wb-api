@@ -19,8 +19,10 @@ defmodule MotivusWbApi.ListenerDispatch do
   def handle_info({_topic, _name, %{data_node: data_node, data_task: data_task}}, state) do
     IO.inspect(label: "new dispatch")
 
+    [user_uuid, _] = data_node.channel_id |> String.split(":")
+
     task = Repo.get_by!(Task, id: data_task.task_id)
-    user = Repo.get_by!(User, uuid: data_node.id)
+    user = Repo.get_by!(User, uuid: user_uuid)
 
     task
     |> change(%{
@@ -33,14 +35,14 @@ defmodule MotivusWbApi.ListenerDispatch do
     input = data_task |> Map.put(:tid, data_node.tid)
 
     MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> data_node[:id],
+      "room:worker:" <> data_node.channel_id,
       "input",
       input
     )
 
     MotivusWbApi.QueueProcessing.put(
       MotivusWbApi.QueueProcessing,
-      data_node.id,
+      data_node.channel_id,
       data_node.tid,
       input
     )

@@ -18,17 +18,17 @@ defmodule MotivusWbApi.QueueNodes do
   end
 
   @doc """
-  Drops all threads belonging to a node
+  Drops all threads belonging to a channel
   """
-  def drop(pid, id) do
-    GenServer.cast(pid, {:drop, id})
+  def drop(pid, channel_id) do
+    GenServer.cast(pid, {:drop, channel_id})
   end
 
   @doc """
-  Drops a single thread belonging to a node
+  Drops a single thread belonging to a channel
   """
-  def drop(pid, id, tid) do
-    GenServer.cast(pid, {:drop, id, tid})
+  def drop(pid, channel_id, tid) do
+    GenServer.cast(pid, {:drop, channel_id, tid})
   end
 
   def list(pid) do
@@ -81,12 +81,12 @@ defmodule MotivusWbApi.QueueNodes do
 
   @impl true
   def handle_cast({:drop, id}, state) do
-    {:noreply, Enum.filter(state, fn e -> e.id != id end)}
+    {:noreply, Enum.filter(state, fn e -> e.channel_id != id end)}
   end
 
   @impl true
-  def handle_cast({:drop, id, tid}, state) do
-    element = %{id: id, tid: tid}
+  def handle_cast({:drop, channel_id, tid}, state) do
+    element = %{channel_id: channel_id, tid: tid}
     {:noreply, state -- [element]}
   end
 end

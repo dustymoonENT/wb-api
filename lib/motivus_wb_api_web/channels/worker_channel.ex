@@ -2,16 +2,15 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   use Phoenix.Channel
   alias Phoenix.PubSub
 
-  def join("room:worker:" <> uuid, _message, socket) do
+  def join("room:worker:" <> channel_id, _message, socket) do
     PubSub.broadcast(
       MotivusWbApi.PubSub,
       "nodes",
-      {"new_channel", :hola, %{uuid: uuid}}
+      {"new_channel", :hola, %{channel_id: channel_id}}
     )
 
     {:ok, socket}
   end
-
 
   def join("room:private", _message, socket) do
     {:ok, socket}
@@ -35,7 +34,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
       ) do
     case type do
       "response" ->
-        [_, id] = socket.topic |> String.split("room:worker:")
+        [_, channel_id] = socket.topic |> String.split("room:worker:")
 
         PubSub.broadcast(
           MotivusWbApi.PubSub,
@@ -46,7 +45,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
              type: type,
              ref: ref,
              client_id: client_id,
-             id: id,
+             channel_id: channel_id,
              task_id: task_id,
              tid: tid
            }}
@@ -60,14 +59,26 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   end
 
   def handle_in("input_request", %{"tid" => tid}, socket) do
-    [_, uuid] = socket.topic |> String.split("room:worker:")
-    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"new_node", :hola, %{id: uuid, tid: tid}})
+    [_, channel_id] = socket.topic |> String.split("room:worker:")
+
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "nodes",
+      {"new_task_slot", :hola, %{channel_id: channel_id, tid: tid}}
+    )
+
     {:noreply, socket}
   end
 
   def terminate(reason, socket) do
-    [_, id] = socket.topic |> String.split("room:worker:")
-    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"dead_node", :hola, %{id: id}})
+    [_, channel_id] = socket.topic |> String.split("room:worker:")
+
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "nodes",
+      {"dead_channel", :hola, %{channel_id: channel_id, join_ref: socket.join_ref}}
+    )
+
     # MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
     # {:ok,task} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
     # IO.inspect(MotivusWbApi.QueueProcessing.list(MotivusWbApi.QueueProcessing)) 

@@ -2,10 +2,10 @@ use Mix.Config
 
 # Configure your database
 config :motivus_wb_api, MotivusWbApi.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "motivus_wb_api_dev",
-  hostname: "db",
+  username: System.get_env("POSTGRES_USER", "postgres"),
+  password: System.get_env("POSTGRES_PASSWORD", "postgres"),
+  database: System.get_env("POSTGRES_DB", "motivus_wb_api_dev"),
+  hostname: System.get_env("DB_HOST", "localhost"),
   port: 5432,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

@@ -5,22 +5,22 @@ defmodule MotivusWbApi.QueueProcessing do
     GenServer.start_link(__MODULE__, %{}, opts)
   end
 
-  def put(pid, node_id, tid, task) do
-    GenServer.cast(pid, {:put, node_id, tid, task})
+  def put(pid, channel_id, tid, task) do
+    GenServer.cast(pid, {:put, channel_id, tid, task})
   end
 
   @doc """
-  Drops all processing tasks associated to the id supplied
+  Drops all processing tasks associated to the channel_id supplied
   """
-  def drop(pid, id) do
-    GenServer.call(pid, {:drop, id})
+  def drop(pid, channel_id) do
+    GenServer.call(pid, {:drop, channel_id})
   end
 
   @doc """
-  Drops a single processing task by id and thread id
+  Drops a single processing task by channel_id and thread id
   """
-  def drop(pid, id, tid) do
-    GenServer.call(pid, {:drop, id, tid})
+  def drop(pid, channel_id, tid) do
+    GenServer.call(pid, {:drop, channel_id, tid})
   end
 
   def list(pid) do

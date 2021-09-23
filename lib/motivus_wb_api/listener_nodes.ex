@@ -16,11 +16,14 @@ defmodule MotivusWbApi.ListenerNodes do
 
   # Callbacks
 
-  def handle_info({"new_channel", _, data}, state) do
-    user = Repo.get_by!(Users.User, uuid: data.uuid)
+  def handle_info({"new_channel", _, %{channel_id: channel_id}}, state) do
+    IO.inspect(label: "new channel")
+    [user_uuid, _] = channel_id |> String.split(":")
+    user = Repo.get_by!(Users.User, uuid: user_uuid)
     current_season = Stats.get_current_season(DateTime.utc_now())
+
     MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> data.uuid,
+      "room:worker:" <> channel_id,
       "stats",
       %{uid: 1, body: Stats.get_user_stats(user.id, current_season), type: "stats"}
     )
@@ -28,8 +31,8 @@ defmodule MotivusWbApi.ListenerNodes do
     {:noreply, state}
   end
 
-  def handle_info({"new_node", _name, data}, state) do
-    IO.inspect(label: "new node")
+  def handle_info({"new_task_slot", _name, data}, state) do
+    IO.inspect(label: "new task slot")
 
     MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)
     # Condicionado al la correcta ejecución del push
@@ -37,10 +40,10 @@ defmodule MotivusWbApi.ListenerNodes do
     {:noreply, state}
   end
 
-  def handle_info({"dead_node", _name, %{id: id}}, state) do
-    IO.inspect(label: "dead node")
-    MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, id)
-    {status, tasks} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, id)
+  def handle_info({"dead_channel", _name, %{channel_id: channel_id}}, state) do
+    IO.inspect(label: "dead channel")
+    MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, channel_id)
+    {status, tasks} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, channel_id)
 
     case status do
       :ok ->

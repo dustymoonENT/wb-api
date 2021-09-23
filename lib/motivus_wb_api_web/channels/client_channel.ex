@@ -46,9 +46,6 @@ defmodule MotivusWbApiWeb.ClientChannel do
     {:noreply, socket}
   end
 
-
-
-
   ## agregar manejo de validated
 
   def terminate(reason, socket) do
