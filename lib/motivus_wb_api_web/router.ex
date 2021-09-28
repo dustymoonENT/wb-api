@@ -46,7 +46,11 @@ defmodule MotivusWbApiWeb.Router do
     pipe_through([:auth])
 
     get "/user", Users.UserController, :get
-    resources "/users", Users.UserController, as: :users_user
+
+    resources "/users", Users.UserController, as: :users_user do
+      resources "/application_tokens", ApplicationTokenController, except: [:new, :edit]
+    end
+
     resources "/tasks", Processing.TaskController, as: :processing_task
   end
 
