@@ -38,6 +38,6 @@ defmodule MotivusWbApiWeb.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(MotivusWbApi.Repo, {:shared, self()})
     end
 
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    %{conn: Phoenix.ConnTest.build_conn()}
   end
 end

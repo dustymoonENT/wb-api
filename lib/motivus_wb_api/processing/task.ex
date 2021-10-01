@@ -16,6 +16,7 @@ defmodule MotivusWbApi.Processing.Task do
     field :result, :map
     field :is_valid, :boolean
     field :client_id, :string
+    field :application_token_id, :id
 
     timestamps()
   end
@@ -23,7 +24,32 @@ defmodule MotivusWbApi.Processing.Task do
   @doc false
   def changeset(task, attrs) do
     task
-    |> cast(attrs, [:type, :params, :date_in, :date_last_dispatch, :date_out, :attempts, :flops, :processing_base_time, :user_id, :flop, :result, :is_valid, :client_id ])
-    |> validate_required([:type, :params, :date_in, :date_last_dispatch, :date_out, :attempts, :flops, :processing_base_time])
+    |> cast(attrs, [
+      :type,
+      :params,
+      :date_in,
+      :date_last_dispatch,
+      :date_out,
+      :attempts,
+      :flops,
+      :processing_base_time,
+      :user_id,
+      :flop,
+      :result,
+      :is_valid,
+      :client_id,
+      :application_token_id
+    ])
+    |> validate_required([
+      :type,
+      :params,
+      :date_in,
+      :date_last_dispatch,
+      :date_out,
+      :attempts,
+      :flops,
+      :processing_base_time,
+      :application_token_id
+    ])
   end
 end

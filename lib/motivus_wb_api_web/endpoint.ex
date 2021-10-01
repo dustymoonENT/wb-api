@@ -10,6 +10,10 @@ defmodule MotivusWbApiWeb.Endpoint do
     signing_salt: "xNwGcGxg"
   ]
 
+  socket "/client_socket", MotivusWbApiWeb.ClientSocket,
+    websocket: [timeout: 30_000, check_origin: false],
+    longpoll: false
+
   socket "/socket", MotivusWbApiWeb.UserSocket,
     websocket: [timeout: 30_000, check_origin: false],
     longpoll: false

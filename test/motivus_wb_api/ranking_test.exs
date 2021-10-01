@@ -116,6 +116,13 @@ defmodule MotivusWbApi.RankingTest do
           uuid: "7488a646-e31f-11e4-aace-600308960662"
         })
 
+      {:ok, application_token} =
+        Users.create_application_token(%{
+          value: "value",
+          description: "description",
+          user_id: user1.id
+        })
+
       {:ok, %User{} = user2} =
         Users.create_user(%{
           avatar: "some avatar",
@@ -140,6 +147,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task1} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -157,6 +165,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task2} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -174,6 +183,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task3} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -191,6 +201,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task4} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -208,6 +219,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task5} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -251,6 +263,13 @@ defmodule MotivusWbApi.RankingTest do
           uuid: "7488a646-e31f-11e4-aace-600308960662"
         })
 
+      {:ok, application_token} =
+        Users.create_application_token(%{
+          value: "value",
+          description: "description",
+          user_id: user1.id
+        })
+
       {:ok, %User{} = user2} =
         Users.create_user(%{
           avatar: "some avatar",
@@ -287,6 +306,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task1} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -304,6 +324,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task2} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -321,6 +342,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task3} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -338,6 +360,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task4} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -355,6 +378,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task5} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -372,6 +396,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task6} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:00:00Z",
           date_last_dispatch: "2021-01-28T14:00:00Z",
@@ -415,8 +440,16 @@ defmodule MotivusWbApi.RankingTest do
           uuid: "7488a646-e31f-11e4-aace-600308960662"
         })
 
+      {:ok, application_token} =
+        Users.create_application_token(%{
+          value: "value",
+          description: "description",
+          user_id: user.id
+        })
+
       {:ok, %Task{} = task1} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:30:00Z",
           date_last_dispatch: "2021-01-28T14:40:00Z",
@@ -434,6 +467,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task2} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:30:00Z",
           date_last_dispatch: "2021-01-28T14:40:00Z",
@@ -451,6 +485,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task3} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:30:00Z",
           date_last_dispatch: "2021-01-28T14:40:00Z",
@@ -498,8 +533,16 @@ defmodule MotivusWbApi.RankingTest do
           uuid: "7488a646-e31f-11e4-aace-600308960662"
         })
 
+      {:ok, application_token} =
+        Users.create_application_token(%{
+          value: "value",
+          description: "description",
+          user_id: user.id
+        })
+
       {:ok, %Task{} = task1} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:30:00Z",
           date_last_dispatch: "2021-01-28T14:40:00Z",
@@ -517,6 +560,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task2} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:30:00Z",
           date_last_dispatch: "2021-01-28T14:40:00Z",
@@ -534,6 +578,7 @@ defmodule MotivusWbApi.RankingTest do
 
       {:ok, %Task{} = task3} =
         Processing.create_task(%{
+          application_token_id: application_token.id,
           attempts: 42,
           date_in: "2021-01-28T14:30:00Z",
           date_last_dispatch: "2021-01-28T14:40:00Z",

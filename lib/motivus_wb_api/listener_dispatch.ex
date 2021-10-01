@@ -5,6 +5,8 @@ defmodule MotivusWbApi.ListenerDispatch do
   alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Users.User
 
+  @redact_task_data [:client_channel_id, :client_id, :task_id, :application_token_id, :ref]
+
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
   end
@@ -16,7 +18,10 @@ defmodule MotivusWbApi.ListenerDispatch do
 
   # Callbacks
 
-  def handle_info({_topic, _name, %{data_node: data_node, data_task: data_task}}, state) do
+  def handle_info(
+        {"worker_task_match", _name, %{data_node: data_node, data_task: data_task}},
+        state
+      ) do
     IO.inspect(label: "new dispatch")
 
     [user_uuid, _] = data_node.channel_id |> String.split(":")
@@ -32,19 +37,19 @@ defmodule MotivusWbApi.ListenerDispatch do
     })
     |> Repo.update()
 
-    input = data_task |> Map.put(:tid, data_node.tid)
+    worker_input = data_task |> Map.put(:tid, data_node.tid) |> Map.drop(@redact_task_data)
 
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> data_node.channel_id,
       "input",
-      input
+      worker_input
     )
 
     MotivusWbApi.QueueProcessing.put(
       MotivusWbApi.QueueProcessing,
       data_node.channel_id,
       data_node.tid,
-      input
+      data_task
     )
 
     {:noreply, state}
