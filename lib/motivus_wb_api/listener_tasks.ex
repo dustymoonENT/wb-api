@@ -25,19 +25,22 @@ defmodule MotivusWbApi.ListenerTasks do
         processing_base_time: data[:body]["processing_base_time"],
         flops: data[:body]["flops"],
         flop: data[:body]["flop"],
-        client_id: data[:client_id]
+        client_id: data[:client_id],
+        application_token_id: data[:application_token_id]
       }
       |> Repo.insert!()
 
-    data = Map.put(data, :task_id, task.id)
+    data =
+      data |> Map.put(:task_id, task.id) |> Map.put(:client_channel_id, data.client_channel_id)
+
     MotivusWbApi.QueueTasks.push(MotivusWbApi.QueueTasks, data)
-    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :hola, %{}})
+    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
     {:noreply, state}
   end
 
   def handle_info({"retry_task", _name, data}, state) do
     MotivusWbApi.QueueTasks.push(MotivusWbApi.QueueTasks, data)
-    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :hola, %{}})
+    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
     {:noreply, state}
   end
 

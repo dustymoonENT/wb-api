@@ -136,6 +136,9 @@ defmodule MotivusWbApi.Users do
   def get_application_token!(user_id, id),
     do: ApplicationToken |> where(user_id: ^user_id, id: ^id) |> Repo.one!()
 
+  def get_application_token_from_value!(value),
+    do: ApplicationToken |> where(value: ^value) |> Repo.one!()
+
   @doc """
   Creates a application_token.
 

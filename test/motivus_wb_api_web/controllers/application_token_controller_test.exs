@@ -21,8 +21,7 @@ defmodule MotivusWbApiWeb.ApplicationTokenControllerTest do
   setup :with_auth
 
   setup %{conn: conn} do
-    user = Fixtures.fixture(:user)
-    {:ok, conn: put_req_header(conn, "accept", "application/json"), user: user}
+    {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
   describe "index" do
@@ -45,9 +44,14 @@ defmodule MotivusWbApiWeb.ApplicationTokenControllerTest do
 
       assert %{
                "id" => id,
-               "description" => "some description",
-               "value" => "some value"
+               "description" => "some description"
              } = json_response(conn, 200)["data"]
+
+      %{
+        "value" => value
+      } = json_response(conn, 200)["data"]
+
+      assert value |> String.starts_with?("MWBat")
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
