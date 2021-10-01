@@ -55,13 +55,13 @@ defmodule MotivusWbApi.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:cors_plug, "~> 2.0"},
       {:guardian, "~> 2.0"},
+      {:guardian_phoenix, "~> 2.0"},
       {:ueberauth_github, "~> 0.7"},
       {:ueberauth_google, "~> 0.10"},
       {:ueberauth_facebook, "~> 0.8"},
       {:telemetry_metrics_cloudwatch, "~> 0.2"},
       {:confex, "~> 3.5.0"}
-      #{:telemetry_metrics_prometheus, "~> 0.6"},
-
+      # {:telemetry_metrics_prometheus, "~> 0.6"},
     ]
   end
 

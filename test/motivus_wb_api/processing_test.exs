@@ -2,6 +2,7 @@ defmodule MotivusWbApi.ProcessingTest do
   use MotivusWbApi.DataCase
 
   alias MotivusWbApi.Processing
+  alias MotivusWbApi.Fixtures
 
   describe "tasks" do
     alias MotivusWbApi.Processing.Task
@@ -50,8 +51,12 @@ defmodule MotivusWbApi.ProcessingTest do
     }
 
     def task_fixture(attrs \\ %{}) do
+      user = Fixtures.fixture(:user)
+      application_token = Fixtures.fixture(:application_token, user.id)
+
       {:ok, task} =
         attrs
+        |> Map.put_new(:application_token_id, application_token.id)
         |> Enum.into(@valid_attrs)
         |> Processing.create_task()
 
@@ -69,7 +74,15 @@ defmodule MotivusWbApi.ProcessingTest do
     end
 
     test "create_task/1 with valid data creates a task" do
-      assert {:ok, %Task{} = task} = Processing.create_task(@valid_attrs)
+      user = Fixtures.fixture(:user)
+      application_token = Fixtures.fixture(:application_token, user.id)
+
+      assert {:ok, %Task{} = task} =
+               Processing.create_task(
+                 @valid_attrs
+                 |> Map.put_new(:application_token_id, application_token.id)
+               )
+
       assert task.attempts == 42
       assert task.date_in == DateTime.from_naive!(~N[2010-04-17T14:00:00Z], "Etc/UTC")
       assert task.date_last_dispatch == DateTime.from_naive!(~N[2010-04-17T14:00:00Z], "Etc/UTC")

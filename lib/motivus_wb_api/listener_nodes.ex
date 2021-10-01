@@ -36,7 +36,7 @@ defmodule MotivusWbApi.ListenerNodes do
 
     MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)
     # Condicionado al la correcta ejecución del push
-    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :hola, %{}})
+    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
     {:noreply, state}
   end
 
@@ -49,7 +49,7 @@ defmodule MotivusWbApi.ListenerNodes do
       :ok ->
         tasks
         |> Enum.map(fn {_tid, t} ->
-          PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"retry_task", :hola, t})
+          PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"retry_task", :unused, t})
         end)
 
       _ ->

@@ -22,11 +22,7 @@ defmodule MotivusWbApi.ListenerCompleted do
         {"task_completed", _name,
          %{
            body: body,
-           type: type,
-           ref: ref,
-           client_id: client_id,
            channel_id: channel_id,
-           task_id: task_id,
            tid: tid
          }},
         state
@@ -36,18 +32,17 @@ defmodule MotivusWbApi.ListenerCompleted do
 
     user = Repo.get_by!(Users.User, uuid: user_uuid)
 
-    MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, channel_id, tid)
+    {:ok, data_task} =
+      MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, channel_id, tid)
 
-    result = body
-    # result = %{time: Enum.at(body,0), flops: Enum.at(body,1), rvs: Enum.at(body,2)}
-    Repo.get_by(Task, id: task_id, user_id: user.id)
-    |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second), result: result})
+    Repo.get_by(Task, id: data_task.task_id, user_id: user.id)
+    |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second), result: body})
     |> Repo.update()
 
     MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:client:" <> client_id,
+      "room:client:" <> data_task.client_channel_id,
       "result",
-      %{uid: 1, body: body, type: "response", ref: ref, client_id: client_id, task_id: task_id}
+      %{body: body, type: "response", ref: data_task.ref, task_id: data_task.task_id}
     )
 
     current_season = Stats.get_current_season(DateTime.utc_now())
@@ -55,7 +50,7 @@ defmodule MotivusWbApi.ListenerCompleted do
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:worker:" <> channel_id,
       "stats",
-      %{uid: 1, body: Stats.get_user_stats(user.id, current_season), type: "stats"}
+      %{body: Stats.get_user_stats(user.id, current_season), type: "stats"}
     )
 
     {:noreply, state}
