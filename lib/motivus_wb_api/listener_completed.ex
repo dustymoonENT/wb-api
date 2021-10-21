@@ -23,6 +23,8 @@ defmodule MotivusWbApi.ListenerCompleted do
          %{
            body: body,
            channel_id: channel_id,
+           stdout: stdout,
+           stderr: stderr,
            tid: tid
          }},
         state
@@ -42,7 +44,14 @@ defmodule MotivusWbApi.ListenerCompleted do
     MotivusWbApiWeb.Endpoint.broadcast!(
       "room:client:" <> data_task.client_channel_id,
       "result",
-      %{body: body, type: "response", ref: data_task.ref, task_id: data_task.task_id}
+      %{
+        body: body,
+        type: "response",
+        ref: data_task.ref,
+        task_id: data_task.task_id,
+        stdout: stdout,
+        stderr: stderr
+      }
     )
 
     current_season = Stats.get_current_season(DateTime.utc_now())
