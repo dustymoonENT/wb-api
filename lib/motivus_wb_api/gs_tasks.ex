@@ -17,6 +17,10 @@ defmodule MotivusWbApi.QueueTasks do
     GenServer.call(pid, :list)
   end
 
+  def drop(pid, client_channel_id) do
+    GenServer.call(pid, {:drop_by, :client_channel_id, client_channel_id})
+  end
+
   # Callbacks
 
   @impl true
@@ -32,6 +36,12 @@ defmodule MotivusWbApi.QueueTasks do
     rescue
       MatchError -> {:reply, :error, []}
     end
+  end
+
+  @impl true
+  def handle_call({:drop_by, key, value}, _from, elements) do
+    partition = elements |> Enum.group_by(fn e -> e |> Map.get(key) == value end)
+    {:reply, Map.get(partition, true, []), Map.get(partition, false, [])}
   end
 
   @impl true

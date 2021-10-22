@@ -7,6 +7,7 @@ defmodule MotivusWbApi.Processing.Task do
     field :date_in, :utc_datetime
     field :date_last_dispatch, :utc_datetime
     field :date_out, :utc_datetime
+    field :aborted_on, :utc_datetime
     field :flops, :float
     field :params, :map
     field :processing_base_time, :integer
@@ -30,6 +31,7 @@ defmodule MotivusWbApi.Processing.Task do
       :date_in,
       :date_last_dispatch,
       :date_out,
+      :aborted_on,
       :attempts,
       :flops,
       :processing_base_time,

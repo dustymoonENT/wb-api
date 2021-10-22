@@ -76,7 +76,17 @@ defmodule MotivusWbApiWeb.ClientChannel do
 
   ## agregar manejo de validated
 
-  def terminate(reason, socket) do
-    IO.inspect("desde Clientchanel")
+  def terminate(_reason, socket) do
+    case socket.topic do
+      "room:client:" <> channel_id ->
+        PubSub.broadcast(
+          MotivusWbApi.PubSub,
+          "tasks",
+          {"dead_client", :unused, %{channel_id: channel_id}}
+        )
+
+      _ ->
+        nil
+    end
   end
 end

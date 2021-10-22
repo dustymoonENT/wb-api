@@ -47,13 +47,17 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     {:noreply, socket}
   end
 
-  def terminate(reason, socket) do
-    [_, channel_id] = socket.topic |> String.split("room:worker:")
+  def terminate(_reason, socket) do
+    case socket.topic do
+      "room:worker:" <> channel_id ->
+        PubSub.broadcast(
+          MotivusWbApi.PubSub,
+          "nodes",
+          {"dead_channel", :unused, %{channel_id: channel_id}}
+        )
 
-    PubSub.broadcast(
-      MotivusWbApi.PubSub,
-      "nodes",
-      {"dead_channel", :unused, %{channel_id: channel_id, join_ref: socket.join_ref}}
-    )
+      _ ->
+        nil
+    end
   end
 end
