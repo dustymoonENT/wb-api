@@ -139,6 +139,14 @@ defmodule MotivusWbApi.Users do
   def get_application_token_from_value!(value),
     do: ApplicationToken |> where(value: ^value) |> Repo.one!()
 
+  def who_is_this!(application_token) do
+    Mojito.request(
+      method: :get,
+      url: "http://127.0.0.1:4001/api/account/user",
+      headers: [{"authorization", "Bearer #{application_token}"}]
+    )
+  end
+
   @doc """
   Creates a application_token.
 
