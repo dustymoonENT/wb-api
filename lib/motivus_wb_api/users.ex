@@ -145,20 +145,28 @@ defmodule MotivusWbApi.Users do
     do: ApplicationToken |> where(value: ^value) |> Repo.one!()
 
   def who_is_this!(application_token) do
-    retry with: exponential_backoff() |> randomize |> expiry(30_000) do
-      with {:ok, %{body: body}} <-
-             Mojito.request(
-               method: :get,
-               url: Application.get_env(:motivus_wb_api, :external_user_provider_uri),
-               headers: [{"authorization", "Bearer #{application_token}"}]
-             ),
-           {:ok, %{"data" => user}} <-
-             Jason.decode(body),
-           %{valid?: true, changes: user} <-
-             change_user_external_provider(%{}, user) do
-        user
-      else
-        e -> e
+    retry with: exponential_backoff() |> randomize |> expiry(3_000) do
+      response =
+        Mojito.request(
+          method: :get,
+          url: Application.get_env(:motivus_wb_api, :external_user_provider_uri),
+          headers: [{"authorization", "Bearer #{application_token}"}]
+        )
+
+      case response do
+        {:ok, %{status_code: 401}} ->
+          nil
+
+        response ->
+          with {:ok, %{body: body}} <- response,
+               {:ok, %{"data" => user}} <-
+                 Jason.decode(body),
+               %{valid?: true, changes: user} <-
+                 change_user_external_provider(%{}, user) do
+            user
+          else
+            e -> e
+          end
       end
     after
       r -> r

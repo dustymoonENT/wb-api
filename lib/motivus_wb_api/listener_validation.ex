@@ -1,10 +1,8 @@
 defmodule MotivusWbApi.ListenerValidation do
   use GenServer
-  alias Phoenix.PubSub
   import Ecto.Changeset
   alias MotivusWbApi.Repo
   alias MotivusWbApi.Processing.Task
-
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
@@ -28,11 +26,10 @@ defmodule MotivusWbApi.ListenerValidation do
       ) do
     IO.inspect(label: "new validation")
 
-    Repo.get_by(Task, [id: task_id, client_id: client_id])
+    Repo.get_by(Task, id: task_id, client_id: client_id)
     |> change(%{is_valid: body["is_valid"]})
     |> Repo.update()
 
     {:noreply, state}
   end
-
 end

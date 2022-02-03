@@ -1,6 +1,5 @@
 defmodule MotivusWbApi.ListenerCompleted do
   use GenServer
-  alias Phoenix.PubSub
   import Ecto.Changeset
   alias MotivusWbApi.Repo
   alias MotivusWbApi.Users
