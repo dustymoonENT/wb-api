@@ -34,6 +34,10 @@ defmodule MotivusWbApi.QueueProcessing do
     GenServer.call(pid, :list)
   end
 
+  def empty(pid \\ __MODULE__) do
+    GenServer.call(pid, :clear)
+  end
+
   # Callbacks
 
   @impl true
@@ -90,6 +94,9 @@ defmodule MotivusWbApi.QueueProcessing do
           )
 
         {:reply, Map.get(partition, true, []), new_state}
+
+      :clear ->
+        {:reply, %{}, %{}}
     end
   end
 

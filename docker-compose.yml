@@ -9,6 +9,8 @@ services:
             - "9568:9568"
         volumes:
             - ./:/app
+            - _build:/app/_build
+            - deps:/app/deps
         env_file: .env
         environment:
             - DB_HOST=db
@@ -35,3 +37,5 @@ services:
 
 volumes:
     db-data:
+    deps:
+    _build:

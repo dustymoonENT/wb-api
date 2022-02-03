@@ -13,7 +13,7 @@ defmodule MotivusWbApi.Fixtures do
              mail: "some mail",
              name: "some name",
              provider: "some provider",
-             uuid: "7488a646-e31f-11e4-aace-600308960662"
+             uuid: UUID.uuid4()
            }) do
       user
     end
@@ -90,4 +90,10 @@ defmodule MotivusWbApi.Fixtures do
 
     user.uuid <> ":" <> UUID.uuid4()
   end
+
+  def worker_slot_fixture(user_id),
+    do: %{
+      channel_id: user_id |> channel_fixture(),
+      tid: UUID.uuid4()
+    }
 end

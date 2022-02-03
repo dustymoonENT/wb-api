@@ -1,13 +1,30 @@
 defmodule MotivusWbApiWeb.ClientChannelTest do
   use MotivusWbApiWeb.ChannelCase
-  import MotivusWbApi.Fixtures
+  import Mock
 
-  setup do
-    application_token = application_token_fixture()
+  setup_with_mocks([
+    {Mojito, [],
+     [
+       request: fn
+         _opts ->
+           {:ok,
+            %Mojito.Response{
+              body:
+                "{\"data\":{\"avatar_url\":\"https://avatars.githubusercontent.com/u/13546914?v=4\",\"email\":\"f.mora.g90@gmail.com\",\"id\":2,\"name\":\"a8c71\",\"provider\":\"github\",\"username\":null,\"uuid\":\"3b796d2f-4d75-4b71-a55c-9137296a6574\"}}",
+              status_code: 200
+            }}
+       end
+     ]}
+  ]) do
+    token = "MWBatqwerty"
+
+    MotivusWbApi.QueueTasks.empty()
+    MotivusWbApi.QueueNodes.empty()
+    MotivusWbApi.QueueProcessing.empty()
 
     {:ok, socket} =
       MotivusWbApiWeb.ClientSocket
-      |> connect(%{"token" => application_token.value}, %{})
+      |> connect(%{"token" => token}, %{})
 
     %{socket: socket}
   end
@@ -24,19 +41,11 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
       |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client:#{uuid}:#{UUID.uuid4()}")
 
     client_ref = UUID.uuid4()
-    ref = push(socket, "task", %{"body" => %{}, "type" => "work", "ref" => client_ref})
+    task = %{body: %{}, type: "work", ref: client_ref}
+    push(socket, "task", task)
 
-    # ref = push(socket, "handleinevent", %{})
-    # assert_reply ref, :ok, %{"uuid" => "there"}
-  end
+    refute_broadcast "*", _
 
-  test "shout broadcasts to client:lobby", %{socket: socket} do
-    push(socket, "shout", %{"hello" => "all"})
-    assert_broadcast "shout", %{"hello" => "all"}
-  end
-
-  test "broadcasts are pushed to the client", %{socket: socket} do
-    broadcast_from!(socket, "broadcast", %{"some" => "data"})
-    assert_push "broadcast", %{"some" => "data"}
+    assert [%{ref: ^client_ref, client_id: ^uuid}] = MotivusWbApi.QueueTasks.list()
   end
 end

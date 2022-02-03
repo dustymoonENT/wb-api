@@ -37,6 +37,10 @@ defmodule MotivusWbApi.QueueNodes do
     GenServer.call(pid, :list)
   end
 
+  def empty(pid \\ __MODULE__) do
+    GenServer.call(pid, :clear)
+  end
+
   # Callbacks
 
   @impl true
@@ -57,6 +61,11 @@ defmodule MotivusWbApi.QueueNodes do
   @impl true
   def handle_call(:list, _from, elements) do
     {:reply, elements, elements}
+  end
+
+  @impl true
+  def handle_call(:clear, _from, _elements) do
+    {:reply, [], []}
   end
 
   @impl true
