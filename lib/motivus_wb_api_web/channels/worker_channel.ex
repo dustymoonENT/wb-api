@@ -16,7 +16,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
 
   def join("room:" <> _private_room_id, _params, _socket), do: {:error, %{reason: "unauthorized"}}
 
-  def handle_in("result", %{"body" => body, "tid" => tid}, socket) do
+  def handle_in("result", %{"body" => body, "tid" => tid} = result, socket) do
     [_, channel_id] = socket.topic |> String.split("room:worker:")
 
     PubSub.broadcast(
@@ -26,6 +26,8 @@ defmodule MotivusWbApiWeb.WorkerChannel do
        %{
          body: body,
          channel_id: channel_id,
+         stdout: result["stdout"],
+         stderr: result["stderr"],
          tid: tid
        }}
     )
@@ -45,13 +47,17 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     {:noreply, socket}
   end
 
-  def terminate(reason, socket) do
-    [_, channel_id] = socket.topic |> String.split("room:worker:")
+  def terminate(_reason, socket) do
+    case socket.topic do
+      "room:worker:" <> channel_id ->
+        PubSub.broadcast(
+          MotivusWbApi.PubSub,
+          "nodes",
+          {"dead_channel", :unused, %{channel_id: channel_id}}
+        )
 
-    PubSub.broadcast(
-      MotivusWbApi.PubSub,
-      "nodes",
-      {"dead_channel", :unused, %{channel_id: channel_id, join_ref: socket.join_ref}}
-    )
+      _ ->
+        nil
+    end
   end
 end

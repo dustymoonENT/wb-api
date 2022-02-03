@@ -7,12 +7,10 @@ defmodule MotivusWbApi.Stats do
   alias MotivusWbApi.Repo
 
   alias MotivusWbApi.Processing.Task
-  alias MotivusWbApi.Users.User
   alias MotivusWbApi.Ranking.CurrentSeasonRanking
   alias MotivusWbApi.Ranking.Season
 
   def get_user_stats(user_id, current_season) do
-    user = Repo.get_by(User, id: user_id)
     ranking = from c in CurrentSeasonRanking, where: c.user_id == ^user_id
     user_ranking = Repo.one(ranking)
 

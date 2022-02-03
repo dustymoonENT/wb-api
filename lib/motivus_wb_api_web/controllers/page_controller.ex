@@ -1,6 +1,5 @@
 defmodule MotivusWbApiWeb.PageController do
   use MotivusWbApiWeb, :controller
-  alias MotivusWbApi.Users
   alias MotivusWbApi.QueueTasks
 
   def index(conn, _params) do

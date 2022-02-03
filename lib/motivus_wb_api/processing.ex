@@ -73,6 +73,14 @@ defmodule MotivusWbApi.Processing do
     |> Repo.update()
   end
 
+  def update_many_task(task_ids, update) do
+    query =
+      from t in Task,
+        where: t.id in ^task_ids
+
+    query |> Repo.update_all(set: update)
+  end
+
   @doc """
   Deletes a task.
 

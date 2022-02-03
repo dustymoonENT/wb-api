@@ -5,16 +5,25 @@ defmodule MotivusWbApi.QueueNodes do
     GenServer.start_link(__MODULE__, [], opts)
   end
 
-  def push(pid, element) do
+  def push(pid \\ __MODULE__, element) do
     GenServer.cast(pid, {:push, element})
   end
 
-  def push_top(pid, element) do
+  def push_top(pid \\ __MODULE__, element) do
     GenServer.cast(pid, {:push_top, element})
   end
 
-  def pop(pid) do
+  def pop(pid \\ __MODULE__) do
     GenServer.call(pid, :pop)
+  end
+
+  def drop(pid \\ __MODULE__, target)
+
+  @doc """
+  Drops a single thread belonging to a channel
+  """
+  def drop(pid, {channel_id, tid}) do
+    GenServer.cast(pid, {:drop, channel_id, tid})
   end
 
   @doc """
@@ -24,15 +33,12 @@ defmodule MotivusWbApi.QueueNodes do
     GenServer.cast(pid, {:drop, channel_id})
   end
 
-  @doc """
-  Drops a single thread belonging to a channel
-  """
-  def drop(pid, channel_id, tid) do
-    GenServer.cast(pid, {:drop, channel_id, tid})
+  def list(pid \\ __MODULE__) do
+    GenServer.call(pid, :list)
   end
 
-  def list(pid) do
-    GenServer.call(pid, :list)
+  def empty(pid \\ __MODULE__) do
+    GenServer.call(pid, :clear)
   end
 
   # Callbacks
@@ -55,6 +61,11 @@ defmodule MotivusWbApi.QueueNodes do
   @impl true
   def handle_call(:list, _from, elements) do
     {:reply, elements, elements}
+  end
+
+  @impl true
+  def handle_call(:clear, _from, _elements) do
+    {:reply, [], []}
   end
 
   @impl true

@@ -32,4 +32,20 @@ defmodule MotivusWbApi.Users.User do
     ])
     |> validate_required([:name, :mail, :uuid, :is_guest])
   end
+
+  def external_provider_changeset(user, attrs) do
+    types = %{
+      avatar_url: :string,
+      email: :string,
+      id: :integer,
+      name: :string,
+      provider: :string,
+      username: :string,
+      uuid: :string
+    }
+
+    {%{} = user, types}
+    |> cast(attrs, Map.keys(types))
+    |> validate_required([:uuid, :id, :email])
+  end
 end
