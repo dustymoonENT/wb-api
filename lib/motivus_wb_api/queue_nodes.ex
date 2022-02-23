@@ -41,6 +41,10 @@ defmodule MotivusWbApi.QueueNodes do
     GenServer.call(pid, :clear)
   end
 
+  def by_user(pid \\ __MODULE__) do
+    GenServer.call(pid, :by_user)
+  end
+
   # Callbacks
 
   @impl true
@@ -66,6 +70,18 @@ defmodule MotivusWbApi.QueueNodes do
   @impl true
   def handle_call(:clear, _from, _elements) do
     {:reply, [], []}
+  end
+
+  @impl true
+  def handle_call(:by_user, _from, elements) do
+    map =
+      elements
+      |> Enum.group_by(fn %{channel_id: channel_id} ->
+        [user_uuid | _] = channel_id |> String.split(":")
+        user_uuid
+      end)
+
+    {:reply, map, elements}
   end
 
   @impl true

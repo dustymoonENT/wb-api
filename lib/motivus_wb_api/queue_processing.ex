@@ -30,12 +30,16 @@ defmodule MotivusWbApi.QueueProcessing do
     GenServer.call(pid, {:drop_by, key, value})
   end
 
-  def list(pid) do
+  def list(pid \\ __MODULE__) do
     GenServer.call(pid, :list)
   end
 
   def empty(pid \\ __MODULE__) do
     GenServer.call(pid, :clear)
+  end
+
+  def by_worker_user(pid \\ __MODULE__) do
+    GenServer.call(pid, :by_worker_user)
   end
 
   # Callbacks
@@ -53,6 +57,16 @@ defmodule MotivusWbApi.QueueProcessing do
           map |> Enum.map(fn {_node_id, threads} -> threads end) |> Enum.flat_map(fn t -> t end)
 
         {:reply, flat_map, map}
+
+      :by_worker_user ->
+        by_user =
+          map
+          |> Enum.group_by(fn {channel_id, _v} ->
+            [user_uuid | _] = channel_id |> String.split(":")
+            user_uuid
+          end)
+
+        {:reply, by_user, map}
 
       {:drop, key} ->
         case Map.has_key?(map, key) do

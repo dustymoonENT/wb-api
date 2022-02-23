@@ -4,6 +4,7 @@ defmodule MotivusWbApi.ListenerDispatch do
   alias MotivusWbApi.Repo
   alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Users.User
+  import MotivusWbApi.ListenerNodes, only: [broadcast_user_stats: 1]
 
   @redact_task_data [:client_channel_id, :client_id, :task_id, :application_token_id, :ref]
 
@@ -51,6 +52,8 @@ defmodule MotivusWbApi.ListenerDispatch do
       data_node.tid,
       data_task
     )
+
+    broadcast_user_stats(data_node.channel_id)
 
     {:noreply, state}
   end
