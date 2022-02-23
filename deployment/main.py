@@ -56,7 +56,7 @@ class MotivusWbApiStack(core.Stack):
 
         database_name = "motivus_wb_api"
         db = aws_rds.DatabaseInstance(self, f'{title}-db-prod',
-                                      engine=aws_rds.PostgresEngineVersion.VER_12,
+                                      engine=aws_rds.DatabaseInstanceEngine.postgres(version=aws_rds.PostgresEngineVersion.VER_12),
                                       preferred_backup_window="05:00-06:00",
                                       backup_retention=Duration.days(7),
                                       removal_policy=core.RemovalPolicy.RETAIN,
