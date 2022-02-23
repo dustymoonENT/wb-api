@@ -26,7 +26,10 @@ config :motivus_wb_api,
   spa_origin: System.get_env("SPA_ORIGIN", "https://motivus.cl"),
   spa_alias_origin: System.get_env("SPA_ALIAS_ORIGIN", "https://www.motivus.cl"),
   external_user_provider_uri:
-    System.get_env("EXTERNAL_USER_PROVIDER_URI", "https://marketplace.api.motivus.cl")
+    System.get_env(
+      "EXTERNAL_USER_PROVIDER_URI",
+      "https://marketplace.api.motivus.cl/api/account/user"
+    )
 
 config :ueberauth, Ueberauth,
   providers: [
