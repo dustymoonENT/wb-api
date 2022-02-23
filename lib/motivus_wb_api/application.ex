@@ -90,7 +90,8 @@ defmodule MotivusWbApi.Application do
     [
       Metrics.last_value("nodes.queue.total"),
       Metrics.last_value("tasks.queue.total"),
-      Metrics.last_value("processing.queue.total")
+      Metrics.last_value("processing.queue.total"),
+      Metrics.last_value("worker.users.total")
     ]
   end
 end

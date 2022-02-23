@@ -46,7 +46,8 @@ defmodule MotivusWbApiWeb.Telemetry do
       # queues
       last_value("processing.queue.total"),
       last_value("tasks.queue.total"),
-      last_value("nodes.queue.total")
+      last_value("nodes.queue.total"),
+      last_value("worker.users.total")
     ]
   end
 
@@ -57,7 +58,8 @@ defmodule MotivusWbApiWeb.Telemetry do
       # {MotivusWbApiWeb, :count_users, []}
       {MotivusWbApi, :nodes_queue_total, []},
       {MotivusWbApi, :tasks_queue_total, []},
-      {MotivusWbApi, :processing_queue_total, []}
+      {MotivusWbApi, :processing_queue_total, []},
+      {MotivusWbApi, :worker_users_total, []}
     ]
   end
 end

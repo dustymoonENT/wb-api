@@ -7,12 +7,10 @@ defmodule MotivusWbApi.Stats do
   alias MotivusWbApi.Repo
 
   alias MotivusWbApi.Processing.Task
-  alias MotivusWbApi.Users.User
   alias MotivusWbApi.Ranking.CurrentSeasonRanking
   alias MotivusWbApi.Ranking.Season
 
   def get_user_stats(user_id, current_season) do
-    user = Repo.get_by(User, id: user_id)
     ranking = from c in CurrentSeasonRanking, where: c.user_id == ^user_id
     user_ranking = Repo.one(ranking)
 
@@ -108,97 +106,14 @@ defmodule MotivusWbApi.Stats do
     end
   end
 
-  @doc """
-  Returns the list of tasks.
+  def get_cluster_stats() do
+    processing_count = MotivusWbApi.QueueProcessing.list() |> length()
 
-  ## Examples
-
-      iex> list_tasks()
-      [%Task{}, ...]
-
-  """
-  def list_tasks do
-    Repo.all(Task)
-  end
-
-  @doc """
-  Gets a single task.
-
-  Raises `Ecto.NoResultsError` if the Task does not exist.
-
-  ## Examples
-
-      iex> get_task!(123)
-      %Task{}
-
-      iex> get_task!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_task!(id), do: Repo.get!(Task, id)
-
-  @doc """
-  Creates a task.
-
-  ## Examples
-
-      iex> create_task(%{field: value})
-      {:ok, %Task{}}
-
-      iex> create_task(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_task(attrs \\ %{}) do
-    %Task{}
-    |> Task.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a task.
-
-  ## Examples
-
-      iex> update_task(task, %{field: new_value})
-      {:ok, %Task{}}
-
-      iex> update_task(task, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_task(%Task{} = task, attrs) do
-    task
-    |> Task.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a task.
-
-  ## Examples
-
-      iex> delete_task(task)
-      {:ok, %Task{}}
-
-      iex> delete_task(task)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_task(%Task{} = task) do
-    Repo.delete(task)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking task changes.
-
-  ## Examples
-
-      iex> change_task(task)
-      %Ecto.Changeset{data: %Task{}}
-
-  """
-  def change_task(%Task{} = task, attrs \\ %{}) do
-    Task.changeset(task, attrs)
+    %{
+      threads_available: MotivusWbApi.QueueNodes.list() |> length(),
+      threads_processing: processing_count,
+      tasks_available: MotivusWbApi.QueueTasks.list() |> length(),
+      tasks_processing: processing_count
+    }
   end
 end

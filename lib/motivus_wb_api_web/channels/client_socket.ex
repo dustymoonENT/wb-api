@@ -18,16 +18,13 @@ defmodule MotivusWbApiWeb.ClientSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{"token" => token}, socket, _connect_info) do
-    with %{user_id: user_id} = application_token <-
-           Users.get_application_token_from_value!(token),
-         user <- Users.get_user!(user_id) do
+    with user = %{} <- Users.who_is_this!(token) do
       authenticated_socket =
         socket
         |> assign(
           :user,
           user
         )
-        |> assign(:application_token, application_token)
 
       {:ok, authenticated_socket}
     else

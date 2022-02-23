@@ -22,9 +22,60 @@ defmodule MotivusWbApiWeb.ChannelCase do
       # Import conveniences for testing with channels
       import Phoenix.ChannelTest
       import MotivusWbApiWeb.ChannelCase
+      import MotivusWbApi.Fixtures
+      alias MotivusWbApi.Users.Guardian
 
       # The default endpoint for testing
       @endpoint MotivusWbApiWeb.Endpoint
+
+      def connect_client() do
+        token = "MWBatqwerty"
+
+        {:ok, socket} =
+          MotivusWbApiWeb.ClientSocket
+          |> connect(%{"token" => token}, %{})
+
+        %{socket: socket}
+      end
+
+      def join_client_channel() do
+        %{socket: socket} = connect_client()
+
+        {:ok, %{uuid: uuid}, socket} =
+          socket
+          |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client?")
+
+        channel_id = "#{uuid}:#{UUID.uuid4()}"
+
+        {:ok, _, socket} =
+          socket
+          |> subscribe_and_join(
+            MotivusWbApiWeb.ClientChannel,
+            "room:client:" <> channel_id
+          )
+
+        %{socket: socket, channel_id: channel_id}
+      end
+
+      def connect_worker() do
+        user = user_fixture()
+        {:ok, token, _} = Guardian.encode_and_sign(user)
+
+        {:ok, socket} = MotivusWbApiWeb.UserSocket |> connect(%{"token" => token}, %{})
+        %{socket: socket, user: user}
+      end
+
+      def join_worker_channel do
+        %{socket: socket, user: user} = connect_worker()
+        channel_id = channel_fixture(user.id)
+        topic = "room:worker:#{channel_id}"
+
+        {:ok, _, socket} =
+          socket
+          |> subscribe_and_join(MotivusWbApiWeb.WorkerChannel, topic)
+
+        %{socket: socket, user: user, channel_id: channel_id, topic: topic}
+      end
     end
   end
 

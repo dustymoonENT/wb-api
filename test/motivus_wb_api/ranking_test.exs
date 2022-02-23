@@ -134,7 +134,7 @@ defmodule MotivusWbApi.RankingTest do
           uuid: "7488a646-e31f-11e4-aace-600308960662"
         })
 
-      {:ok, %User{} = user3} =
+      {:ok, %User{}} =
         Users.create_user(%{
           avatar: "some avatar",
           is_guest: true,
@@ -145,7 +145,7 @@ defmodule MotivusWbApi.RankingTest do
           uuid: "7488a646-e31f-11e4-aace-600308960662"
         })
 
-      {:ok, %Task{} = task1} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -163,7 +163,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task2} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -181,7 +181,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task3} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -199,7 +199,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task4} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -217,7 +217,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task5} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -281,7 +281,7 @@ defmodule MotivusWbApi.RankingTest do
           uuid: "7488a646-e31f-11e4-aace-600308960662"
         })
 
-      {:ok, %User{} = user3} =
+      {:ok, %User{}} =
         Users.create_user(%{
           avatar: "some avatar",
           is_guest: true,
@@ -304,7 +304,7 @@ defmodule MotivusWbApi.RankingTest do
           black_listed: true
         })
 
-      {:ok, %Task{} = task1} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -322,7 +322,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task2} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -340,7 +340,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task3} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -358,7 +358,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task4} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -376,7 +376,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task5} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -394,7 +394,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task6} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -540,7 +540,7 @@ defmodule MotivusWbApi.RankingTest do
           user_id: user.id
         })
 
-      {:ok, %Task{} = task1} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -558,7 +558,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task2} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,
@@ -576,7 +576,7 @@ defmodule MotivusWbApi.RankingTest do
           client_id: "1"
         })
 
-      {:ok, %Task{} = task3} =
+      {:ok, %Task{}} =
         Processing.create_task(%{
           application_token_id: application_token.id,
           attempts: 42,

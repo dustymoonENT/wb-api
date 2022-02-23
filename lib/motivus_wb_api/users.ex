@@ -7,6 +7,7 @@ defmodule MotivusWbApi.Users do
   alias MotivusWbApi.Repo
 
   alias MotivusWbApi.Users.User
+  use Retry
 
   @doc """
   Returns the list of users.
@@ -102,6 +103,10 @@ defmodule MotivusWbApi.Users do
     User.changeset(user, attrs)
   end
 
+  def change_user_external_provider(%{} = user, attrs \\ %{}) do
+    User.external_provider_changeset(user, attrs)
+  end
+
   alias MotivusWbApi.Users.ApplicationToken
 
   @doc """
@@ -138,6 +143,37 @@ defmodule MotivusWbApi.Users do
 
   def get_application_token_from_value!(value),
     do: ApplicationToken |> where(value: ^value) |> Repo.one!()
+
+  def who_is_this!(application_token) do
+    retry with: exponential_backoff() |> randomize |> expiry(3_000) do
+      response =
+        Mojito.request(
+          method: :get,
+          url: Application.get_env(:motivus_wb_api, :external_user_provider_uri),
+          headers: [{"authorization", "Bearer #{application_token}"}]
+        )
+
+      case response do
+        {:ok, %{status_code: 401}} ->
+          nil
+
+        response ->
+          with {:ok, %{body: body}} <- response,
+               {:ok, %{"data" => user}} <-
+                 Jason.decode(body),
+               %{valid?: true, changes: user} <-
+                 change_user_external_provider(%{}, user) do
+            user
+          else
+            e -> e
+          end
+      end
+    after
+      r -> r
+    else
+      e -> e
+    end
+  end
 
   @doc """
   Creates a application_token.

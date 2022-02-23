@@ -8,7 +8,6 @@ defmodule MotivusWbApiWeb.AuthController do
 
   alias MotivusWbApi.Users.Guardian
   alias MotivusWbApi.Users
-  alias MotivusWbApi.Users.User
 
   def delete(conn, _params) do
     conn

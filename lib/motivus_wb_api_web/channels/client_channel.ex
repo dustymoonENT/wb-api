@@ -22,8 +22,7 @@ defmodule MotivusWbApiWeb.ClientChannel do
   def handle_in(
         "task",
         %{"body" => body, "type" => type, "ref" => ref},
-        %{assigns: %{user: %{uuid: uuid}, application_token: %{id: application_token_id}}} =
-          socket
+        %{assigns: %{user: %{uuid: uuid}}} = socket
       ) do
     [_, channel_id] = socket.topic |> String.split("room:client:")
 
@@ -34,7 +33,6 @@ defmodule MotivusWbApiWeb.ClientChannel do
           type: "work",
           ref: ref,
           client_id: uuid,
-          application_token_id: application_token_id,
           client_channel_id: channel_id
         }
 

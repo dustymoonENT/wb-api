@@ -27,7 +27,8 @@ defmodule MotivusWbApi.MixProject do
         :ueberauth_github,
         :ueberauth_google,
         :ueberauth_facebook,
-        :confex
+        :confex,
+        :retry
       ]
     ]
   end
@@ -60,7 +61,11 @@ defmodule MotivusWbApi.MixProject do
       {:ueberauth_google, "~> 0.10"},
       {:ueberauth_facebook, "~> 0.8"},
       {:telemetry_metrics_cloudwatch, "~> 0.2"},
-      {:confex, "~> 3.5.0"}
+      {:confex, "~> 3.5.0"},
+      {:mojito, "~> 0.7.10"},
+      {:mock, "~> 0.3.0", only: :test},
+      {:uuid, "~> 1.1"},
+      {:retry, "~> 0.15"}
       # {:telemetry_metrics_prometheus, "~> 0.6"},
     ]
   end

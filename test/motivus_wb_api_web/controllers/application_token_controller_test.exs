@@ -2,7 +2,6 @@ defmodule MotivusWbApiWeb.ApplicationTokenControllerTest do
   use MotivusWbApiWeb.ConnCase
   import MotivusWbApi.AuthControllerCase
 
-  alias MotivusWbApi.Users
   alias MotivusWbApi.Users.ApplicationToken
   alias MotivusWbApi.Fixtures
 
