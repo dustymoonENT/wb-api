@@ -5,6 +5,8 @@ defmodule MotivusWbApi.ListenerNodes do
   alias MotivusWbApi.Repo
   alias MotivusWbApi.Stats
 
+  @broadcast_stats_every 15_000
+
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
   end
@@ -18,25 +20,18 @@ defmodule MotivusWbApi.ListenerNodes do
 
   def handle_info({"new_channel", _, %{channel_id: channel_id}}, state) do
     IO.inspect(label: "new channel")
-    [user_uuid, _] = channel_id |> String.split(":")
-    user = Repo.get_by!(Users.User, uuid: user_uuid)
-    current_season = Stats.get_current_season(DateTime.utc_now())
-
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> channel_id,
-      "stats",
-      %{uid: 1, body: Stats.get_user_stats(user.id, current_season), type: "stats"}
-    )
-
+    broadcast_user_stats(channel_id)
+    Process.send_after(self(), {:broadcast_user_stats, channel_id}, @broadcast_stats_every)
     {:noreply, state}
   end
 
-  def handle_info({"new_task_slot", _name, data}, state) do
+  def handle_info({"new_task_slot", _name, %{channel_id: channel_id} = data}, state) do
     IO.inspect(label: "new task slot")
 
     MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)
-    # Condicionado al la correcta ejecución del push
     PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
+
+    broadcast_user_stats(channel_id)
     {:noreply, state}
   end
 
@@ -59,7 +54,33 @@ defmodule MotivusWbApi.ListenerNodes do
     {:noreply, state}
   end
 
+  def handle_info({:broadcast_user_stats, channel_id}, state) do
+    broadcast_user_stats(channel_id)
+    Process.send_after(self(), {:broadcast_user_stats, channel_id}, @broadcast_stats_every)
+
+    {:noreply, state}
+  end
+
   def handle_call({:get, key}, _from, state) do
     {:reply, Map.fetch!(state, key), state}
+  end
+
+  def broadcast_user_stats(channel_id) do
+    [user_uuid, _] = channel_id |> String.split(":")
+    user = Repo.get_by!(Users.User, uuid: user_uuid)
+
+    current_season = Stats.get_current_season(DateTime.utc_now())
+
+    MotivusWbApiWeb.Endpoint.broadcast!(
+      "room:worker:" <> channel_id,
+      "stats",
+      %{
+        uid: 1,
+        body:
+          Stats.get_user_stats(user.id, current_season)
+          |> Map.merge(Stats.get_cluster_stats()),
+        type: "stats"
+      }
+    )
   end
 end

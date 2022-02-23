@@ -16,17 +16,11 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
        end
      ]}
   ]) do
-    token = "MWBatqwerty"
-
     MotivusWbApi.QueueTasks.empty()
     MotivusWbApi.QueueNodes.empty()
     MotivusWbApi.QueueProcessing.empty()
 
-    {:ok, socket} =
-      MotivusWbApiWeb.ClientSocket
-      |> connect(%{"token" => token}, %{})
-
-    %{socket: socket}
+    connect_client()
   end
 
   test "joins client channel", %{socket: socket} do
