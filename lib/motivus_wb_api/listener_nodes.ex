@@ -21,7 +21,7 @@ defmodule MotivusWbApi.ListenerNodes do
   def handle_info({"new_channel", _, %{channel_id: channel_id}}, state) do
     IO.inspect(label: "new channel")
     broadcast_user_stats(channel_id)
-    Process.send_after(self(), {:broadcast_user_stats, channel_id}, @broadcast_stats_every)
+    # Process.send_after(self(), {:broadcast_user_stats, channel_id}, @broadcast_stats_every)
     {:noreply, state}
   end
 
