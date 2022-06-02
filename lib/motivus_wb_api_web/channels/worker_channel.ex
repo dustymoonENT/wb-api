@@ -12,7 +12,15 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     {:ok, socket}
   end
 
-  def join("room:private", _message, socket), do: {:ok, socket}
+  def join("room:trusted_worker:" <> channel_id, _message, socket) do
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "trusted_nodes",
+      {"new_channel", :unused, %{channel_id: channel_id}}
+    )
+
+    {:ok, socket}
+  end
 
   def join("room:" <> _private_room_id, _params, _socket), do: {:error, %{reason: "unauthorized"}}
 

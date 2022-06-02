@@ -65,6 +65,18 @@ defmodule MotivusWbApiWeb.ChannelCase do
         %{socket: socket, user: user}
       end
 
+      def join_private_worker_channel do
+        %{socket: socket, user: user} = connect_worker()
+        channel_id = channel_fixture(user.id)
+        topic = "room:trusted_worker:#{channel_id}"
+
+        {:ok, _, socket} =
+          socket
+          |> subscribe_and_join(MotivusWbApiWeb.WorkerChannel, topic)
+
+        %{socket: socket, user: user, channel_id: channel_id, topic: topic}
+      end
+
       def join_worker_channel do
         %{socket: socket, user: user} = connect_worker()
         channel_id = channel_fixture(user.id)

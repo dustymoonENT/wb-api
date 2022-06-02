@@ -43,10 +43,13 @@ defmodule MotivusWbApiWeb.ClientChannel do
           body: body,
           type: "work",
           ref: ref,
+          client_id: uuid,
           client_channel_id: channel_id
         }
 
-        MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", payload)
+        PubSub.broadcast(MotivusWbApi.PubSub, "private_tasks", {"new_task", :unused, payload})
+
+      # MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", payload)
 
       _ ->
         nil
