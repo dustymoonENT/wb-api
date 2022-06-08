@@ -33,7 +33,11 @@ defmodule MotivusWbApi.Application do
       # Pubsub
       # {Phoenix.PubSub, name: :my_pubsub},
       # Listener
-      Supervisor.child_spec({MotivusWbApi.ListenerTasks, name: MotivusWbApi.ListenerTasks},
+      Supervisor.child_spec(
+        {MotivusWbApi.ListenerTasks,
+         name: MotivusWbApi.ListenerTasks,
+         queue_tasks: MotivusWbApi.QueueTasks,
+         queue_processing: MotivusWbApi.QueueProcessing},
         id: :listener_tasks
       ),
       Supervisor.child_spec({MotivusWbApi.ListenerNodes, name: MotivusWbApi.ListenerNodes},

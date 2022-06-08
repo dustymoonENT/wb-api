@@ -7,6 +7,9 @@ defmodule MotivusWbApi.ListenerNodes do
 
   @broadcast_stats_every 15_000
 
+  @queue_nodes MotivusWbApi.QueueNodes
+  @queue_processing MotivusWbApi.QueueProcessing
+
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
   end
@@ -16,32 +19,16 @@ defmodule MotivusWbApi.ListenerNodes do
     |> IO.inspect(label: "Subscribed to nodes PubSub")
   end
 
-  # Callbacks
+  defp register_task_slot(info), do: @queue_nodes.push(@queue_nodes, info)
 
-  def handle_info({"new_channel", _, %{channel_id: channel_id}}, state) do
-    IO.inspect(label: "new channel")
-    broadcast_user_stats(channel_id)
-    # Process.send_after(self(), {:broadcast_user_stats, channel_id}, @broadcast_stats_every)
-    {:noreply, state}
-  end
+  defp deregister_task_slots(channel_id), do: @queue_nodes.drop(@queue_nodes, channel_id)
 
-  def handle_info({"new_task_slot", _name, %{channel_id: channel_id} = data}, state) do
-    IO.inspect(label: "new task slot")
+  defp maybe_match_task_to_node,
+    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
 
-    MotivusWbApi.QueueNodes.push(MotivusWbApi.QueueNodes, data)
-    PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
-
-    broadcast_user_stats(channel_id)
-    {:noreply, state}
-  end
-
-  def handle_info({"dead_channel", _name, %{channel_id: channel_id}}, state) do
-    IO.inspect(label: "dead channel")
-    MotivusWbApi.QueueNodes.drop(MotivusWbApi.QueueNodes, channel_id)
-    {status, tasks} = MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, channel_id)
-
-    case status do
-      :ok ->
+  defp maybe_retry_dropped_tasks(channel_id) do
+    case @queue_processing.drop(@queue_processing, channel_id) do
+      {:ok, tasks} ->
         tasks
         |> Enum.map(fn {_tid, t} ->
           PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"retry_task", :unused, t})
@@ -50,6 +37,27 @@ defmodule MotivusWbApi.ListenerNodes do
       _ ->
         nil
     end
+  end
+
+  # Callbacks
+
+  def handle_info({"new_channel", _, %{channel_id: channel_id}}, state) do
+    broadcast_user_stats(channel_id)
+
+    {:noreply, state}
+  end
+
+  def handle_info({"new_task_slot", _name, %{channel_id: channel_id} = data}, state) do
+    register_task_slot(data)
+    maybe_match_task_to_node()
+    broadcast_user_stats(channel_id)
+
+    {:noreply, state}
+  end
+
+  def handle_info({"dead_channel", _name, %{channel_id: channel_id}}, state) do
+    deregister_task_slots(channel_id)
+    maybe_retry_dropped_tasks(channel_id)
 
     {:noreply, state}
   end

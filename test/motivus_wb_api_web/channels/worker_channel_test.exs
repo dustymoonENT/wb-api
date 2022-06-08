@@ -123,5 +123,9 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
     }
 
     assert MotivusWbApi.get_worker_users_total() == 2
+
+    Process.unlink(client_socket.channel_pid)
+    close(client_socket)
+    assert_push "abort_task", _
   end
 end
