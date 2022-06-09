@@ -1,15 +1,21 @@
+defmodule MotivusWbApi.QueueStructs.Thread do
+  @enforce_keys [:channel_id, :tid]
+  defstruct [:channel_id, :tid]
+end
+
 defmodule MotivusWbApi.QueueNodes do
   use GenServer
+  alias MotivusWbApi.QueueStructs.Thread
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, [], opts)
   end
 
-  def push(pid \\ __MODULE__, element) do
+  def push(pid \\ __MODULE__, %Thread{} = element) do
     GenServer.cast(pid, {:push, element})
   end
 
-  def push_top(pid \\ __MODULE__, element) do
+  def push_top(pid \\ __MODULE__, %Thread{} = element) do
     GenServer.cast(pid, {:push_top, element})
   end
 
@@ -22,8 +28,8 @@ defmodule MotivusWbApi.QueueNodes do
   @doc """
   Drops a single thread belonging to a channel
   """
-  def drop(pid, {channel_id, tid}) do
-    GenServer.cast(pid, {:drop, channel_id, tid})
+  def drop(pid, %Thread{} = element) do
+    GenServer.cast(pid, {:drop, element.channel_id, element.tid})
   end
 
   @doc """

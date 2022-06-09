@@ -35,12 +35,20 @@ defmodule MotivusWbApi.Application do
       # Listener
       Supervisor.child_spec(
         {MotivusWbApi.ListenerTasks,
-         name: MotivusWbApi.ListenerTasks,
-         queue_tasks: MotivusWbApi.QueueTasks,
-         queue_processing: MotivusWbApi.QueueProcessing},
+         %{
+           name: MotivusWbApi.ListenerTasks,
+           queue_tasks: MotivusWbApi.QueueTasks,
+           queue_processing: MotivusWbApi.QueueProcessing
+         }},
         id: :listener_tasks
       ),
-      Supervisor.child_spec({MotivusWbApi.ListenerNodes, name: MotivusWbApi.ListenerNodes},
+      Supervisor.child_spec(
+        {MotivusWbApi.ListenerNodes,
+         %{
+           name: MotivusWbApi.ListenerNodes,
+           thread_pool: MotivusWbApi.QueueNodes,
+           queue_processing: MotivusWbApi.QueueProcessing
+         }},
         id: :listener_nodes
       ),
       Supervisor.child_spec({MotivusWbApi.ListenerMatches, name: MotivusWbApi.ListenerMatches},

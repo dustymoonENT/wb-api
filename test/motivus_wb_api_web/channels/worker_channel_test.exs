@@ -1,5 +1,6 @@
 defmodule MotivusWbApiWeb.WorkerChannelTest do
   use MotivusWbApiWeb.ChannelCase
+  alias MotivusWbApi.QueueStructs.Thread
   import Mock
 
   setup_with_mocks([
@@ -84,11 +85,11 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
 
     initial_tid =
       [slot_1, slot_2]
-      |> Enum.map(fn tid -> %{channel_id: channel_id, tid: tid} end)
+      |> Enum.map(fn tid -> struct(Thread, %{channel_id: channel_id, tid: tid}) end)
 
     other_tid =
       [slot_3]
-      |> Enum.map(fn tid -> %{channel_id: other_channel_id, tid: tid} end)
+      |> Enum.map(fn tid -> struct(Thread, %{channel_id: other_channel_id, tid: tid}) end)
 
     assert nodes == initial_tid ++ other_tid
 
