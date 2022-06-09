@@ -1,22 +1,22 @@
-defmodule MotivusWbApi.QueueStructs.Thread do
+defmodule MotivusWbApi.ThreadPool.Thread do
   @enforce_keys [:channel_id, :tid]
   defstruct [:channel_id, :tid]
 end
 
-defmodule MotivusWbApi.QueueNodes do
+defmodule MotivusWbApi.ThreadPool do
   use GenServer
-  alias MotivusWbApi.QueueStructs.Thread
+  alias MotivusWbApi.ThreadPool.Thread
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, [], opts)
   end
 
-  def push(pid \\ __MODULE__, %Thread{} = element) do
-    GenServer.cast(pid, {:push, element})
+  def push(pid \\ __MODULE__, %Thread{} = thread) do
+    GenServer.cast(pid, {:push, thread})
   end
 
-  def push_top(pid \\ __MODULE__, %Thread{} = element) do
-    GenServer.cast(pid, {:push_top, element})
+  def push_top(pid \\ __MODULE__, %Thread{} = thread) do
+    GenServer.cast(pid, {:push_top, thread})
   end
 
   def pop(pid \\ __MODULE__) do
@@ -28,8 +28,8 @@ defmodule MotivusWbApi.QueueNodes do
   @doc """
   Drops a single thread belonging to a channel
   """
-  def drop(pid, %Thread{} = element) do
-    GenServer.cast(pid, {:drop, element.channel_id, element.tid})
+  def drop(pid, %Thread{} = thread) do
+    GenServer.cast(pid, {:drop, thread.channel_id, thread.tid})
   end
 
   @doc """
@@ -59,9 +59,9 @@ defmodule MotivusWbApi.QueueNodes do
   end
 
   @impl true
-  def handle_call(:pop, _from, elements) do
+  def handle_call(:pop, _from, threads) do
     try do
-      [head | tail] = elements
+      [head | tail] = threads
       {:reply, head, tail}
     rescue
       MatchError -> {:reply, :error, []}
@@ -69,57 +69,57 @@ defmodule MotivusWbApi.QueueNodes do
   end
 
   @impl true
-  def handle_call(:list, _from, elements) do
-    {:reply, elements, elements}
+  def handle_call(:list, _from, threads) do
+    {:reply, threads, threads}
   end
 
   @impl true
-  def handle_call(:clear, _from, _elements) do
+  def handle_call(:clear, _from, _threads) do
     {:reply, [], []}
   end
 
   @impl true
-  def handle_call(:by_user, _from, elements) do
+  def handle_call(:by_user, _from, threads) do
     map =
-      elements
+      threads
       |> Enum.group_by(fn %{channel_id: channel_id} ->
         [user_uuid | _] = channel_id |> String.split(":")
         user_uuid
       end)
 
-    {:reply, map, elements}
+    {:reply, map, threads}
   end
 
   @impl true
-  def handle_cast({:push, element}, state) do
-    case length(state) do
+  def handle_cast({:push, thread}, threads) do
+    case length(threads) do
       0 ->
-        {:noreply, [element]}
+        {:noreply, [thread]}
 
       _ ->
-        {:noreply, state ++ [element]}
+        {:noreply, threads ++ [thread]}
     end
   end
 
   @impl true
-  def handle_cast({:push_top, element}, state) do
-    case length(state) do
+  def handle_cast({:push_top, thread}, threads) do
+    case length(threads) do
       0 ->
-        {:noreply, [element]}
+        {:noreply, [thread]}
 
       _ ->
-        {:noreply, [element] ++ state}
+        {:noreply, [thread] ++ threads}
     end
   end
 
   @impl true
-  def handle_cast({:drop, id}, state) do
-    {:noreply, Enum.filter(state, fn e -> e.channel_id != id end)}
+  def handle_cast({:drop, id}, threads) do
+    {:noreply, Enum.filter(threads, fn t -> t.channel_id != id end)}
   end
 
   @impl true
-  def handle_cast({:drop, channel_id, tid}, state) do
-    element = %{channel_id: channel_id, tid: tid}
-    {:noreply, state -- [element]}
+  def handle_cast({:drop, channel_id, tid}, threads) do
+    thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
+    {:noreply, threads -- [thread]}
   end
 end

@@ -46,8 +46,8 @@ defmodule MotivusWbApi.ListenerDispatch do
       worker_input
     )
 
-    MotivusWbApi.QueueProcessing.put(
-      MotivusWbApi.QueueProcessing,
+    MotivusWbApi.ProcessingRegistry.put(
+      MotivusWbApi.ProcessingRegistry,
       data_node.channel_id,
       data_node.tid,
       data_task

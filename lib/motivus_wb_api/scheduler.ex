@@ -3,17 +3,17 @@ defmodule MotivusWbApi.Scheduler do
 
   def match() do
     case [
-      MotivusWbApi.QueueNodes.pop(MotivusWbApi.QueueNodes),
-      MotivusWbApi.QueueTasks.pop(MotivusWbApi.QueueTasks)
+      MotivusWbApi.ThreadPool.pop(MotivusWbApi.ThreadPool),
+      MotivusWbApi.TaskPool.pop(MotivusWbApi.TaskPool)
     ] do
       [:error, :error] ->
         nil
 
       [data_node, :error] ->
-        MotivusWbApi.QueueNodes.push_top(MotivusWbApi.QueueNodes, data_node)
+        MotivusWbApi.ThreadPool.push_top(MotivusWbApi.ThreadPool, data_node)
 
       [:error, data_task] ->
-        MotivusWbApi.QueueTasks.push(MotivusWbApi.QueueTasks, data_task)
+        MotivusWbApi.TaskPool.push(MotivusWbApi.TaskPool, data_task)
 
       [data_node, data_task] ->
         dispatch(data_node, data_task)

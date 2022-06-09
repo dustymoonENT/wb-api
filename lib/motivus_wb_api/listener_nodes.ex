@@ -1,7 +1,7 @@
 defmodule MotivusWbApi.ListenerNodes do
   use GenServer
   alias Phoenix.PubSub
-  alias MotivusWbApi.QueueStructs.Thread
+  alias MotivusWbApi.ThreadPool.Thread
 
   import MotivusWbApi.CommonActions
 
@@ -22,7 +22,7 @@ defmodule MotivusWbApi.ListenerNodes do
 
   def handle_info({"new_thread", _name, %Thread{} = thread}, context) do
     register_thread(thread, context.thread_pool)
-    maybe_match_task_to_node()
+    maybe_match_task_to_thread()
     broadcast_user_stats(thread.channel_id)
 
     {:noreply, context}
@@ -30,7 +30,7 @@ defmodule MotivusWbApi.ListenerNodes do
 
   def handle_info({"dead_channel", _name, %{channel_id: channel_id}}, context) do
     deregister_threads(channel_id, context.thread_pool)
-    maybe_retry_dropped_tasks(channel_id, context.queue_processing)
+    maybe_retry_dropped_tasks(channel_id, context.processing_registry)
 
     {:noreply, context}
   end

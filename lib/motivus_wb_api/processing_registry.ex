@@ -1,4 +1,4 @@
-defmodule MotivusWbApi.QueueProcessing do
+defmodule MotivusWbApi.ProcessingRegistry do
   use GenServer
 
   def start_link(opts) do

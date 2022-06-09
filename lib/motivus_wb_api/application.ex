@@ -19,16 +19,17 @@ defmodule MotivusWbApi.Application do
       # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
       # {MotivusWbApi.Worker, arg}
       # Queue for Tasks
-      Supervisor.child_spec({MotivusWbApi.QueueTasks, name: MotivusWbApi.QueueTasks},
-        id: :queue_tasks
+      Supervisor.child_spec({MotivusWbApi.TaskPool, name: MotivusWbApi.TaskPool},
+        id: :task_pool
       ),
       # Queue for Nodes
-      Supervisor.child_spec({MotivusWbApi.QueueNodes, name: MotivusWbApi.QueueNodes},
-        id: :queue_nodes
+      Supervisor.child_spec({MotivusWbApi.ThreadPool, name: MotivusWbApi.ThreadPool},
+        id: :thread_pool
       ),
       # Queue for Processing task
-      Supervisor.child_spec({MotivusWbApi.QueueProcessing, name: MotivusWbApi.QueueProcessing},
-        id: :queue_processing
+      Supervisor.child_spec(
+        {MotivusWbApi.ProcessingRegistry, name: MotivusWbApi.ProcessingRegistry},
+        id: :processing_registry
       ),
       # Pubsub
       # {Phoenix.PubSub, name: :my_pubsub},
@@ -37,8 +38,8 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.ListenerTasks,
          %{
            name: MotivusWbApi.ListenerTasks,
-           queue_tasks: MotivusWbApi.QueueTasks,
-           queue_processing: MotivusWbApi.QueueProcessing
+           task_pool: MotivusWbApi.TaskPool,
+           processing_registry: MotivusWbApi.ProcessingRegistry
          }},
         id: :listener_tasks
       ),
@@ -46,8 +47,8 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.ListenerNodes,
          %{
            name: MotivusWbApi.ListenerNodes,
-           thread_pool: MotivusWbApi.QueueNodes,
-           queue_processing: MotivusWbApi.QueueProcessing
+           thread_pool: MotivusWbApi.ThreadPool,
+           processing_registry: MotivusWbApi.ProcessingRegistry
          }},
         id: :listener_nodes
       ),

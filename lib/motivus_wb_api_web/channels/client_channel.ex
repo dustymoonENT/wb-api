@@ -1,6 +1,7 @@
 defmodule MotivusWbApiWeb.ClientChannel do
   use Phoenix.Channel
   alias Phoenix.PubSub
+  alias MotivusWbApi.TaskPool.TaskDefinition
 
   def join("room:client:" <> channel_id, _message, %{assigns: %{user: %{uuid: uuid}}} = socket) do
     [user_uuid, _] = String.split(channel_id, ":")
@@ -28,26 +29,28 @@ defmodule MotivusWbApiWeb.ClientChannel do
 
     case type do
       "work" ->
-        payload = %{
-          body: body,
-          type: "work",
-          ref: ref,
-          client_id: uuid,
-          client_channel_id: channel_id
-        }
+        task_def =
+          struct!(TaskDefinition, %{
+            body: body,
+            type: "work",
+            ref: ref,
+            client_id: uuid,
+            client_channel_id: channel_id
+          })
 
-        PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"new_task", :unused, payload})
+        PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"new_task", :unused, task_def})
 
       "trusted_work" ->
-        payload = %{
-          body: body,
-          type: "work",
-          ref: ref,
-          client_id: uuid,
-          client_channel_id: channel_id
-        }
+        task_def =
+          struct(TaskDefinition, %{
+            body: body,
+            type: "work",
+            ref: ref,
+            client_id: uuid,
+            client_channel_id: channel_id
+          })
 
-        PubSub.broadcast(MotivusWbApi.PubSub, "private_tasks", {"new_task", :unused, payload})
+        PubSub.broadcast(MotivusWbApi.PubSub, "private_tasks", {"new_task", :unused, task_def})
 
       # MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", payload)
 

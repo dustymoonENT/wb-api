@@ -34,7 +34,7 @@ defmodule MotivusWbApi.ListenerCompleted do
     user = Repo.get_by!(Users.User, uuid: user_uuid)
 
     {:ok, data_task} =
-      MotivusWbApi.QueueProcessing.drop(MotivusWbApi.QueueProcessing, channel_id, tid)
+      MotivusWbApi.ProcessingRegistry.drop(MotivusWbApi.ProcessingRegistry, channel_id, tid)
 
     Repo.get_by(Task, id: data_task.task_id, user_id: user.id)
     |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second), result: body})

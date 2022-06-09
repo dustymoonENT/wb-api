@@ -1,6 +1,8 @@
 defmodule MotivusWbApi.ListenerTasks do
   use GenServer
   alias Phoenix.PubSub
+  alias MotivusWbApi.TaskPool.TaskDefinition
+  alias MotivusWbApi.TaskPool.Task
 
   import MotivusWbApi.CommonActions
 
@@ -13,28 +15,27 @@ defmodule MotivusWbApi.ListenerTasks do
     {:ok, opts}
   end
 
-  def handle_info({"new_task", _name, data}, %{queue_tasks: queue} = context) do
-    prepare_task(data)
-    |> enqueue_task(queue)
+  def handle_info({"new_task", _name, %TaskDefinition{} = task_def}, %{task_pool: pool} = context) do
+    prepare_task(task_def)
+    |> add_task(pool)
 
-    maybe_match_task_to_node()
+    maybe_match_task_to_thread()
 
     {:noreply, context}
   end
 
-  def handle_info({"retry_task", _name, data}, %{queue_tasks: queue} = context) do
-    enqueue_task(data, queue)
-
-    maybe_match_task_to_node()
+  def handle_info({"retry_task", _name, %Task{} = task}, %{task_pool: pool} = context) do
+    add_task(task, pool)
+    maybe_match_task_to_thread()
 
     {:noreply, context}
   end
 
   def handle_info({"dead_client", _name, %{channel_id: channel_id}}, context) do
-    # TODO update dequeued tasks with aborted_on
-    dequeue_tasks(channel_id, context.queue_tasks)
+    # TODO update depoold tasks with aborted_on
+    remove_tasks(channel_id, context.task_pool)
 
-    maybe_stop_tasks(channel_id, context.queue_processing)
+    maybe_stop_tasks(channel_id, context.processing_registry)
     |> mark_aborted_tasks()
 
     {:noreply, context}

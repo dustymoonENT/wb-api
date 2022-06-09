@@ -1,6 +1,6 @@
 defmodule MotivusWbApiWeb.WorkerChannelTest do
   use MotivusWbApiWeb.ChannelCase
-  alias MotivusWbApi.QueueStructs.Thread
+  alias MotivusWbApi.ThreadPool.Thread
   import Mock
 
   setup_with_mocks([
@@ -17,9 +17,9 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
        end
      ]}
   ]) do
-    MotivusWbApi.QueueTasks.empty()
-    MotivusWbApi.QueueNodes.empty()
-    MotivusWbApi.QueueProcessing.empty()
+    MotivusWbApi.TaskPool.empty()
+    MotivusWbApi.ThreadPool.empty()
+    MotivusWbApi.ProcessingRegistry.empty()
 
     join_worker_channel()
   end
@@ -81,7 +81,7 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
       }
     }
 
-    nodes = MotivusWbApi.QueueNodes.list()
+    threads = MotivusWbApi.ThreadPool.list()
 
     initial_tid =
       [slot_1, slot_2]
@@ -91,7 +91,7 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
       [slot_3]
       |> Enum.map(fn tid -> struct(Thread, %{channel_id: other_channel_id, tid: tid}) end)
 
-    assert nodes == initial_tid ++ other_tid
+    assert threads == initial_tid ++ other_tid
 
     %{socket: client_socket} = join_client_channel()
 

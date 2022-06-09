@@ -16,9 +16,9 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
        end
      ]}
   ]) do
-    MotivusWbApi.QueueTasks.empty()
-    MotivusWbApi.QueueNodes.empty()
-    MotivusWbApi.QueueProcessing.empty()
+    MotivusWbApi.TaskPool.empty()
+    MotivusWbApi.ThreadPool.empty()
+    MotivusWbApi.ProcessingRegistry.empty()
 
     connect_client()
   end
@@ -40,6 +40,6 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
 
     refute_broadcast "*", _
 
-    assert [%{ref: ^client_ref, client_id: ^uuid}] = MotivusWbApi.QueueTasks.list()
+    assert [%{ref: ^client_ref, client_id: ^uuid}] = MotivusWbApi.TaskPool.list()
   end
 end

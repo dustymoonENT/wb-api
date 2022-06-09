@@ -1,7 +1,7 @@
 defmodule MotivusWbApiWeb.WorkerChannel do
   use Phoenix.Channel
   alias Phoenix.PubSub
-  alias MotivusWbApi.QueueStructs.Thread
+  alias MotivusWbApi.ThreadPool.Thread
 
   def join("room:worker:" <> channel_id, _message, socket) do
     PubSub.broadcast(
@@ -47,7 +47,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   def handle_in("input_request", %{"tid" => tid}, socket) do
     [_, channel_id] = socket.topic |> String.split("room:worker:")
 
-    thread = struct(Thread, %{channel_id: channel_id, tid: tid})
+    thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
 
     PubSub.broadcast(
       MotivusWbApi.PubSub,

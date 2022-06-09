@@ -1,46 +1,47 @@
 defmodule MotivusWbApi.CommonActions do
   alias Phoenix.PubSub
   alias MotivusWbApi.Repo
-  alias MotivusWbApi.Processing.Task
   alias MotivusWbApi.Processing
   alias MotivusWbApi.Stats
   alias MotivusWbApi.Users
+  alias MotivusWbApi.TaskPool.TaskDefinition
+  alias MotivusWbApi.TaskPool.Task
+  alias MotivusWbApi.ThreadPool.Thread
 
-  def task_from_data(data),
-    do: %Task{
-      type: data[:body]["run_type"],
-      params: %{data: data[:body]["params"]},
+  def task_from_definition(%TaskDefinition{} = task_def),
+    do: %Processing.Task{
+      type: task_def.body["run_type"],
+      params: %{data: task_def.body["params"]},
       date_in: DateTime.truncate(DateTime.utc_now(), :second),
       attempts: 0,
-      processing_base_time: data[:body]["processing_base_time"],
-      flops: data[:body]["flops"],
-      flop: data[:body]["flop"],
-      client_id: data[:client_id],
-      application_token_id: data[:application_token_id]
+      processing_base_time: task_def.body["processing_base_time"],
+      flops: task_def.body["flops"],
+      flop: task_def.body["flop"],
+      client_id: task_def.client_id
     }
 
-  def enqueue_task(data, queue), do: queue.push(queue, data)
+  def prepare_task(%TaskDefinition{} = task_def) do
+    %{id: task_id} =
+      task_from_definition(task_def)
+      |> Repo.insert!()
 
-  def dequeue_tasks(channel_id, queue), do: queue.drop(queue, channel_id)
+    struct!(Task, Map.from_struct(task_def) |> Enum.into(%{task_id: task_id}))
+  end
 
-  def maybe_match_task_to_node,
+  def add_task(%Task{} = task, pool), do: pool.push(pool, task)
+
+  def remove_tasks(channel_id, pool), do: pool.drop(pool, channel_id)
+
+  def maybe_match_task_to_thread,
     do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
 
-  def maybe_stop_tasks(channel_id, queue) do
-    queue.drop_by(queue, :client_channel_id, channel_id)
+  def maybe_stop_tasks(channel_id, pool) do
+    pool.drop_by(pool, :client_channel_id, channel_id)
     |> Enum.map(fn {worker_channel_id, tid, task} ->
       abort_task!(worker_channel_id, tid)
 
       task
     end)
-  end
-
-  def prepare_task(data) do
-    task =
-      task_from_data(data)
-      |> Repo.insert!()
-
-    data |> Map.put(:task_id, task.id) |> Map.put(:client_channel_id, data.client_channel_id)
   end
 
   def mark_aborted_tasks(tasks),
@@ -57,12 +58,12 @@ defmodule MotivusWbApi.CommonActions do
         %{tid: tid}
       )
 
-  def register_thread(info, queue), do: queue.push(queue, info)
+  def register_thread(%Thread{} = thread, pool), do: pool.push(pool, thread)
 
-  def deregister_threads(channel_id, queue), do: queue.drop(queue, channel_id)
+  def deregister_threads(channel_id, pool), do: pool.drop(pool, channel_id)
 
-  def maybe_retry_dropped_tasks(channel_id, queue) do
-    case queue.drop(queue, channel_id) do
+  def maybe_retry_dropped_tasks(channel_id, registry) do
+    case registry.drop(registry, channel_id) do
       {:ok, tasks} ->
         tasks
         |> Enum.map(fn {_tid, t} ->
