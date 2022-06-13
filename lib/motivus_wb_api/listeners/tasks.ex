@@ -15,7 +15,10 @@ defmodule MotivusWbApi.Listeners.Task do
     {:ok, opts}
   end
 
-  def handle_info({"new_task", _name, %TaskDefinition{} = task_def}, %{task_pool: pool} = context) do
+  def handle_info(
+        {"NEW_TASK_DEFINITION", _name, %TaskDefinition{} = task_def},
+        %{task_pool: pool} = context
+      ) do
     prepare_task(task_def)
     |> add_task(pool)
 
@@ -24,14 +27,14 @@ defmodule MotivusWbApi.Listeners.Task do
     {:noreply, context}
   end
 
-  def handle_info({"retry_task", _name, %Task{} = task}, %{task_pool: pool} = context) do
+  def handle_info({"UNFINISHED_TASK", _name, %Task{} = task}, %{task_pool: pool} = context) do
     add_task(task, pool)
     maybe_match_task_to_thread()
 
     {:noreply, context}
   end
 
-  def handle_info({"dead_client", _name, %{channel_id: channel_id}}, context) do
+  def handle_info({"CLIENT_CHANNEL_CLOSED", _name, %{channel_id: channel_id}}, context) do
     # TODO update depoold tasks with aborted_on
     remove_tasks(channel_id, context.task_pool)
 

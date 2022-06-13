@@ -7,7 +7,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     PubSub.broadcast(
       MotivusWbApi.PubSub,
       "nodes",
-      {"new_channel", :unused, %{channel_id: channel_id}}
+      {"WORKER_CHANNEL_OPENED", :unused, %{channel_id: channel_id}}
     )
 
     {:ok, socket}
@@ -17,7 +17,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     PubSub.broadcast(
       MotivusWbApi.PubSub,
       "trusted_nodes",
-      {"new_channel", :unused, %{channel_id: channel_id}}
+      {"WORKER_CHANNEL_OPENED", :unused, %{channel_id: channel_id}}
     )
 
     {:ok, socket}
@@ -52,7 +52,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
     PubSub.broadcast(
       MotivusWbApi.PubSub,
       "nodes",
-      {"new_thread", :unused, thread}
+      {"THREAD_AVAILABLE", :unused, thread}
     )
 
     {:noreply, socket}
@@ -64,7 +64,7 @@ defmodule MotivusWbApiWeb.WorkerChannel do
         PubSub.broadcast(
           MotivusWbApi.PubSub,
           "nodes",
-          {"dead_channel", :unused, %{channel_id: channel_id}}
+          {"WORKER_CHANNEL_CLOSED", :unused, %{channel_id: channel_id}}
         )
 
       _ ->

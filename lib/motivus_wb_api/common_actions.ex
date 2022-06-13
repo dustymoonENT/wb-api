@@ -1,12 +1,15 @@
 defmodule MotivusWbApi.CommonActions do
   alias Phoenix.PubSub
   alias MotivusWbApi.Repo
+  alias MotivusWbApi.Users.User
   alias MotivusWbApi.Processing
   alias MotivusWbApi.Stats
   alias MotivusWbApi.Users
   alias MotivusWbApi.TaskPool.TaskDefinition
   alias MotivusWbApi.TaskPool.Task
   alias MotivusWbApi.ThreadPool.Thread
+
+  @redacted_task_data [:client_channel_id, :client_id, :task_id, :application_token_id, :ref]
 
   def task_from_definition(%TaskDefinition{} = task_def),
     do: %Processing.Task{
@@ -33,7 +36,7 @@ defmodule MotivusWbApi.CommonActions do
   def remove_tasks(channel_id, pool), do: pool.drop(pool, channel_id)
 
   def maybe_match_task_to_thread,
-    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"maybe_match", :unused, %{}})
+    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"POOL_UPDATED", :unused, %{}})
 
   def maybe_stop_tasks(channel_id, pool) do
     pool.drop_by(pool, :client_channel_id, channel_id)
@@ -62,12 +65,12 @@ defmodule MotivusWbApi.CommonActions do
 
   def deregister_threads(channel_id, pool), do: pool.drop(pool, channel_id)
 
-  def maybe_retry_dropped_tasks(channel_id, registry) do
+  def drop_running_tasks(channel_id, registry) do
     case registry.drop(registry, channel_id) do
       {:ok, tasks} ->
         tasks
         |> Enum.map(fn {_tid, t} ->
-          PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"retry_task", :unused, t})
+          PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"UNFINISHED_TASK", :unused, t})
         end)
 
       _ ->
@@ -94,7 +97,7 @@ defmodule MotivusWbApi.CommonActions do
     )
   end
 
-  def match(thread_pool, task_pool) do
+  def try_match(thread_pool, task_pool) do
     case [thread_pool.pop(thread_pool), task_pool.pop(task_pool)] do
       [:error, :error] ->
         nil
@@ -106,15 +109,43 @@ defmodule MotivusWbApi.CommonActions do
         task_pool.push(task_pool, task)
 
       [%Thread{} = thread, %Task{} = task] ->
-        dispatch(thread, task)
+        assign_task_to_thread(thread, task)
     end
   end
 
-  def dispatch(%Thread{} = thread, %Task{} = task) do
+  def assign_task_to_thread(%Thread{} = thread, %Task{} = task) do
     PubSub.broadcast(
       MotivusWbApi.PubSub,
       "dispatch",
-      {"worker_task_match", :unused, %{data_node: thread, data_task: task}}
+      {"TASK_ASSIGNED", :unused, %{thread: thread, task: task}}
     )
   end
+
+  def update_task_worker(%Task{task_id: task_id}, %Thread{} = thread) do
+    [user_uuid, _] = thread.channel_id |> String.split(":")
+
+    task = Repo.get_by!(Processing.Task, id: task_id)
+    user = Repo.get_by!(User, uuid: user_uuid)
+
+    task
+    |> Ecto.Changeset.change(%{
+      date_last_dispatch: DateTime.truncate(DateTime.utc_now(), :second),
+      attempts: task.attempts + 1,
+      user_id: user.id
+    })
+    |> Repo.update()
+  end
+
+  def deliver_task(%Task{} = task, %Thread{} = thread) do
+    worker_input = task |> Map.put(:tid, thread.tid) |> Map.drop(@redacted_task_data)
+
+    MotivusWbApiWeb.Endpoint.broadcast!(
+      "room:worker:" <> thread.channel_id,
+      "input",
+      worker_input
+    )
+  end
+
+  def register_task_assignment(%Task{} = task, %Thread{} = thread, registry),
+    do: registry.put(registry, thread.channel_id, thread.tid, task)
 end

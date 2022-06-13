@@ -62,7 +62,11 @@ defmodule MotivusWbApi.Application do
         id: :listener_matches
       ),
       Supervisor.child_spec(
-        {MotivusWbApi.Listeners.Dispatch, name: MotivusWbApi.Listeners.Dispatch},
+        {MotivusWbApi.Listeners.Dispatch,
+         %{
+           name: MotivusWbApi.Listeners.Dispatch,
+           processing_registry: MotivusWbApi.ProcessingRegistry
+         }},
         id: :listener_dispatch
       ),
       Supervisor.child_spec(

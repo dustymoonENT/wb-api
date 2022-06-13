@@ -38,7 +38,11 @@ defmodule MotivusWbApiWeb.ClientChannel do
             client_channel_id: channel_id
           })
 
-        PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"new_task", :unused, task_def})
+        PubSub.broadcast(
+          MotivusWbApi.PubSub,
+          "tasks",
+          {"NEW_TASK_DEFINITION", :unused, task_def}
+        )
 
       "trusted_work" ->
         task_def =
@@ -50,7 +54,11 @@ defmodule MotivusWbApiWeb.ClientChannel do
             client_channel_id: channel_id
           })
 
-        PubSub.broadcast(MotivusWbApi.PubSub, "private_tasks", {"new_task", :unused, task_def})
+        PubSub.broadcast(
+          MotivusWbApi.PubSub,
+          "private_tasks",
+          {"NEW_TASK_DEFINITION", :unused, task_def}
+        )
 
       # MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", payload)
 
@@ -86,7 +94,7 @@ defmodule MotivusWbApiWeb.ClientChannel do
         PubSub.broadcast(
           MotivusWbApi.PubSub,
           "tasks",
-          {"dead_client", :unused, %{channel_id: channel_id}}
+          {"CLIENT_CHANNEL_CLOSED", :unused, %{channel_id: channel_id}}
         )
 
       _ ->
