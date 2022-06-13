@@ -1,7 +1,13 @@
-defmodule MotivusWbApiWeb.WorkerChannel do
+defmodule MotivusWbApiWeb.Channels.Worker.Result do
+  @enforce_keys [:body, :stdout, :stderr]
+  defstruct @enforce_keys
+end
+
+defmodule MotivusWbApiWeb.Channels.Worker do
   use Phoenix.Channel
   alias Phoenix.PubSub
   alias MotivusWbApi.ThreadPool.Thread
+  alias MotivusWbApiWeb.Channels.Worker.Result
 
   def join("room:worker:" <> channel_id, _message, socket) do
     PubSub.broadcast(
@@ -28,17 +34,19 @@ defmodule MotivusWbApiWeb.WorkerChannel do
   def handle_in("result", %{"body" => body, "tid" => tid} = result, socket) do
     [_, channel_id] = socket.topic |> String.split("room:worker:")
 
+    thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
+
+    result =
+      struct!(Result, %{
+        body: body,
+        stdout: result["stdout"],
+        stderr: result["stderr"]
+      })
+
     PubSub.broadcast(
       MotivusWbApi.PubSub,
       "completed",
-      {"task_completed", :unused,
-       %{
-         body: body,
-         channel_id: channel_id,
-         stdout: result["stdout"],
-         stderr: result["stderr"],
-         tid: tid
-       }}
+      {"TASK_COMPLETED", :unused, {thread, result}}
     )
 
     {:noreply, socket}

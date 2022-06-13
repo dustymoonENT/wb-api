@@ -70,7 +70,11 @@ defmodule MotivusWbApi.Application do
         id: :listener_dispatch
       ),
       Supervisor.child_spec(
-        {MotivusWbApi.Listeners.Completed, name: MotivusWbApi.Listeners.Completed},
+        {MotivusWbApi.Listeners.Completed,
+         %{
+           name: MotivusWbApi.Listeners.Completed,
+           processing_registry: MotivusWbApi.ProcessingRegistry
+         }},
         id: :listener_completed
       ),
       Supervisor.child_spec(

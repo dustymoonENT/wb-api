@@ -1,70 +1,29 @@
 defmodule MotivusWbApi.Listeners.Completed do
   use GenServer
-  import Ecto.Changeset
-  alias MotivusWbApi.Repo
-  alias MotivusWbApi.Users
-  alias MotivusWbApi.Processing.Task
-  alias MotivusWbApi.Stats
+  alias MotivusWbApiWeb.Channels.Worker.Result
+  alias MotivusWbApi.ThreadPool.Thread
+  import MotivusWbApi.CommonActions
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, name: __MODULE__)
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, opts)
   end
 
-  def init(_) do
-    {:ok, {Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "completed")}}
-    |> IO.inspect(label: "Subscribed to completed PubSub")
+  def init(opts) do
+    Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "completed")
+    {:ok, opts}
   end
-
-  # Callbacks
 
   def handle_info(
-        {"task_completed", _name,
-         %{
-           body: body,
-           channel_id: channel_id,
-           stdout: stdout,
-           stderr: stderr,
-           tid: tid
-         }},
-        state
+        {"TASK_COMPLETED", _name, {%Thread{} = thread, %Result{} = result}},
+        %{processing_registry: registry} = context
       ) do
-    IO.inspect(label: "new completed")
-    [user_uuid, _] = channel_id |> String.split(":")
+    task = deregister_task_assignment(thread, registry)
 
-    user = Repo.get_by!(Users.User, uuid: user_uuid)
+    update_task_result(task, result)
+    send_task_result(task, result)
 
-    {:ok, data_task} =
-      MotivusWbApi.ProcessingRegistry.drop(MotivusWbApi.ProcessingRegistry, channel_id, tid)
+    broadcast_user_stats(thread.channel_id)
 
-    Repo.get_by(Task, id: data_task.task_id, user_id: user.id)
-    |> change(%{date_out: DateTime.truncate(DateTime.utc_now(), :second), result: body})
-    |> Repo.update()
-
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:client:" <> data_task.client_channel_id,
-      "result",
-      %{
-        body: body,
-        type: "response",
-        ref: data_task.ref,
-        task_id: data_task.task_id,
-        stdout: stdout,
-        stderr: stderr
-      }
-    )
-
-    current_season = Stats.get_current_season(DateTime.utc_now())
-
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> channel_id,
-      "stats",
-      %{body: Stats.get_user_stats(user.id, current_season), type: "stats"}
-    )
-
-    {:noreply, state}
-  end
-
-  def handle_call({:get, key}, _from, state) do
-    {:reply, Map.fetch!(state, key), state}
+    {:noreply, context}
   end
 end

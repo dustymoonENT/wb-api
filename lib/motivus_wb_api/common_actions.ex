@@ -8,6 +8,7 @@ defmodule MotivusWbApi.CommonActions do
   alias MotivusWbApi.TaskPool.TaskDefinition
   alias MotivusWbApi.TaskPool.Task
   alias MotivusWbApi.ThreadPool.Thread
+  alias MotivusWbApiWeb.Channels.Worker.Result
 
   @redacted_task_data [:client_channel_id, :client_id, :task_id, :application_token_id, :ref]
 
@@ -148,4 +149,41 @@ defmodule MotivusWbApi.CommonActions do
 
   def register_task_assignment(%Task{} = task, %Thread{} = thread, registry),
     do: registry.put(registry, thread.channel_id, thread.tid, task)
+
+  def deregister_task_assignment(%Thread{} = thread, registry) do
+    {:ok, task} =
+      registry.drop(
+        registry,
+        thread.channel_id,
+        thread.tid
+      )
+
+    task
+  end
+
+  def update_task_result(%Task{} = task, %Result{} = result) do
+    Repo.get_by(Processing.Task, id: task.task_id)
+    |> Ecto.Changeset.change(%{
+      date_out: DateTime.truncate(DateTime.utc_now(), :second),
+      result: result.body
+    })
+    |> Repo.update()
+
+    task
+  end
+
+  def send_task_result(%Task{} = task, %Result{} = result) do
+    MotivusWbApiWeb.Endpoint.broadcast!(
+      "room:client:" <> task.client_channel_id,
+      "result",
+      %{
+        type: "response",
+        body: result.body,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        ref: task.ref,
+        task_id: task.task_id
+      }
+    )
+  end
 end

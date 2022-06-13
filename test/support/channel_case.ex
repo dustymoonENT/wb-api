@@ -72,7 +72,7 @@ defmodule MotivusWbApiWeb.ChannelCase do
 
         {:ok, _, socket} =
           socket
-          |> subscribe_and_join(MotivusWbApiWeb.WorkerChannel, topic)
+          |> subscribe_and_join(MotivusWbApiWeb.Channels.Worker, topic)
 
         %{socket: socket, user: user, channel_id: channel_id, topic: topic}
       end
@@ -84,7 +84,7 @@ defmodule MotivusWbApiWeb.ChannelCase do
 
         {:ok, _, socket} =
           socket
-          |> subscribe_and_join(MotivusWbApiWeb.WorkerChannel, topic)
+          |> subscribe_and_join(MotivusWbApiWeb.Channels.Worker, topic)
 
         %{socket: socket, user: user, channel_id: channel_id, topic: topic}
       end
