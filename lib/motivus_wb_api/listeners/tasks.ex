@@ -1,4 +1,4 @@
-defmodule MotivusWbApi.ListenerTasks do
+defmodule MotivusWbApi.Listeners.Task do
   use GenServer
   alias Phoenix.PubSub
   alias MotivusWbApi.TaskPool.TaskDefinition

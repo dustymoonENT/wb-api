@@ -1,11 +1,12 @@
 defmodule MotivusWbApi.ProcessingRegistry do
   use GenServer
+  alias MotivusWbApi.TaskPool.Task
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, %{}, opts)
   end
 
-  def put(pid, channel_id, tid, task) do
+  def put(pid, channel_id, tid, %Task{} = task) do
     GenServer.cast(pid, {:put, channel_id, tid, task})
   end
 

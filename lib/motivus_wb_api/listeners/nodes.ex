@@ -1,4 +1,4 @@
-defmodule MotivusWbApi.ListenerNodes do
+defmodule MotivusWbApi.Listeners.Node do
   use GenServer
   alias Phoenix.PubSub
   alias MotivusWbApi.ThreadPool.Thread

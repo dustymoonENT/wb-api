@@ -33,7 +33,7 @@ defmodule MotivusWbApi.CommonActions do
   def remove_tasks(channel_id, pool), do: pool.drop(pool, channel_id)
 
   def maybe_match_task_to_thread,
-    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"try_to_match", :unused, %{}})
+    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"maybe_match", :unused, %{}})
 
   def maybe_stop_tasks(channel_id, pool) do
     pool.drop_by(pool, :client_channel_id, channel_id)
@@ -91,6 +91,30 @@ defmodule MotivusWbApi.CommonActions do
           |> Map.merge(Stats.get_cluster_stats()),
         type: "stats"
       }
+    )
+  end
+
+  def match(thread_pool, task_pool) do
+    case [thread_pool.pop(thread_pool), task_pool.pop(task_pool)] do
+      [:error, :error] ->
+        nil
+
+      [%Thread{} = thread, :error] ->
+        thread_pool.push_top(thread_pool, thread)
+
+      [:error, %Task{} = task] ->
+        task_pool.push(task_pool, task)
+
+      [%Thread{} = thread, %Task{} = task] ->
+        dispatch(thread, task)
+    end
+  end
+
+  def dispatch(%Thread{} = thread, %Task{} = task) do
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "dispatch",
+      {"worker_task_match", :unused, %{data_node: thread, data_task: task}}
     )
   end
 end

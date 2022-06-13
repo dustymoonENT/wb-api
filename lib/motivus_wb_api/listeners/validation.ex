@@ -1,4 +1,4 @@
-defmodule MotivusWbApi.ListenerValidation do
+defmodule MotivusWbApi.Listeners.Validation do
   use GenServer
   import Ecto.Changeset
   alias MotivusWbApi.Repo

@@ -35,35 +35,42 @@ defmodule MotivusWbApi.Application do
       # {Phoenix.PubSub, name: :my_pubsub},
       # Listener
       Supervisor.child_spec(
-        {MotivusWbApi.ListenerTasks,
+        {MotivusWbApi.Listeners.Task,
          %{
-           name: MotivusWbApi.ListenerTasks,
+           name: MotivusWbApi.Listeners.Task,
            task_pool: MotivusWbApi.TaskPool,
            processing_registry: MotivusWbApi.ProcessingRegistry
          }},
         id: :listener_tasks
       ),
       Supervisor.child_spec(
-        {MotivusWbApi.ListenerNodes,
+        {MotivusWbApi.Listeners.Node,
          %{
-           name: MotivusWbApi.ListenerNodes,
+           name: MotivusWbApi.Listeners.Node,
            thread_pool: MotivusWbApi.ThreadPool,
            processing_registry: MotivusWbApi.ProcessingRegistry
          }},
         id: :listener_nodes
       ),
-      Supervisor.child_spec({MotivusWbApi.ListenerMatches, name: MotivusWbApi.ListenerMatches},
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Match,
+         %{
+           name: MotivusWbApi.Listeners.Match,
+           thread_pool: MotivusWbApi.ThreadPool,
+           task_pool: MotivusWbApi.TaskPool
+         }},
         id: :listener_matches
       ),
-      Supervisor.child_spec({MotivusWbApi.ListenerDispatch, name: MotivusWbApi.ListenerDispatch},
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Dispatch, name: MotivusWbApi.Listeners.Dispatch},
         id: :listener_dispatch
       ),
       Supervisor.child_spec(
-        {MotivusWbApi.ListenerCompleted, name: MotivusWbApi.ListenerCompleted},
+        {MotivusWbApi.Listeners.Completed, name: MotivusWbApi.Listeners.Completed},
         id: :listener_completed
       ),
       Supervisor.child_spec(
-        {MotivusWbApi.ListenerValidation, name: MotivusWbApi.ListenerValidation},
+        {MotivusWbApi.Listeners.Validation, name: MotivusWbApi.Listeners.Validation},
         id: :listener_validation
       ),
       Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},

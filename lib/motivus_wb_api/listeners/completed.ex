@@ -1,4 +1,4 @@
-defmodule MotivusWbApi.ListenerCompleted do
+defmodule MotivusWbApi.Listeners.Completed do
   use GenServer
   import Ecto.Changeset
   alias MotivusWbApi.Repo
