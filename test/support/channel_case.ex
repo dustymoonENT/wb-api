@@ -43,14 +43,14 @@ defmodule MotivusWbApiWeb.ChannelCase do
 
         {:ok, %{uuid: uuid}, socket} =
           socket
-          |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client?")
+          |> subscribe_and_join(MotivusWbApiWeb.Channels.Client, "room:client?")
 
         channel_id = "#{uuid}:#{UUID.uuid4()}"
 
         {:ok, _, socket} =
           socket
           |> subscribe_and_join(
-            MotivusWbApiWeb.ClientChannel,
+            MotivusWbApiWeb.Channels.Client,
             "room:client:" <> channel_id
           )
 

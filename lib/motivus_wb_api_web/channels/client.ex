@@ -1,4 +1,4 @@
-defmodule MotivusWbApiWeb.ClientChannel do
+defmodule MotivusWbApiWeb.Channels.Client do
   use Phoenix.Channel
   alias Phoenix.PubSub
   alias MotivusWbApi.TaskPool.TaskDefinition

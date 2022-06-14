@@ -1,6 +1,6 @@
 defmodule MotivusWbApi.ThreadPool.Thread do
   @enforce_keys [:channel_id, :tid]
-  defstruct [:channel_id, :tid]
+  defstruct @enforce_keys
 end
 
 defmodule MotivusWbApi.ThreadPool do
@@ -114,12 +114,11 @@ defmodule MotivusWbApi.ThreadPool do
 
   @impl true
   def handle_cast({:drop, id}, threads) do
-    {:noreply, Enum.filter(threads, fn t -> t.channel_id != id end)}
+    {:noreply, Enum.reject(threads, fn t -> t.channel_id == id end)}
   end
 
   @impl true
   def handle_cast({:drop, channel_id, tid}, threads) do
-    thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
-    {:noreply, threads -- [thread]}
+    {:noreply, Enum.reject(threads, fn t -> t.channel_id == channel_id and t.tid == tid end)}
   end
 end

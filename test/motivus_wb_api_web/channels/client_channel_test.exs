@@ -1,4 +1,4 @@
-defmodule MotivusWbApiWeb.ClientChannelTest do
+defmodule MotivusWbApiWeb.Channels.ClientTest do
   use MotivusWbApiWeb.ChannelCase
   import Mock
 
@@ -26,13 +26,16 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
   test "joins client channel", %{socket: socket} do
     {:ok, reply, socket} =
       socket
-      |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client?")
+      |> subscribe_and_join(MotivusWbApiWeb.Channels.Client, "room:client?")
 
     assert %{uuid: uuid} = reply
 
     {:ok, _, socket} =
       socket
-      |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client:#{uuid}:#{UUID.uuid4()}")
+      |> subscribe_and_join(
+        MotivusWbApiWeb.Channels.Client,
+        "room:client:#{uuid}:#{UUID.uuid4()}"
+      )
 
     client_ref = UUID.uuid4()
     task = %{body: %{}, type: "work", ref: client_ref}
