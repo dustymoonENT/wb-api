@@ -71,17 +71,16 @@ defmodule MotivusWbApiWeb.ClientChannel do
 
   def handle_in(
         "set_validation",
-        %{"body" => body, "type" => type, "task_id" => task_id},
+        %{"is_valid" => is_valid, "task_id" => task_id},
         %{assigns: %{user: %{uuid: uuid}}} = socket
       ) do
-    case type do
-      "validation" ->
-        payload = %{body: body, task_id: task_id, client_id: uuid}
-        PubSub.broadcast(MotivusWbApi.PubSub, "validation", {"set_validation", :unused, payload})
+    payload = %{is_valid: is_valid, task_id: task_id, client_id: uuid}
 
-      _ ->
-        nil
-    end
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "validation",
+      {"TASK_RESULT_VALIDATED", :unused, payload}
+    )
 
     {:noreply, socket}
   end

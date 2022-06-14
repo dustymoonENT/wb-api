@@ -140,6 +140,16 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
     db_task = MotivusWbApi.Processing.get_task!(db_task.id)
     assert %{attempts: 1, user_id: ^user_id, result: %{}} = db_task
 
+    push(client_socket, "set_validation", %{
+      "is_valid" => true,
+      "task_id" => db_task.id
+    })
+
+    refute_broadcast "*", _payload
+
+    db_task = MotivusWbApi.Processing.get_task!(db_task.id)
+    assert %{is_valid: true} = db_task
+
     Process.unlink(client_socket.channel_pid)
     close(client_socket)
     assert_push "abort_task", _

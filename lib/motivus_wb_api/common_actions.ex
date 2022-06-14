@@ -162,7 +162,7 @@ defmodule MotivusWbApi.CommonActions do
   end
 
   def update_task_result(%Task{} = task, %Result{} = result) do
-    Repo.get_by(Processing.Task, id: task.task_id)
+    Repo.get_by!(Processing.Task, id: task.task_id)
     |> Ecto.Changeset.change(%{
       date_out: DateTime.truncate(DateTime.utc_now(), :second),
       result: result.body
@@ -185,5 +185,11 @@ defmodule MotivusWbApi.CommonActions do
         task_id: task.task_id
       }
     )
+  end
+
+  def update_task_result_validation(task_id, client_id, is_valid) do
+    Repo.get_by!(Processing.Task, id: task_id, client_id: client_id)
+    |> Ecto.Changeset.change(%{is_valid: is_valid})
+    |> Repo.update()
   end
 end

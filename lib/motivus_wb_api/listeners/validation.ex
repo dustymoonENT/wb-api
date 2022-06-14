@@ -1,35 +1,25 @@
 defmodule MotivusWbApi.Listeners.Validation do
   use GenServer
-  import Ecto.Changeset
-  alias MotivusWbApi.Repo
-  alias MotivusWbApi.Processing.Task
+  import MotivusWbApi.CommonActions
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, name: __MODULE__)
   end
 
   def init(_) do
-    {:ok, {Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "validation")}}
-    |> IO.inspect(label: "Subscribed to validation PubSub")
+    Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "validation")
+    {:ok, nil}
   end
 
-  # Callbacks
-
   def handle_info(
-        {"set_validation", _name,
-         %{
-           body: body,
-           task_id: task_id,
-           client_id: client_id
-         }},
+        {"TASK_RESULT_VALIDATED", _name,
+         %{is_valid: is_valid, task_id: task_id, client_id: client_id}},
         state
       ) do
-    IO.inspect(label: "new validation")
-
-    Repo.get_by(Task, id: task_id, client_id: client_id)
-    |> change(%{is_valid: body["is_valid"]})
-    |> Repo.update()
+    update_task_result_validation(task_id, client_id, is_valid)
 
     {:noreply, state}
   end
+
+  # TODO: invalid tasks might be automatically re-tried
 end
