@@ -11,7 +11,7 @@ defmodule MotivusWbApi.Listeners.Match do
     {:ok, opts}
   end
 
-  def handle_info({"POOL_UPDATED", _name, _data}, context) do
+  def handle_info({"POOL_UPDATED", _, _data}, context) do
     try_match(context.thread_pool, context.task_pool)
     {:noreply, context}
   end

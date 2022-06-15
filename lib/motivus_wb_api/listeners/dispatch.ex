@@ -12,7 +12,7 @@ defmodule MotivusWbApi.Listeners.Dispatch do
     {:ok, opts}
   end
 
-  def handle_info({"TASK_ASSIGNED", _name, %{thread: thread, task: task}}, context) do
+  def handle_info({"TASK_ASSIGNED", _, %{thread: thread, task: task}}, context) do
     update_task_worker(task, thread)
     deliver_task(task, thread)
     register_task_assignment(task, thread, context.processing_registry)

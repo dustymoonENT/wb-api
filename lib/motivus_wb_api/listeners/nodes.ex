@@ -20,7 +20,7 @@ defmodule MotivusWbApi.Listeners.Node do
     {:noreply, context}
   end
 
-  def handle_info({"THREAD_AVAILABLE", _name, %Thread{} = thread}, context) do
+  def handle_info({"THREAD_AVAILABLE", _, %Thread{} = thread}, context) do
     register_thread(thread, context.thread_pool)
     maybe_match_task_to_thread()
     broadcast_user_stats(thread.channel_id)
@@ -28,7 +28,7 @@ defmodule MotivusWbApi.Listeners.Node do
     {:noreply, context}
   end
 
-  def handle_info({"WORKER_CHANNEL_CLOSED", _name, %{channel_id: channel_id}}, context) do
+  def handle_info({"WORKER_CHANNEL_CLOSED", _, %{channel_id: channel_id}}, context) do
     deregister_threads(channel_id, context.thread_pool)
     drop_running_tasks(channel_id, context.processing_registry)
 

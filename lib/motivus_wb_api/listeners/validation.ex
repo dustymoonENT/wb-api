@@ -12,7 +12,7 @@ defmodule MotivusWbApi.Listeners.Validation do
   end
 
   def handle_info(
-        {"TASK_RESULT_VALIDATED", _name,
+        {"TASK_RESULT_VALIDATED", _,
          %{is_valid: is_valid, task_id: task_id, client_id: client_id}},
         state
       ) do

@@ -16,23 +16,23 @@ defmodule MotivusWbApi.TaskPool do
     GenServer.start_link(__MODULE__, [], opts)
   end
 
-  def push(pid \\ __MODULE__, %Task{} = task) do
+  def push(pid, %Task{} = task) do
     GenServer.cast(pid, {:push, task})
   end
 
-  def pop(pid \\ __MODULE__) do
+  def pop(pid) do
     GenServer.call(pid, :pop)
   end
 
-  def list(pid \\ __MODULE__) do
+  def list(pid) do
     GenServer.call(pid, :list)
   end
 
-  def drop(pid \\ __MODULE__, client_channel_id) do
+  def drop(pid, client_channel_id) do
     GenServer.call(pid, {:drop_by, :client_channel_id, client_channel_id})
   end
 
-  def empty(pid \\ __MODULE__) do
+  def empty(pid) do
     GenServer.call(pid, :clear)
   end
 

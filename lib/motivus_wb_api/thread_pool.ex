@@ -11,19 +11,19 @@ defmodule MotivusWbApi.ThreadPool do
     GenServer.start_link(__MODULE__, [], opts)
   end
 
-  def push(pid \\ __MODULE__, %Thread{} = thread) do
+  def push(pid, %Thread{} = thread) do
     GenServer.cast(pid, {:push, thread})
   end
 
-  def push_top(pid \\ __MODULE__, %Thread{} = thread) do
+  def push_top(pid, %Thread{} = thread) do
     GenServer.cast(pid, {:push_top, thread})
   end
 
-  def pop(pid \\ __MODULE__) do
+  def pop(pid) do
     GenServer.call(pid, :pop)
   end
 
-  def drop(pid \\ __MODULE__, target)
+  def drop(pid, target)
 
   @doc """
   Drops a single thread belonging to a channel
@@ -39,15 +39,15 @@ defmodule MotivusWbApi.ThreadPool do
     GenServer.cast(pid, {:drop, channel_id})
   end
 
-  def list(pid \\ __MODULE__) do
+  def list(pid) do
     GenServer.call(pid, :list)
   end
 
-  def empty(pid \\ __MODULE__) do
+  def empty(pid) do
     GenServer.call(pid, :clear)
   end
 
-  def by_user(pid \\ __MODULE__) do
+  def by_user(pid) do
     GenServer.call(pid, :by_user)
   end
 

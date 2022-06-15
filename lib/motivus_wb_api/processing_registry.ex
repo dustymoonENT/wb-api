@@ -31,15 +31,15 @@ defmodule MotivusWbApi.ProcessingRegistry do
     GenServer.call(pid, {:drop_by, key, value})
   end
 
-  def list(pid \\ __MODULE__) do
+  def list(pid) do
     GenServer.call(pid, :list)
   end
 
-  def empty(pid \\ __MODULE__) do
+  def empty(pid) do
     GenServer.call(pid, :clear)
   end
 
-  def by_worker_user(pid \\ __MODULE__) do
+  def by_worker_user(pid) do
     GenServer.call(pid, :by_worker_user)
   end
 

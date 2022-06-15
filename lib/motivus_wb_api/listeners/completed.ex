@@ -14,7 +14,7 @@ defmodule MotivusWbApi.Listeners.Completed do
   end
 
   def handle_info(
-        {"TASK_COMPLETED", _name, {%Thread{} = thread, %Result{} = result}},
+        {"TASK_COMPLETED", _, {%Thread{} = thread, %Result{} = result}},
         %{processing_registry: registry} = context
       ) do
     task = deregister_task_assignment(thread, registry)

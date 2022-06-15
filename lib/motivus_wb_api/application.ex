@@ -6,40 +6,32 @@ defmodule MotivusWbApi.Application do
   use Application
   alias Telemetry.Metrics
 
-  def start(_type, _args) do
-    Confex.resolve_env!(:motivus_wb_api)
+  def task_worker_stack(id) do
+    task_pool = String.to_atom(id <> "_task_pool")
+    thread_pool = String.to_atom(id <> "_thread_pool")
+    processing_registry = String.to_atom(id <> "_processing_registry")
 
-    children = [
-      # Start the Ecto repository
-      MotivusWbApi.Repo,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: MotivusWbApi.PubSub},
-      # Start the Endpoint (http/https)
-      MotivusWbApiWeb.Endpoint,
-      # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
-      # {MotivusWbApi.Worker, arg}
-      # Queue for Tasks
-      Supervisor.child_spec({MotivusWbApi.TaskPool, name: MotivusWbApi.TaskPool},
-        id: :task_pool
+    [
+      Supervisor.child_spec({MotivusWbApi.TaskPool, name: task_pool},
+        id: task_pool
       ),
-      # Queue for Nodes
-      Supervisor.child_spec({MotivusWbApi.ThreadPool, name: MotivusWbApi.ThreadPool},
-        id: :thread_pool
-      ),
-      # Queue for Processing task
       Supervisor.child_spec(
-        {MotivusWbApi.ProcessingRegistry, name: MotivusWbApi.ProcessingRegistry},
-        id: :processing_registry
+        {MotivusWbApi.ThreadPool, name: thread_pool},
+        id: thread_pool
       ),
-      # Pubsub
-      # {Phoenix.PubSub, name: :my_pubsub},
-      # Listener
+      Supervisor.child_spec(
+        {MotivusWbApi.ProcessingRegistry, name: processing_registry},
+        id: processing_registry
+      ),
       Supervisor.child_spec(
         {MotivusWbApi.Listeners.Task,
          %{
            name: MotivusWbApi.Listeners.Task,
-           task_pool: MotivusWbApi.TaskPool,
-           processing_registry: MotivusWbApi.ProcessingRegistry
+           task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool},
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
          }},
         id: :listener_tasks
       ),
@@ -47,8 +39,11 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Node,
          %{
            name: MotivusWbApi.Listeners.Node,
-           thread_pool: MotivusWbApi.ThreadPool,
-           processing_registry: MotivusWbApi.ProcessingRegistry
+           thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
          }},
         id: :listener_nodes
       ),
@@ -56,8 +51,8 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Match,
          %{
            name: MotivusWbApi.Listeners.Match,
-           thread_pool: MotivusWbApi.ThreadPool,
-           task_pool: MotivusWbApi.TaskPool
+           thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
+           task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool}
          }},
         id: :listener_matches
       ),
@@ -65,7 +60,10 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Dispatch,
          %{
            name: MotivusWbApi.Listeners.Dispatch,
-           processing_registry: MotivusWbApi.ProcessingRegistry
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
          }},
         id: :listener_dispatch
       ),
@@ -73,23 +71,40 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Completed,
          %{
            name: MotivusWbApi.Listeners.Completed,
-           processing_registry: MotivusWbApi.ProcessingRegistry
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
          }},
         id: :listener_completed
-      ),
-      Supervisor.child_spec(
-        {MotivusWbApi.Listeners.Validation, name: MotivusWbApi.Listeners.Validation},
-        id: :listener_validation
-      ),
-      Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
-        id: cron_config_1_ranking()[:id]
-      ),
-      {TelemetryMetricsCloudwatch,
-       [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
-      # {TelemetryMetricsPrometheus, [metrics: metrics()]},
-      # Start the Telemetry supervisor
-      MotivusWbApiWeb.Telemetry
+      )
     ]
+  end
+
+  def start(_type, _args) do
+    Confex.resolve_env!(:motivus_wb_api)
+
+    children =
+      [
+        # Start the Ecto repository
+        MotivusWbApi.Repo,
+        # Start the PubSub system
+        {Phoenix.PubSub, name: MotivusWbApi.PubSub},
+        # Start the Endpoint (http/https)
+        MotivusWbApiWeb.Endpoint,
+        # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
+        Supervisor.child_spec(
+          {MotivusWbApi.Listeners.Validation, name: MotivusWbApi.Listeners.Validation},
+          id: :listener_validation
+        ),
+        Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
+          id: cron_config_1_ranking()[:id]
+        ),
+        {TelemetryMetricsCloudwatch,
+         [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
+        # Start the Telemetry supervisor
+        MotivusWbApiWeb.Telemetry
+      ] ++ task_worker_stack("public")
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

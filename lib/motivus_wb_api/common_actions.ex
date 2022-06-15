@@ -32,15 +32,15 @@ defmodule MotivusWbApi.CommonActions do
     struct!(Task, Map.from_struct(task_def) |> Enum.into(%{task_id: task_id}))
   end
 
-  def add_task(%Task{} = task, pool), do: pool.push(pool, task)
+  def add_task(%Task{} = task, %{module: pool, id: pool_id}), do: pool.push(pool_id, task)
 
-  def remove_tasks(channel_id, pool), do: pool.drop(pool, channel_id)
+  def remove_tasks(channel_id, %{module: pool, id: pool_id}), do: pool.drop(pool_id, channel_id)
 
   def maybe_match_task_to_thread,
     do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"POOL_UPDATED", :unused, %{}})
 
-  def maybe_stop_tasks(channel_id, pool) do
-    pool.drop_by(pool, :client_channel_id, channel_id)
+  def maybe_stop_tasks(channel_id, %{module: pool, id: pool_id}) do
+    pool.drop_by(pool_id, :client_channel_id, channel_id)
     |> Enum.map(fn {worker_channel_id, tid, task} ->
       abort_task!(worker_channel_id, tid)
 
@@ -62,12 +62,14 @@ defmodule MotivusWbApi.CommonActions do
         %{tid: tid}
       )
 
-  def register_thread(%Thread{} = thread, pool), do: pool.push(pool, thread)
+  def register_thread(%Thread{} = thread, %{module: pool, id: pool_id}),
+    do: pool.push(pool_id, thread)
 
-  def deregister_threads(channel_id, pool), do: pool.drop(pool, channel_id)
+  def deregister_threads(channel_id, %{module: pool, id: pool_id}),
+    do: pool.drop(pool_id, channel_id)
 
-  def drop_running_tasks(channel_id, registry) do
-    case registry.drop(registry, channel_id) do
+  def drop_running_tasks(channel_id, %{module: registry, id: registry_id}) do
+    case registry.drop(registry_id, channel_id) do
       {:ok, tasks} ->
         tasks
         |> Enum.map(fn {_tid, t} ->
@@ -98,8 +100,8 @@ defmodule MotivusWbApi.CommonActions do
     )
   end
 
-  def try_match(thread_pool, task_pool) do
-    case [thread_pool.pop(thread_pool), task_pool.pop(task_pool)] do
+  def try_match(thread_pool, %{module: task_pool, id: task_pool_id}) do
+    case [thread_pool.pop(thread_pool), task_pool.pop(task_pool_id)] do
       [:error, :error] ->
         nil
 
@@ -107,7 +109,7 @@ defmodule MotivusWbApi.CommonActions do
         thread_pool.push_top(thread_pool, thread)
 
       [:error, %Task{} = task] ->
-        task_pool.push(task_pool, task)
+        task_pool.push(task_pool_id, task)
 
       [%Thread{} = thread, %Task{} = task] ->
         assign_task_to_thread(thread, task)
@@ -147,13 +149,16 @@ defmodule MotivusWbApi.CommonActions do
     )
   end
 
-  def register_task_assignment(%Task{} = task, %Thread{} = thread, registry),
-    do: registry.put(registry, thread.channel_id, thread.tid, task)
+  def register_task_assignment(%Task{} = task, %Thread{} = thread, %{
+        module: registry,
+        id: registry_id
+      }),
+      do: registry.put(registry_id, thread.channel_id, thread.tid, task)
 
-  def deregister_task_assignment(%Thread{} = thread, registry) do
+  def deregister_task_assignment(%Thread{} = thread, %{module: registry, id: registry_id}) do
     {:ok, task} =
       registry.drop(
-        registry,
+        registry_id,
         thread.channel_id,
         thread.tid
       )
