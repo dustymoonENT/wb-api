@@ -17,9 +17,9 @@ defmodule MotivusWbApiWeb.PrivateWorkerChannelTest do
        end
      ]}
   ]) do
-    MotivusWbApi.TaskPool.empty()
-    MotivusWbApi.ThreadPool.empty()
-    MotivusWbApi.ProcessingRegistry.empty()
+    MotivusWbApi.TaskPool.empty(:public_task_pool)
+    MotivusWbApi.ThreadPool.empty(:public_thread_pool)
+    MotivusWbApi.ProcessingRegistry.empty(:public_processing_registry)
 
     join_private_worker_channel()
   end

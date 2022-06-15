@@ -100,13 +100,13 @@ defmodule MotivusWbApi.CommonActions do
     )
   end
 
-  def try_match(thread_pool, %{module: task_pool, id: task_pool_id}) do
-    case [thread_pool.pop(thread_pool), task_pool.pop(task_pool_id)] do
+  def try_match(%{module: thread_pool, id: thread_pool_id}, %{module: task_pool, id: task_pool_id}) do
+    case [thread_pool.pop(thread_pool_id), task_pool.pop(task_pool_id)] do
       [:error, :error] ->
         nil
 
       [%Thread{} = thread, :error] ->
-        thread_pool.push_top(thread_pool, thread)
+        thread_pool.push_top(thread_pool_id, thread)
 
       [:error, %Task{} = task] ->
         task_pool.push(task_pool_id, task)

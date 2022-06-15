@@ -16,9 +16,9 @@ defmodule MotivusWbApiWeb.Channels.ClientTest do
        end
      ]}
   ]) do
-    MotivusWbApi.TaskPool.empty()
-    MotivusWbApi.ThreadPool.empty()
-    MotivusWbApi.ProcessingRegistry.empty()
+    MotivusWbApi.TaskPool.empty(:public_task_pool)
+    MotivusWbApi.ThreadPool.empty(:public_thread_pool)
+    MotivusWbApi.ProcessingRegistry.empty(:public_processing_registry)
 
     connect_client()
   end
@@ -43,6 +43,6 @@ defmodule MotivusWbApiWeb.Channels.ClientTest do
 
     refute_broadcast "*", _
 
-    assert [%{ref: ^client_ref, client_id: ^uuid}] = MotivusWbApi.TaskPool.list()
+    assert [%{ref: ^client_ref, client_id: ^uuid}] = MotivusWbApi.TaskPool.list(:public_task_pool)
   end
 end

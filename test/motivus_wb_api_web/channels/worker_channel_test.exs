@@ -85,7 +85,7 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
       }
     }
 
-    threads = MotivusWbApi.ThreadPool.list()
+    threads = MotivusWbApi.ThreadPool.list(:public_thread_pool)
 
     initial_tid =
       [slot_1, slot_2]
