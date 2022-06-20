@@ -7,11 +7,13 @@ defmodule MotivusWbApi.Application do
   alias Telemetry.Metrics
 
   def task_worker_stack(id) do
+    pubsub = String.to_atom(id <> "_pubsub")
     task_pool = String.to_atom(id <> "_task_pool")
     thread_pool = String.to_atom(id <> "_thread_pool")
     processing_registry = String.to_atom(id <> "_processing_registry")
 
     [
+      {Phoenix.PubSub, name: pubsub},
       Supervisor.child_spec({MotivusWbApi.TaskPool, name: task_pool},
         id: task_pool
       ),
@@ -27,6 +29,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Task,
          %{
            name: MotivusWbApi.Listeners.Task,
+           pubsub: pubsub,
            task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool},
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
@@ -39,6 +42,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Node,
          %{
            name: MotivusWbApi.Listeners.Node,
+           pubsub: pubsub,
            thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
@@ -51,6 +55,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Match,
          %{
            name: MotivusWbApi.Listeners.Match,
+           pubsub: pubsub,
            thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
            task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool}
          }},
@@ -60,6 +65,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Dispatch,
          %{
            name: MotivusWbApi.Listeners.Dispatch,
+           pubsub: pubsub,
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
              id: processing_registry
@@ -71,6 +77,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Completed,
          %{
            name: MotivusWbApi.Listeners.Completed,
+           pubsub: pubsub,
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
              id: processing_registry
@@ -88,8 +95,6 @@ defmodule MotivusWbApi.Application do
       [
         # Start the Ecto repository
         MotivusWbApi.Repo,
-        # Start the PubSub system
-        {Phoenix.PubSub, name: MotivusWbApi.PubSub},
         # Start the Endpoint (http/https)
         MotivusWbApiWeb.Endpoint,
         # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
