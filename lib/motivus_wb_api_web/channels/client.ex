@@ -39,7 +39,7 @@ defmodule MotivusWbApiWeb.Channels.Client do
           })
 
         PubSub.broadcast(
-          MotivusWbApi.PubSub,
+          :public_pubsub,
           "tasks",
           {"NEW_TASK_DEFINITION", :unused, task_def}
         )
@@ -77,7 +77,7 @@ defmodule MotivusWbApiWeb.Channels.Client do
     payload = %{is_valid: is_valid, task_id: task_id, client_id: uuid}
 
     PubSub.broadcast(
-      MotivusWbApi.PubSub,
+      :public_pubsub,
       "validation",
       {"TASK_RESULT_VALIDATED", :unused, payload}
     )
@@ -85,13 +85,11 @@ defmodule MotivusWbApiWeb.Channels.Client do
     {:noreply, socket}
   end
 
-  ## agregar manejo de validated
-
   def terminate(_reason, socket) do
     case socket.topic do
       "room:client:" <> channel_id ->
         PubSub.broadcast(
-          MotivusWbApi.PubSub,
+          :public_pubsub,
           "tasks",
           {"CLIENT_CHANNEL_CLOSED", :unused, %{channel_id: channel_id}}
         )

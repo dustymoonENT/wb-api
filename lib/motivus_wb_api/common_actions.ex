@@ -36,8 +36,8 @@ defmodule MotivusWbApi.CommonActions do
 
   def remove_tasks(channel_id, %{module: pool, id: pool_id}), do: pool.drop(pool_id, channel_id)
 
-  def maybe_match_task_to_thread,
-    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"POOL_UPDATED", :unused, %{}})
+  def maybe_match_task_to_thread(pubsub),
+    do: PubSub.broadcast(pubsub, "matches", {"POOL_UPDATED", :unused, %{}})
 
   def maybe_stop_tasks(channel_id, %{module: pool, id: pool_id}) do
     pool.drop_by(pool_id, :client_channel_id, channel_id)
@@ -68,12 +68,12 @@ defmodule MotivusWbApi.CommonActions do
   def deregister_threads(channel_id, %{module: pool, id: pool_id}),
     do: pool.drop(pool_id, channel_id)
 
-  def drop_running_tasks(channel_id, %{module: registry, id: registry_id}) do
+  def drop_running_tasks(channel_id, %{module: registry, id: registry_id}, pubsub) do
     case registry.drop(registry_id, channel_id) do
       {:ok, tasks} ->
         tasks
         |> Enum.map(fn {_tid, t} ->
-          PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"UNFINISHED_TASK", :unused, t})
+          PubSub.broadcast(pubsub, "tasks", {"UNFINISHED_TASK", :unused, t})
         end)
 
       _ ->
@@ -100,7 +100,11 @@ defmodule MotivusWbApi.CommonActions do
     )
   end
 
-  def try_match(%{module: thread_pool, id: thread_pool_id}, %{module: task_pool, id: task_pool_id}) do
+  def try_match(
+        %{module: thread_pool, id: thread_pool_id},
+        %{module: task_pool, id: task_pool_id},
+        pubsub
+      ) do
     case [thread_pool.pop(thread_pool_id), task_pool.pop(task_pool_id)] do
       [:error, :error] ->
         nil
@@ -112,13 +116,13 @@ defmodule MotivusWbApi.CommonActions do
         task_pool.push(task_pool_id, task)
 
       [%Thread{} = thread, %Task{} = task] ->
-        assign_task_to_thread(thread, task)
+        assign_task_to_thread(thread, task, pubsub)
     end
   end
 
-  def assign_task_to_thread(%Thread{} = thread, %Task{} = task) do
+  def assign_task_to_thread(%Thread{} = thread, %Task{} = task, pubsub) do
     PubSub.broadcast(
-      MotivusWbApi.PubSub,
+      pubsub,
       "dispatch",
       {"TASK_ASSIGNED", :unused, %{thread: thread, task: task}}
     )

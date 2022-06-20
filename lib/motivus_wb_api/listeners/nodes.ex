@@ -5,13 +5,13 @@ defmodule MotivusWbApi.Listeners.Node do
 
   import MotivusWbApi.CommonActions
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts)
+  def start_link(context) do
+    GenServer.start_link(__MODULE__, context)
   end
 
-  def init(opts) do
-    PubSub.subscribe(MotivusWbApi.PubSub, "nodes")
-    {:ok, opts}
+  def init(context) do
+    PubSub.subscribe(context.pubsub, "nodes")
+    {:ok, context}
   end
 
   def handle_info({"WORKER_CHANNEL_OPENED", _, %{channel_id: channel_id}}, context) do
@@ -22,7 +22,7 @@ defmodule MotivusWbApi.Listeners.Node do
 
   def handle_info({"THREAD_AVAILABLE", _, %Thread{} = thread}, context) do
     register_thread(thread, context.thread_pool)
-    maybe_match_task_to_thread()
+    maybe_match_task_to_thread(context.pubsub)
     broadcast_user_stats(thread.channel_id)
 
     {:noreply, context}
@@ -30,7 +30,7 @@ defmodule MotivusWbApi.Listeners.Node do
 
   def handle_info({"WORKER_CHANNEL_CLOSED", _, %{channel_id: channel_id}}, context) do
     deregister_threads(channel_id, context.thread_pool)
-    drop_running_tasks(channel_id, context.processing_registry)
+    drop_running_tasks(channel_id, context.processing_registry, context.pubsub)
 
     {:noreply, context}
   end

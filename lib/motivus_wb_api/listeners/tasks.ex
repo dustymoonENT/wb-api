@@ -6,30 +6,27 @@ defmodule MotivusWbApi.Listeners.Task do
 
   import MotivusWbApi.CommonActions
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts)
+  def start_link(context) do
+    GenServer.start_link(__MODULE__, context)
   end
 
-  def init(opts) do
-    PubSub.subscribe(MotivusWbApi.PubSub, "tasks")
-    {:ok, opts}
+  def init(context) do
+    PubSub.subscribe(context.pubsub, "tasks")
+    {:ok, context}
   end
 
-  def handle_info(
-        {"NEW_TASK_DEFINITION", _, %TaskDefinition{} = task_def},
-        %{task_pool: pool} = context
-      ) do
+  def handle_info({"NEW_TASK_DEFINITION", _, %TaskDefinition{} = task_def}, context) do
     prepare_task(task_def)
-    |> add_task(pool)
+    |> add_task(context.task_pool)
 
-    maybe_match_task_to_thread()
+    maybe_match_task_to_thread(context.pubsub)
 
     {:noreply, context}
   end
 
-  def handle_info({"UNFINISHED_TASK", _, %Task{} = task}, %{task_pool: pool} = context) do
-    add_task(task, pool)
-    maybe_match_task_to_thread()
+  def handle_info({"UNFINISHED_TASK", _, %Task{} = task}, context) do
+    add_task(task, context.task_pool)
+    maybe_match_task_to_thread(context.pubsub)
 
     {:noreply, context}
   end

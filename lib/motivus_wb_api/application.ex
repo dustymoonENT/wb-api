@@ -13,7 +13,7 @@ defmodule MotivusWbApi.Application do
     processing_registry = String.to_atom(id <> "_processing_registry")
 
     [
-      {Phoenix.PubSub, name: pubsub},
+      Supervisor.child_spec({Phoenix.PubSub, name: pubsub}, id: pubsub),
       Supervisor.child_spec({MotivusWbApi.TaskPool, name: task_pool},
         id: task_pool
       ),
@@ -84,6 +84,11 @@ defmodule MotivusWbApi.Application do
            }
          }},
         id: :listener_completed
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Validation,
+         %{name: MotivusWbApi.Listeners.Validation, pubsub: pubsub}},
+        id: :listener_validation
       )
     ]
   end
@@ -95,13 +100,10 @@ defmodule MotivusWbApi.Application do
       [
         # Start the Ecto repository
         MotivusWbApi.Repo,
+        {Phoenix.PubSub, name: MotivusWbApi.PubSub},
         # Start the Endpoint (http/https)
         MotivusWbApiWeb.Endpoint,
         # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
-        Supervisor.child_spec(
-          {MotivusWbApi.Listeners.Validation, name: MotivusWbApi.Listeners.Validation},
-          id: :listener_validation
-        ),
         Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
           id: cron_config_1_ranking()[:id]
         ),

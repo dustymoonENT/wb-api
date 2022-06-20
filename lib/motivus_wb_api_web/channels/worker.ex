@@ -11,7 +11,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
 
   def join("room:worker:" <> channel_id, _message, socket) do
     PubSub.broadcast(
-      MotivusWbApi.PubSub,
+      :public_pubsub,
       "nodes",
       {"WORKER_CHANNEL_OPENED", :unused, %{channel_id: channel_id}}
     )
@@ -21,7 +21,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
 
   def join("room:trusted_worker:" <> channel_id, _message, socket) do
     PubSub.broadcast(
-      MotivusWbApi.PubSub,
+      :private_pubsub,
       "trusted_nodes",
       {"WORKER_CHANNEL_OPENED", :unused, %{channel_id: channel_id}}
     )
@@ -44,7 +44,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
       })
 
     PubSub.broadcast(
-      MotivusWbApi.PubSub,
+      :public_pubsub,
       "completed",
       {"TASK_COMPLETED", :unused, {thread, result}}
     )
@@ -58,7 +58,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
     thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
 
     PubSub.broadcast(
-      MotivusWbApi.PubSub,
+      :public_pubsub,
       "nodes",
       {"THREAD_AVAILABLE", :unused, thread}
     )
@@ -70,7 +70,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
     case socket.topic do
       "room:worker:" <> channel_id ->
         PubSub.broadcast(
-          MotivusWbApi.PubSub,
+          :public_pubsub,
           "nodes",
           {"WORKER_CHANNEL_CLOSED", :unused, %{channel_id: channel_id}}
         )

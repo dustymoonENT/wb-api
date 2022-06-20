@@ -3,13 +3,13 @@ defmodule MotivusWbApi.Listeners.Dispatch do
   alias Phoenix.PubSub
   import MotivusWbApi.CommonActions
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts)
+  def start_link(context) do
+    GenServer.start_link(__MODULE__, context)
   end
 
-  def init(opts) do
-    PubSub.subscribe(MotivusWbApi.PubSub, "dispatch")
-    {:ok, opts}
+  def init(context) do
+    PubSub.subscribe(context.pubsub, "dispatch")
+    {:ok, context}
   end
 
   def handle_info({"TASK_ASSIGNED", _, %{thread: thread, task: task}}, context) do
