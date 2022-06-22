@@ -10,27 +10,27 @@ defmodule MotivusWbApi.Listeners.Node do
   end
 
   def init(context) do
-    PubSub.subscribe(context.pubsub, "nodes")
+    PubSub.subscribe(MotivusWbApi.PubSub, "nodes")
     {:ok, context}
   end
 
-  def handle_info({"WORKER_CHANNEL_OPENED", _, %{channel_id: channel_id}}, context) do
+  def handle_info({"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}, context) do
     broadcast_user_stats(channel_id)
 
     {:noreply, context}
   end
 
-  def handle_info({"THREAD_AVAILABLE", _, %Thread{} = thread}, context) do
+  def handle_info({"THREAD_AVAILABLE", %Thread{} = thread}, context) do
     register_thread(thread, context.thread_pool)
-    maybe_match_task_to_thread(context.pubsub)
+    maybe_match_task_to_thread()
     broadcast_user_stats(thread.channel_id)
 
     {:noreply, context}
   end
 
-  def handle_info({"WORKER_CHANNEL_CLOSED", _, %{channel_id: channel_id}}, context) do
+  def handle_info({"WORKER_CHANNEL_CLOSED", %{channel_id: channel_id}}, context) do
     deregister_threads(channel_id, context.thread_pool)
-    drop_running_tasks(channel_id, context.processing_registry, context.pubsub)
+    drop_running_tasks(channel_id, context.processing_registry)
 
     {:noreply, context}
   end

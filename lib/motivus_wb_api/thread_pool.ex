@@ -1,6 +1,10 @@
 defmodule MotivusWbApi.ThreadPool.Thread do
   @enforce_keys [:channel_id, :tid]
   defstruct @enforce_keys
+
+  def format(%__MODULE__{} = thread) do
+    thread.channel_id <> ":" <> thread.tid
+  end
 end
 
 defmodule MotivusWbApi.ThreadPool do

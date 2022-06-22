@@ -116,6 +116,8 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
       }
     }
 
+    assert_push("input", %{body: %{}})
+
     push(client_socket, "task", %{body: %{}, type: "work", ref: UUID.uuid4()})
     push(client_socket, "task", %{body: %{}, type: "work", ref: UUID.uuid4()})
     push(client_socket, "task", %{body: %{}, type: "work", ref: UUID.uuid4()})

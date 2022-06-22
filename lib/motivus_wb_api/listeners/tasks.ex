@@ -11,27 +11,27 @@ defmodule MotivusWbApi.Listeners.Task do
   end
 
   def init(context) do
-    PubSub.subscribe(context.pubsub, "tasks")
+    PubSub.subscribe(MotivusWbApi.PubSub, "tasks")
     {:ok, context}
   end
 
-  def handle_info({"NEW_TASK_DEFINITION", _, %TaskDefinition{} = task_def}, context) do
+  def handle_info({"NEW_TASK_DEFINITION", %TaskDefinition{} = task_def}, context) do
     prepare_task(task_def)
     |> add_task(context.task_pool)
 
-    maybe_match_task_to_thread(context.pubsub)
+    maybe_match_task_to_thread()
 
     {:noreply, context}
   end
 
-  def handle_info({"UNFINISHED_TASK", _, %Task{} = task}, context) do
+  def handle_info({"UNFINISHED_TASK", %Task{} = task}, context) do
     add_task(task, context.task_pool)
-    maybe_match_task_to_thread(context.pubsub)
+    maybe_match_task_to_thread()
 
     {:noreply, context}
   end
 
-  def handle_info({"CLIENT_CHANNEL_CLOSED", _, %{channel_id: channel_id}}, context) do
+  def handle_info({"CLIENT_CHANNEL_CLOSED", %{channel_id: channel_id}}, context) do
     # TODO update depoold tasks with aborted_on
     remove_tasks(channel_id, context.task_pool)
 

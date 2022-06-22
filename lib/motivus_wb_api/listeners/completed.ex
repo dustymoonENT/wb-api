@@ -9,12 +9,12 @@ defmodule MotivusWbApi.Listeners.Completed do
   end
 
   def init(context) do
-    Phoenix.PubSub.subscribe(context.pubsub, "completed")
+    Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "completed")
     {:ok, context}
   end
 
   def handle_info(
-        {"TASK_COMPLETED", _, {%Thread{} = thread, %Result{} = result}},
+        {"TASK_COMPLETED", {%Thread{} = thread, %Result{} = result}},
         %{processing_registry: registry} = context
       ) do
     task = deregister_task_assignment(thread, registry)

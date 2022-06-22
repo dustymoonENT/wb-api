@@ -7,13 +7,11 @@ defmodule MotivusWbApi.Application do
   alias Telemetry.Metrics
 
   def task_worker_stack(id) do
-    pubsub = String.to_atom(id <> "_pubsub")
     task_pool = String.to_atom(id <> "_task_pool")
     thread_pool = String.to_atom(id <> "_thread_pool")
     processing_registry = String.to_atom(id <> "_processing_registry")
 
     [
-      Supervisor.child_spec({Phoenix.PubSub, name: pubsub}, id: pubsub),
       Supervisor.child_spec({MotivusWbApi.TaskPool, name: task_pool},
         id: task_pool
       ),
@@ -29,7 +27,6 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Task,
          %{
            name: MotivusWbApi.Listeners.Task,
-           pubsub: pubsub,
            task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool},
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
@@ -42,7 +39,6 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Node,
          %{
            name: MotivusWbApi.Listeners.Node,
-           pubsub: pubsub,
            thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
@@ -55,7 +51,6 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Match,
          %{
            name: MotivusWbApi.Listeners.Match,
-           pubsub: pubsub,
            thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
            task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool}
          }},
@@ -65,7 +60,6 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Dispatch,
          %{
            name: MotivusWbApi.Listeners.Dispatch,
-           pubsub: pubsub,
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
              id: processing_registry
@@ -77,7 +71,6 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Completed,
          %{
            name: MotivusWbApi.Listeners.Completed,
-           pubsub: pubsub,
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
              id: processing_registry
@@ -86,8 +79,7 @@ defmodule MotivusWbApi.Application do
         id: :listener_completed
       ),
       Supervisor.child_spec(
-        {MotivusWbApi.Listeners.Validation,
-         %{name: MotivusWbApi.Listeners.Validation, pubsub: pubsub}},
+        {MotivusWbApi.Listeners.Validation, %{name: MotivusWbApi.Listeners.Validation}},
         id: :listener_validation
       )
     ]

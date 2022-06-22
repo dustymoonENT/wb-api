@@ -7,12 +7,12 @@ defmodule MotivusWbApi.Listeners.Match do
   end
 
   def init(context) do
-    Phoenix.PubSub.subscribe(context.pubsub, "matches")
+    Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "matches")
     {:ok, context}
   end
 
-  def handle_info({"POOL_UPDATED", _, _data}, context) do
-    try_match(context.thread_pool, context.task_pool, context.pubsub)
+  def handle_info({"POOL_UPDATED", _data}, context) do
+    try_match(context.thread_pool, context.task_pool)
     {:noreply, context}
   end
 end

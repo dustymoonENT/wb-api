@@ -10,10 +10,12 @@ defmodule MotivusWbApiWeb.Channels.Worker do
   alias MotivusWbApiWeb.Channels.Worker.Result
 
   def join("room:worker:" <> channel_id, _message, socket) do
+    PubSub.subscribe(MotivusWbApi.PubSub, "node:" <> channel_id)
+
     PubSub.broadcast(
-      :public_pubsub,
+      MotivusWbApi.PubSub,
       "nodes",
-      {"WORKER_CHANNEL_OPENED", :unused, %{channel_id: channel_id}}
+      {"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}
     )
 
     {:ok, socket}
@@ -23,7 +25,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
     PubSub.broadcast(
       :private_pubsub,
       "trusted_nodes",
-      {"WORKER_CHANNEL_OPENED", :unused, %{channel_id: channel_id}}
+      {"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}
     )
 
     {:ok, socket}
@@ -43,11 +45,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
         stderr: result["stderr"]
       })
 
-    PubSub.broadcast(
-      :public_pubsub,
-      "completed",
-      {"TASK_COMPLETED", :unused, {thread, result}}
-    )
+    PubSub.broadcast(MotivusWbApi.PubSub, "completed", {"TASK_COMPLETED", {thread, result}})
 
     {:noreply, socket}
   end
@@ -56,12 +54,25 @@ defmodule MotivusWbApiWeb.Channels.Worker do
     [_, channel_id] = socket.topic |> String.split("room:worker:")
 
     thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
+    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"THREAD_AVAILABLE", thread})
 
-    PubSub.broadcast(
-      :public_pubsub,
-      "nodes",
-      {"THREAD_AVAILABLE", :unused, thread}
-    )
+    {:noreply, socket}
+  end
+
+  def handle_info({"WORKER_INPUT_READY", input}, socket) do
+    MotivusWbApiWeb.Endpoint.broadcast!(socket.topic, "input", input)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({"TASK_ABORTED", tid}, socket) do
+    MotivusWbApiWeb.Endpoint.broadcast!(socket.topic, "abort_task", %{tid: tid})
+
+    {:noreply, socket}
+  end
+
+  def handle_info({"WORKER_STATS_UPDATED", stats}, socket) do
+    MotivusWbApiWeb.Endpoint.broadcast!(socket.topic, "stats", stats)
 
     {:noreply, socket}
   end
@@ -69,10 +80,12 @@ defmodule MotivusWbApiWeb.Channels.Worker do
   def terminate(_reason, socket) do
     case socket.topic do
       "room:worker:" <> channel_id ->
+        PubSub.unsubscribe(MotivusWbApi.PubSub, "node:" <> channel_id)
+
         PubSub.broadcast(
-          :public_pubsub,
+          MotivusWbApi.PubSub,
           "nodes",
-          {"WORKER_CHANNEL_CLOSED", :unused, %{channel_id: channel_id}}
+          {"WORKER_CHANNEL_CLOSED", %{channel_id: channel_id}}
         )
 
       _ ->

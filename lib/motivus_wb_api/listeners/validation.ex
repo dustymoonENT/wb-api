@@ -7,13 +7,12 @@ defmodule MotivusWbApi.Listeners.Validation do
   end
 
   def init(context) do
-    Phoenix.PubSub.subscribe(context.pubsub, "validation")
+    Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "validation")
     {:ok, context}
   end
 
   def handle_info(
-        {"TASK_RESULT_VALIDATED", _,
-         %{is_valid: is_valid, task_id: task_id, client_id: client_id}},
+        {"TASK_RESULT_VALIDATED", %{is_valid: is_valid, task_id: task_id, client_id: client_id}},
         context
       ) do
     update_task_result_validation(task_id, client_id, is_valid)

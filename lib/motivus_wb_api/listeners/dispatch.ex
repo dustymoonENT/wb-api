@@ -8,11 +8,11 @@ defmodule MotivusWbApi.Listeners.Dispatch do
   end
 
   def init(context) do
-    PubSub.subscribe(context.pubsub, "dispatch")
+    PubSub.subscribe(MotivusWbApi.PubSub, "dispatch")
     {:ok, context}
   end
 
-  def handle_info({"TASK_ASSIGNED", _, %{thread: thread, task: task}}, context) do
+  def handle_info({"TASK_ASSIGNED", %{thread: thread, task: task}}, context) do
     update_task_worker(task, thread)
     deliver_task(task, thread)
     register_task_assignment(task, thread, context.processing_registry)

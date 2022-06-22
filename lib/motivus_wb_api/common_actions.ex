@@ -36,8 +36,8 @@ defmodule MotivusWbApi.CommonActions do
 
   def remove_tasks(channel_id, %{module: pool, id: pool_id}), do: pool.drop(pool_id, channel_id)
 
-  def maybe_match_task_to_thread(pubsub),
-    do: PubSub.broadcast(pubsub, "matches", {"POOL_UPDATED", :unused, %{}})
+  def maybe_match_task_to_thread,
+    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"POOL_UPDATED", %{}})
 
   def maybe_stop_tasks(channel_id, %{module: pool, id: pool_id}) do
     pool.drop_by(pool_id, :client_channel_id, channel_id)
@@ -55,12 +55,7 @@ defmodule MotivusWbApi.CommonActions do
       |> Processing.update_many_task(aborted_on: DateTime.truncate(DateTime.utc_now(), :second))
 
   def abort_task!(channel_id, tid),
-    do:
-      MotivusWbApiWeb.Endpoint.broadcast!(
-        "room:worker:" <> channel_id,
-        "abort_task",
-        %{tid: tid}
-      )
+    do: PubSub.broadcast(MotivusWbApi.PubSub, "node:" <> channel_id, {"TASK_ABORTED", tid})
 
   def register_thread(%Thread{} = thread, %{module: pool, id: pool_id}),
     do: pool.push(pool_id, thread)
@@ -68,12 +63,12 @@ defmodule MotivusWbApi.CommonActions do
   def deregister_threads(channel_id, %{module: pool, id: pool_id}),
     do: pool.drop(pool_id, channel_id)
 
-  def drop_running_tasks(channel_id, %{module: registry, id: registry_id}, pubsub) do
+  def drop_running_tasks(channel_id, %{module: registry, id: registry_id}) do
     case registry.drop(registry_id, channel_id) do
       {:ok, tasks} ->
         tasks
         |> Enum.map(fn {_tid, t} ->
-          PubSub.broadcast(pubsub, "tasks", {"UNFINISHED_TASK", :unused, t})
+          PubSub.broadcast(MotivusWbApi.PubSub, "tasks", {"UNFINISHED_TASK", t})
         end)
 
       _ ->
@@ -87,23 +82,23 @@ defmodule MotivusWbApi.CommonActions do
 
     current_season = Stats.get_current_season(DateTime.utc_now())
 
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> channel_id,
-      "stats",
-      %{
-        uid: 1,
-        body:
-          Stats.get_user_stats(user.id, current_season)
-          |> Map.merge(Stats.get_cluster_stats()),
-        type: "stats"
-      }
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "node:" <> channel_id,
+      {"WORKER_STATS_UPDATED",
+       %{
+         uid: 1,
+         body:
+           Stats.get_user_stats(user.id, current_season)
+           |> Map.merge(Stats.get_cluster_stats()),
+         type: "stats"
+       }}
     )
   end
 
   def try_match(
         %{module: thread_pool, id: thread_pool_id},
-        %{module: task_pool, id: task_pool_id},
-        pubsub
+        %{module: task_pool, id: task_pool_id}
       ) do
     case [thread_pool.pop(thread_pool_id), task_pool.pop(task_pool_id)] do
       [:error, :error] ->
@@ -116,15 +111,15 @@ defmodule MotivusWbApi.CommonActions do
         task_pool.push(task_pool_id, task)
 
       [%Thread{} = thread, %Task{} = task] ->
-        assign_task_to_thread(thread, task, pubsub)
+        assign_task_to_thread(thread, task)
     end
   end
 
-  def assign_task_to_thread(%Thread{} = thread, %Task{} = task, pubsub) do
+  def assign_task_to_thread(%Thread{} = thread, %Task{} = task) do
     PubSub.broadcast(
-      pubsub,
+      MotivusWbApi.PubSub,
       "dispatch",
-      {"TASK_ASSIGNED", :unused, %{thread: thread, task: task}}
+      {"TASK_ASSIGNED", %{thread: thread, task: task}}
     )
   end
 
@@ -146,10 +141,10 @@ defmodule MotivusWbApi.CommonActions do
   def deliver_task(%Task{} = task, %Thread{} = thread) do
     worker_input = task |> Map.put(:tid, thread.tid) |> Map.drop(@redacted_task_data)
 
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:worker:" <> thread.channel_id,
-      "input",
-      worker_input
+    PubSub.broadcast!(
+      MotivusWbApi.PubSub,
+      "node:" <> thread.channel_id,
+      {"WORKER_INPUT_READY", worker_input}
     )
   end
 
@@ -182,17 +177,18 @@ defmodule MotivusWbApi.CommonActions do
   end
 
   def send_task_result(%Task{} = task, %Result{} = result) do
-    MotivusWbApiWeb.Endpoint.broadcast!(
-      "room:client:" <> task.client_channel_id,
-      "result",
-      %{
-        type: "response",
-        body: result.body,
-        stdout: result.stdout,
-        stderr: result.stderr,
-        ref: task.ref,
-        task_id: task.task_id
-      }
+    PubSub.broadcast!(
+      MotivusWbApi.PubSub,
+      "client:" <> task.client_channel_id,
+      {"TASK_RESULT_READY",
+       %{
+         type: "response",
+         body: result.body,
+         stdout: result.stdout,
+         stderr: result.stderr,
+         ref: task.ref,
+         task_id: task.task_id
+       }}
     )
   end
 
