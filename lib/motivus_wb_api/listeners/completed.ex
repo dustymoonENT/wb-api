@@ -9,7 +9,7 @@ defmodule MotivusWbApi.Listeners.Completed do
   end
 
   def init(context) do
-    Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "completed")
+    Phoenix.PubSub.subscribe(MotivusWbApi.PubSub, "completed:" <> context.scope)
     {:ok, context}
   end
 

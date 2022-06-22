@@ -36,8 +36,8 @@ defmodule MotivusWbApi.CommonActions do
 
   def remove_tasks(channel_id, %{module: pool, id: pool_id}), do: pool.drop(pool_id, channel_id)
 
-  def maybe_match_task_to_thread,
-    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches", {"POOL_UPDATED", %{}})
+  def maybe_match_task_to_thread(scope),
+    do: PubSub.broadcast(MotivusWbApi.PubSub, "matches:" <> scope, {"POOL_UPDATED", %{}})
 
   def maybe_stop_tasks(channel_id, %{module: pool, id: pool_id}) do
     pool.drop_by(pool_id, :client_channel_id, channel_id)
@@ -98,7 +98,8 @@ defmodule MotivusWbApi.CommonActions do
 
   def try_match(
         %{module: thread_pool, id: thread_pool_id},
-        %{module: task_pool, id: task_pool_id}
+        %{module: task_pool, id: task_pool_id},
+        scope
       ) do
     case [thread_pool.pop(thread_pool_id), task_pool.pop(task_pool_id)] do
       [:error, :error] ->
@@ -111,14 +112,14 @@ defmodule MotivusWbApi.CommonActions do
         task_pool.push(task_pool_id, task)
 
       [%Thread{} = thread, %Task{} = task] ->
-        assign_task_to_thread(thread, task)
+        assign_task_to_thread(thread, task, scope)
     end
   end
 
-  def assign_task_to_thread(%Thread{} = thread, %Task{} = task) do
+  def assign_task_to_thread(%Thread{} = thread, %Task{} = task, scope) do
     PubSub.broadcast(
       MotivusWbApi.PubSub,
-      "dispatch",
+      "dispatch:" <> scope,
       {"TASK_ASSIGNED", %{thread: thread, task: task}}
     )
   end

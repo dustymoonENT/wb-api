@@ -11,7 +11,7 @@ defmodule MotivusWbApi.Listeners.Task do
   end
 
   def init(context) do
-    PubSub.subscribe(MotivusWbApi.PubSub, "tasks")
+    PubSub.subscribe(MotivusWbApi.PubSub, "tasks:" <> context.scope)
     {:ok, context}
   end
 
@@ -19,14 +19,14 @@ defmodule MotivusWbApi.Listeners.Task do
     prepare_task(task_def)
     |> add_task(context.task_pool)
 
-    maybe_match_task_to_thread()
+    maybe_match_task_to_thread(context.scope)
 
     {:noreply, context}
   end
 
   def handle_info({"UNFINISHED_TASK", %Task{} = task}, context) do
     add_task(task, context.task_pool)
-    maybe_match_task_to_thread()
+    maybe_match_task_to_thread(context.scope)
 
     {:noreply, context}
   end

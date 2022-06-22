@@ -27,6 +27,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Task,
          %{
            name: MotivusWbApi.Listeners.Task,
+           scope: id,
            task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool},
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
@@ -39,6 +40,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Node,
          %{
            name: MotivusWbApi.Listeners.Node,
+           scope: id,
            thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
@@ -51,6 +53,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Match,
          %{
            name: MotivusWbApi.Listeners.Match,
+           scope: id,
            thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
            task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool}
          }},
@@ -60,6 +63,7 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Dispatch,
          %{
            name: MotivusWbApi.Listeners.Dispatch,
+           scope: id,
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
              id: processing_registry
@@ -71,16 +75,13 @@ defmodule MotivusWbApi.Application do
         {MotivusWbApi.Listeners.Completed,
          %{
            name: MotivusWbApi.Listeners.Completed,
+           scope: id,
            processing_registry: %{
              module: MotivusWbApi.ProcessingRegistry,
              id: processing_registry
            }
          }},
         id: :listener_completed
-      ),
-      Supervisor.child_spec(
-        {MotivusWbApi.Listeners.Validation, %{name: MotivusWbApi.Listeners.Validation}},
-        id: :listener_validation
       )
     ]
   end
@@ -103,7 +104,14 @@ defmodule MotivusWbApi.Application do
          [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
         # Start the Telemetry supervisor
         MotivusWbApiWeb.Telemetry
-      ] ++ task_worker_stack("public")
+      ] ++
+        task_worker_stack("public") ++
+        [
+          Supervisor.child_spec(
+            {MotivusWbApi.Listeners.Validation, %{name: MotivusWbApi.Listeners.Validation}},
+            id: :listener_validation
+          )
+        ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

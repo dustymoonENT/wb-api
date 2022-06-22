@@ -10,7 +10,7 @@ defmodule MotivusWbApi.Listeners.Node do
   end
 
   def init(context) do
-    PubSub.subscribe(MotivusWbApi.PubSub, "nodes")
+    PubSub.subscribe(MotivusWbApi.PubSub, "nodes:" <> context.scope)
     {:ok, context}
   end
 
@@ -22,7 +22,7 @@ defmodule MotivusWbApi.Listeners.Node do
 
   def handle_info({"THREAD_AVAILABLE", %Thread{} = thread}, context) do
     register_thread(thread, context.thread_pool)
-    maybe_match_task_to_thread()
+    maybe_match_task_to_thread(context.scope)
     broadcast_user_stats(thread.channel_id)
 
     {:noreply, context}

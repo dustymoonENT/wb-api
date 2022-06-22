@@ -8,7 +8,7 @@ defmodule MotivusWbApi.Listeners.Dispatch do
   end
 
   def init(context) do
-    PubSub.subscribe(MotivusWbApi.PubSub, "dispatch")
+    PubSub.subscribe(MotivusWbApi.PubSub, "dispatch:" <> context.scope)
     {:ok, context}
   end
 

@@ -14,11 +14,11 @@ defmodule MotivusWbApiWeb.Channels.Worker do
 
     PubSub.broadcast(
       MotivusWbApi.PubSub,
-      "nodes",
+      "nodes:public",
       {"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}
     )
 
-    {:ok, socket}
+    {:ok, socket |> assign(:scope, "public") |> assign(:channel_id, channel_id)}
   end
 
   def join("room:trusted_worker:" <> channel_id, _message, socket) do
@@ -28,15 +28,25 @@ defmodule MotivusWbApiWeb.Channels.Worker do
       {"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}
     )
 
-    {:ok, socket}
+    {:ok, socket |> assign(:scope, "private") |> assign(:channel_id, channel_id)}
   end
 
   def join("room:" <> _private_room_id, _params, _socket), do: {:error, %{reason: "unauthorized"}}
 
-  def handle_in("result", %{"body" => body, "tid" => tid} = result, socket) do
-    [_, channel_id] = socket.topic |> String.split("room:worker:")
+  def handle_in("input_request", %{"tid" => tid}, socket) do
+    thread = struct!(Thread, %{channel_id: socket.assigns.channel_id, tid: tid})
 
-    thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "nodes:" <> socket.assigns.scope,
+      {"THREAD_AVAILABLE", thread}
+    )
+
+    {:noreply, socket}
+  end
+
+  def handle_in("result", %{"body" => body, "tid" => tid} = result, socket) do
+    thread = struct!(Thread, %{channel_id: socket.assigns.channel_id, tid: tid})
 
     result =
       struct!(Result, %{
@@ -45,51 +55,40 @@ defmodule MotivusWbApiWeb.Channels.Worker do
         stderr: result["stderr"]
       })
 
-    PubSub.broadcast(MotivusWbApi.PubSub, "completed", {"TASK_COMPLETED", {thread, result}})
-
-    {:noreply, socket}
-  end
-
-  def handle_in("input_request", %{"tid" => tid}, socket) do
-    [_, channel_id] = socket.topic |> String.split("room:worker:")
-
-    thread = struct!(Thread, %{channel_id: channel_id, tid: tid})
-    PubSub.broadcast(MotivusWbApi.PubSub, "nodes", {"THREAD_AVAILABLE", thread})
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "completed:" <> socket.assigns.scope,
+      {"TASK_COMPLETED", {thread, result}}
+    )
 
     {:noreply, socket}
   end
 
   def handle_info({"WORKER_INPUT_READY", input}, socket) do
-    MotivusWbApiWeb.Endpoint.broadcast!(socket.topic, "input", input)
+    push(socket, "input", input)
 
     {:noreply, socket}
   end
 
   def handle_info({"TASK_ABORTED", tid}, socket) do
-    MotivusWbApiWeb.Endpoint.broadcast!(socket.topic, "abort_task", %{tid: tid})
+    push(socket, "abort_task", %{tid: tid})
 
     {:noreply, socket}
   end
 
   def handle_info({"WORKER_STATS_UPDATED", stats}, socket) do
-    MotivusWbApiWeb.Endpoint.broadcast!(socket.topic, "stats", stats)
+    push(socket, "stats", stats)
 
     {:noreply, socket}
   end
 
   def terminate(_reason, socket) do
-    case socket.topic do
-      "room:worker:" <> channel_id ->
-        PubSub.unsubscribe(MotivusWbApi.PubSub, "node:" <> channel_id)
+    PubSub.unsubscribe(MotivusWbApi.PubSub, "node:" <> socket.assigns.channel_id)
 
-        PubSub.broadcast(
-          MotivusWbApi.PubSub,
-          "nodes",
-          {"WORKER_CHANNEL_CLOSED", %{channel_id: channel_id}}
-        )
-
-      _ ->
-        nil
-    end
+    PubSub.broadcast(
+      MotivusWbApi.PubSub,
+      "nodes:" <> socket.assigns.scope,
+      {"WORKER_CHANNEL_CLOSED", %{channel_id: socket.assigns.channel_id}}
+    )
   end
 end
