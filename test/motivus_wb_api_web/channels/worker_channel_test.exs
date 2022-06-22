@@ -105,7 +105,7 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
 
     [db_task] = MotivusWbApi.Processing.list_tasks()
 
-    assert %{attempts: 1, user_id: ^user_id, result: nil} = db_task
+    assert %{attempts: 1, user_id: ^user_id, result: nil, security_level: "PUBLIC"} = db_task
 
     assert_push "stats", %{
       body: %{

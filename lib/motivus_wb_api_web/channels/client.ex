@@ -34,10 +34,10 @@ defmodule MotivusWbApiWeb.Channels.Client do
         ref: ref,
         client_id: socket.assigns.user.uuid,
         client_channel_id: socket.assigns.channel_id,
-        secure_only:
+        security_level:
           case type do
-            "work" -> false
-            "trusted_work" -> true
+            "work" -> "PUBLIC"
+            "trusted_work" -> "SECURE"
             _ -> nil
           end
       })

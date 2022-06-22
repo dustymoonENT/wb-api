@@ -17,21 +17,25 @@ defmodule MotivusWbApiWeb.PrivateWorkerChannelTest do
        end
      ]}
   ]) do
-    MotivusWbApi.TaskPool.empty(:public_task_pool)
-    MotivusWbApi.ThreadPool.empty(:public_thread_pool)
-    MotivusWbApi.ProcessingRegistry.empty(:public_processing_registry)
+    MotivusWbApi.TaskPool.empty(:private_task_pool)
+    MotivusWbApi.ThreadPool.empty(:private_thread_pool)
+    MotivusWbApi.ProcessingRegistry.empty(:private_processing_registry)
 
     join_private_worker_channel()
   end
 
-  test "task is registered for trusted_work", %{socket: socket, channel_id: channel_id} do
+  test "task is registered for trusted_work", %{socket: socket, channel_id: _channel_id} do
+    push(socket, "input_request", %{"tid" => UUID.uuid4()})
+    refute_broadcast "*", _payload
+
+    assert MotivusWbApi.ThreadPool.list(:private_thread_pool) |> length() == 1
+
     %{socket: client_socket} = join_client_channel()
 
     push(client_socket, "task", %{body: %{}, type: "trusted_work", ref: UUID.uuid4()})
-
     refute_broadcast "*", _payload
 
-    task_count = Processing.list_tasks() |> Enum.count()
-    assert task_count == 1
+    [task] = Processing.list_tasks()
+    assert %{security_level: "SECURE"} = task
   end
 end

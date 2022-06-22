@@ -10,6 +10,11 @@ defmodule MotivusWbApi.Application do
     task_pool = String.to_atom(id <> "_task_pool")
     thread_pool = String.to_atom(id <> "_thread_pool")
     processing_registry = String.to_atom(id <> "_processing_registry")
+    tasks_listener = String.to_atom(id <> "_tasks_listener")
+    nodes_listener = String.to_atom(id <> "_nodes_listener")
+    match_listener = String.to_atom(id <> "_match_listener")
+    dispatch_listener = String.to_atom(id <> "_dispatch_listener")
+    completed_listener = String.to_atom(id <> "_completed_listener")
 
     [
       Supervisor.child_spec({MotivusWbApi.TaskPool, name: task_pool},
@@ -34,7 +39,7 @@ defmodule MotivusWbApi.Application do
              id: processing_registry
            }
          }},
-        id: :listener_tasks
+        id: tasks_listener
       ),
       Supervisor.child_spec(
         {MotivusWbApi.Listeners.Node,
@@ -47,7 +52,7 @@ defmodule MotivusWbApi.Application do
              id: processing_registry
            }
          }},
-        id: :listener_nodes
+        id: nodes_listener
       ),
       Supervisor.child_spec(
         {MotivusWbApi.Listeners.Match,
@@ -57,7 +62,7 @@ defmodule MotivusWbApi.Application do
            thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
            task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool}
          }},
-        id: :listener_matches
+        id: match_listener
       ),
       Supervisor.child_spec(
         {MotivusWbApi.Listeners.Dispatch,
@@ -69,7 +74,7 @@ defmodule MotivusWbApi.Application do
              id: processing_registry
            }
          }},
-        id: :listener_dispatch
+        id: dispatch_listener
       ),
       Supervisor.child_spec(
         {MotivusWbApi.Listeners.Completed,
@@ -81,7 +86,7 @@ defmodule MotivusWbApi.Application do
              id: processing_registry
            }
          }},
-        id: :listener_completed
+        id: completed_listener
       )
     ]
   end
@@ -106,6 +111,7 @@ defmodule MotivusWbApi.Application do
         MotivusWbApiWeb.Telemetry
       ] ++
         task_worker_stack("public") ++
+        task_worker_stack("private") ++
         [
           Supervisor.child_spec(
             {MotivusWbApi.Listeners.Validation, %{name: MotivusWbApi.Listeners.Validation}},

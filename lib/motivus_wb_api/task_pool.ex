@@ -1,10 +1,10 @@
 defmodule MotivusWbApi.TaskPool.TaskDefinition do
-  @enforce_keys [:body, :type, :ref, :client_id, :client_channel_id, :secure_only]
+  @enforce_keys [:body, :type, :ref, :client_id, :client_channel_id, :security_level]
   defstruct @enforce_keys
 end
 
 defmodule MotivusWbApi.TaskPool.Task do
-  @enforce_keys [:body, :type, :ref, :client_id, :client_channel_id, :task_id, :secure_only]
+  @enforce_keys [:body, :type, :ref, :client_id, :client_channel_id, :task_id, :security_level]
   defstruct @enforce_keys
 end
 

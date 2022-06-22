@@ -21,7 +21,8 @@ defmodule MotivusWbApi.CommonActions do
       processing_base_time: task_def.body["processing_base_time"],
       flops: task_def.body["flops"],
       flop: task_def.body["flop"],
-      client_id: task_def.client_id
+      client_id: task_def.client_id,
+      security_level: task_def.security_level
     }
 
   def prepare_task(%TaskDefinition{} = task_def) do

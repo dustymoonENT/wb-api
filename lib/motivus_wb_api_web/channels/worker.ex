@@ -23,8 +23,8 @@ defmodule MotivusWbApiWeb.Channels.Worker do
 
   def join("room:trusted_worker:" <> channel_id, _message, socket) do
     PubSub.broadcast(
-      :private_pubsub,
-      "trusted_nodes",
+      MotivusWbApi.PubSub,
+      "nodes:private",
       {"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}
     )
 
