@@ -1,0 +1,7 @@
+deployment/
+.git/
+.elixir_ls/
+.circleci/
+deps/
+_build/
+.env*

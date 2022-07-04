@@ -20,10 +20,11 @@ config :motivus_wb_api, MotivusWbApi.Repo,
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
   port: 5432,
   queue_target: 30000,
-  queue_interval: 30000
+  queue_interval: 30000,
+  ssl: true
 
-secret_key_base =
-  System.get_env("SECRET_KEY_BASE") #||
+# ||
+secret_key_base = System.get_env("SECRET_KEY_BASE")
 #    raise """
 #    environment variable SECRET_KEY_BASE is missing.
 #    You can generate one by calling: mix phx.gen.secret

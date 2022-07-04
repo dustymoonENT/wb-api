@@ -1,12 +1,28 @@
-FROM elixir:1.10.4
+FROM elixir:1.10.4-slim
 
-RUN mix local.hex --force
-
-RUN mix local.rebar --force
-
-RUN wget -q https://github.com/phoenixframework/archives/raw/master/phx_new.ez && mix archive.install --force phx_new.ez
-COPY . /app
 WORKDIR /app
+
+RUN useradd --create-home elixir \
+  && mkdir -p /mix && chown elixir:elixir -R /mix /app
+
+RUN mix local.hex --force && mix local.rebar --force
+
+ARG MIX_ENV="prod"
+ENV MIX_ENV="${MIX_ENV}" \
+    USER="elixir"
+
+COPY --chown=elixir:elixir mix.* ./
+
+RUN if [ "${MIX_ENV}" = "dev" ]; then \
+  mix deps.get; else mix deps.get --only "${MIX_ENV}"; fi
+
+COPY --chown=elixir:elixir config/config.exs config/"${MIX_ENV}"*.exs config/
+RUN mix deps.compile
+
+COPY --chown=elixir:elixir . .
+
+RUN mix compile
+
 EXPOSE 80
-RUN mix do deps.get, deps.compile, compile
+
 CMD ["./prod_run.sh"]
