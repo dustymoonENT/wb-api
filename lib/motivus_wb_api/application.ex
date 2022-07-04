@@ -6,62 +6,118 @@ defmodule MotivusWbApi.Application do
   use Application
   alias Telemetry.Metrics
 
+  def task_worker_stack(id) do
+    task_pool = String.to_atom(id <> "_task_pool")
+    thread_pool = String.to_atom(id <> "_thread_pool")
+    processing_registry = String.to_atom(id <> "_processing_registry")
+    tasks_listener = String.to_atom(id <> "_tasks_listener")
+    nodes_listener = String.to_atom(id <> "_nodes_listener")
+    match_listener = String.to_atom(id <> "_match_listener")
+    dispatch_listener = String.to_atom(id <> "_dispatch_listener")
+    completed_listener = String.to_atom(id <> "_completed_listener")
+
+    [
+      Supervisor.child_spec({MotivusWbApi.TaskPool, name: task_pool},
+        id: task_pool
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.ThreadPool, name: thread_pool},
+        id: thread_pool
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.ProcessingRegistry, name: processing_registry},
+        id: processing_registry
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Task,
+         %{
+           name: MotivusWbApi.Listeners.Task,
+           scope: id,
+           task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool},
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
+         }},
+        id: tasks_listener
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Node,
+         %{
+           name: MotivusWbApi.Listeners.Node,
+           scope: id,
+           thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
+         }},
+        id: nodes_listener
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Match,
+         %{
+           name: MotivusWbApi.Listeners.Match,
+           scope: id,
+           thread_pool: %{module: MotivusWbApi.ThreadPool, id: thread_pool},
+           task_pool: %{module: MotivusWbApi.TaskPool, id: task_pool}
+         }},
+        id: match_listener
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Dispatch,
+         %{
+           name: MotivusWbApi.Listeners.Dispatch,
+           scope: id,
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
+         }},
+        id: dispatch_listener
+      ),
+      Supervisor.child_spec(
+        {MotivusWbApi.Listeners.Completed,
+         %{
+           name: MotivusWbApi.Listeners.Completed,
+           scope: id,
+           processing_registry: %{
+             module: MotivusWbApi.ProcessingRegistry,
+             id: processing_registry
+           }
+         }},
+        id: completed_listener
+      )
+    ]
+  end
+
   def start(_type, _args) do
     Confex.resolve_env!(:motivus_wb_api)
 
-    children = [
-      # Start the Ecto repository
-      MotivusWbApi.Repo,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: MotivusWbApi.PubSub},
-      # Start the Endpoint (http/https)
-      MotivusWbApiWeb.Endpoint,
-      # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
-      # {MotivusWbApi.Worker, arg}
-      # Queue for Tasks
-      Supervisor.child_spec({MotivusWbApi.QueueTasks, name: MotivusWbApi.QueueTasks},
-        id: :queue_tasks
-      ),
-      # Queue for Nodes
-      Supervisor.child_spec({MotivusWbApi.QueueNodes, name: MotivusWbApi.QueueNodes},
-        id: :queue_nodes
-      ),
-      # Queue for Processing task
-      Supervisor.child_spec({MotivusWbApi.QueueProcessing, name: MotivusWbApi.QueueProcessing},
-        id: :queue_processing
-      ),
-      # Pubsub
-      # {Phoenix.PubSub, name: :my_pubsub},
-      # Listener
-      Supervisor.child_spec({MotivusWbApi.ListenerTasks, name: MotivusWbApi.ListenerTasks},
-        id: :listener_tasks
-      ),
-      Supervisor.child_spec({MotivusWbApi.ListenerNodes, name: MotivusWbApi.ListenerNodes},
-        id: :listener_nodes
-      ),
-      Supervisor.child_spec({MotivusWbApi.ListenerMatches, name: MotivusWbApi.ListenerMatches},
-        id: :listener_matches
-      ),
-      Supervisor.child_spec({MotivusWbApi.ListenerDispatch, name: MotivusWbApi.ListenerDispatch},
-        id: :listener_dispatch
-      ),
-      Supervisor.child_spec(
-        {MotivusWbApi.ListenerCompleted, name: MotivusWbApi.ListenerCompleted},
-        id: :listener_completed
-      ),
-      Supervisor.child_spec(
-        {MotivusWbApi.ListenerValidation, name: MotivusWbApi.ListenerValidation},
-        id: :listener_validation
-      ),
-      Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
-        id: cron_config_1_ranking()[:id]
-      ),
-      {TelemetryMetricsCloudwatch,
-       [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
-      # {TelemetryMetricsPrometheus, [metrics: metrics()]},
-      # Start the Telemetry supervisor
-      MotivusWbApiWeb.Telemetry
-    ]
+    children =
+      [
+        # Start the Ecto repository
+        MotivusWbApi.Repo,
+        {Phoenix.PubSub, name: MotivusWbApi.PubSub},
+        # Start the Endpoint (http/https)
+        MotivusWbApiWeb.Endpoint,
+        # Start a worker by calling: MotivusWbApi.Worker.start_link(arg)
+        Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
+          id: cron_config_1_ranking()[:id]
+        ),
+        {TelemetryMetricsCloudwatch,
+         [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
+        # Start the Telemetry supervisor
+        MotivusWbApiWeb.Telemetry
+      ] ++
+        task_worker_stack("public") ++
+        task_worker_stack("private") ++
+        [
+          Supervisor.child_spec(
+            {MotivusWbApi.Listeners.Validation, %{name: MotivusWbApi.Listeners.Validation}},
+            id: :listener_validation
+          )
+        ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

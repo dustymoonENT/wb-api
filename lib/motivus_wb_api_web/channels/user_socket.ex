@@ -2,7 +2,7 @@ defmodule MotivusWbApiWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "room:worker:*", MotivusWbApiWeb.WorkerChannel
+  channel "room:worker:*", MotivusWbApiWeb.Channels.Worker
   channel "room:private:*", MotivusWbApiWeb.PrivateChannel
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

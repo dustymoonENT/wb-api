@@ -1,11 +1,12 @@
-defmodule MotivusWbApi.QueueProcessing do
+defmodule MotivusWbApi.ProcessingRegistry do
   use GenServer
+  alias MotivusWbApi.TaskPool.Task
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, %{}, opts)
   end
 
-  def put(pid, channel_id, tid, task) do
+  def put(pid, channel_id, tid, %Task{} = task) do
     GenServer.cast(pid, {:put, channel_id, tid, task})
   end
 
@@ -30,15 +31,15 @@ defmodule MotivusWbApi.QueueProcessing do
     GenServer.call(pid, {:drop_by, key, value})
   end
 
-  def list(pid \\ __MODULE__) do
+  def list(pid) do
     GenServer.call(pid, :list)
   end
 
-  def empty(pid \\ __MODULE__) do
+  def empty(pid) do
     GenServer.call(pid, :clear)
   end
 
-  def by_worker_user(pid \\ __MODULE__) do
+  def by_worker_user(pid) do
     GenServer.call(pid, :by_worker_user)
   end
 

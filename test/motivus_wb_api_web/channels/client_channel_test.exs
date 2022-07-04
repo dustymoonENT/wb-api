@@ -1,4 +1,4 @@
-defmodule MotivusWbApiWeb.ClientChannelTest do
+defmodule MotivusWbApiWeb.Channels.ClientTest do
   use MotivusWbApiWeb.ChannelCase
   import Mock
 
@@ -16,9 +16,9 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
        end
      ]}
   ]) do
-    MotivusWbApi.QueueTasks.empty()
-    MotivusWbApi.QueueNodes.empty()
-    MotivusWbApi.QueueProcessing.empty()
+    MotivusWbApi.TaskPool.empty(:public_task_pool)
+    MotivusWbApi.ThreadPool.empty(:public_thread_pool)
+    MotivusWbApi.ProcessingRegistry.empty(:public_processing_registry)
 
     connect_client()
   end
@@ -26,13 +26,16 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
   test "joins client channel", %{socket: socket} do
     {:ok, reply, socket} =
       socket
-      |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client?")
+      |> subscribe_and_join(MotivusWbApiWeb.Channels.Client, "room:client?")
 
     assert %{uuid: uuid} = reply
 
     {:ok, _, socket} =
       socket
-      |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client:#{uuid}:#{UUID.uuid4()}")
+      |> subscribe_and_join(
+        MotivusWbApiWeb.Channels.Client,
+        "room:client:#{uuid}:#{UUID.uuid4()}"
+      )
 
     client_ref = UUID.uuid4()
     task = %{body: %{}, type: "work", ref: client_ref}
@@ -40,6 +43,6 @@ defmodule MotivusWbApiWeb.ClientChannelTest do
 
     refute_broadcast "*", _
 
-    assert [%{ref: ^client_ref, client_id: ^uuid}] = MotivusWbApi.QueueTasks.list()
+    assert [%{ref: ^client_ref, client_id: ^uuid}] = MotivusWbApi.TaskPool.list(:public_task_pool)
   end
 end

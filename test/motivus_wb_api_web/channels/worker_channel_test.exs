@@ -1,5 +1,6 @@
 defmodule MotivusWbApiWeb.WorkerChannelTest do
   use MotivusWbApiWeb.ChannelCase
+  alias MotivusWbApi.ThreadPool.Thread
   import Mock
 
   setup_with_mocks([
@@ -16,14 +17,18 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
        end
      ]}
   ]) do
-    MotivusWbApi.QueueTasks.empty()
-    MotivusWbApi.QueueNodes.empty()
-    MotivusWbApi.QueueProcessing.empty()
+    MotivusWbApi.TaskPool.empty(:public_task_pool)
+    MotivusWbApi.ThreadPool.empty(:public_thread_pool)
+    MotivusWbApi.ProcessingRegistry.empty(:public_processing_registry)
 
     join_worker_channel()
   end
 
-  test "worker can join and offer computing resource", %{socket: socket, channel_id: channel_id} do
+  test "worker can join and offer computing resource", %{
+    socket: socket,
+    channel_id: channel_id,
+    user: %{id: user_id}
+  } do
     assert_push "stats", %{
       body: %{
         threads_available: 0,
@@ -52,7 +57,7 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
 
     assert MotivusWbApi.get_worker_users_total() == 1
 
-    %{channel_id: other_channel_id, socket: socket} = join_worker_channel()
+    %{channel_id: other_channel_id, socket: other_worker_socket} = join_worker_channel()
 
     assert_push "stats", %{
       body: %{
@@ -65,7 +70,7 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
 
     slot_3 = UUID.uuid4()
 
-    push(socket, "input_request", %{"tid" => slot_3})
+    push(other_worker_socket, "input_request", %{"tid" => slot_3})
 
     refute_broadcast "*", _payload
 
@@ -80,23 +85,27 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
       }
     }
 
-    nodes = MotivusWbApi.QueueNodes.list()
+    threads = MotivusWbApi.ThreadPool.list(:public_thread_pool)
 
     initial_tid =
       [slot_1, slot_2]
-      |> Enum.map(fn tid -> %{channel_id: channel_id, tid: tid} end)
+      |> Enum.map(fn tid -> struct(Thread, %{channel_id: channel_id, tid: tid}) end)
 
     other_tid =
       [slot_3]
-      |> Enum.map(fn tid -> %{channel_id: other_channel_id, tid: tid} end)
+      |> Enum.map(fn tid -> struct(Thread, %{channel_id: other_channel_id, tid: tid}) end)
 
-    assert nodes == initial_tid ++ other_tid
+    assert threads == initial_tid ++ other_tid
 
     %{socket: client_socket} = join_client_channel()
 
     push(client_socket, "task", %{body: %{}, type: "work", ref: UUID.uuid4()})
 
     refute_broadcast "*", _payload
+
+    [db_task] = MotivusWbApi.Processing.list_tasks()
+
+    assert %{attempts: 1, user_id: ^user_id, result: nil, security_level: "PUBLIC"} = db_task
 
     assert_push "stats", %{
       body: %{
@@ -106,6 +115,8 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
         tasks_processing: 1
       }
     }
+
+    assert_push("input", %{body: %{}})
 
     push(client_socket, "task", %{body: %{}, type: "work", ref: UUID.uuid4()})
     push(client_socket, "task", %{body: %{}, type: "work", ref: UUID.uuid4()})
@@ -123,5 +134,28 @@ defmodule MotivusWbApiWeb.WorkerChannelTest do
     }
 
     assert MotivusWbApi.get_worker_users_total() == 2
+
+    push(socket, "result", %{body: %{}, tid: slot_1})
+
+    refute_broadcast "*", _payload
+
+    db_task = MotivusWbApi.Processing.get_task!(db_task.id)
+    assert %{attempts: 1, user_id: ^user_id, result: %{}} = db_task
+
+    push(client_socket, "set_validation", %{
+      "is_valid" => true,
+      "task_id" => db_task.id
+    })
+
+    refute_broadcast "*", _payload
+
+    db_task = MotivusWbApi.Processing.get_task!(db_task.id)
+    assert %{is_valid: true} = db_task
+
+    Process.unlink(client_socket.channel_pid)
+    close(client_socket)
+    assert_push "abort_task", _
+
+    refute_broadcast "*", _payload
   end
 end

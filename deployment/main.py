@@ -56,7 +56,7 @@ class MotivusWbApiStack(core.Stack):
 
         database_name = "motivus_wb_api"
         db = aws_rds.DatabaseInstance(self, f'{title}-db-prod',
-                                      engine=aws_rds.DatabaseInstanceEngine.POSTGRES,
+                                      engine=aws_rds.DatabaseInstanceEngine.postgres(version=aws_rds.PostgresEngineVersion.VER_12),
                                       preferred_backup_window="05:00-06:00",
                                       backup_retention=Duration.days(7),
                                       removal_policy=core.RemovalPolicy.RETAIN,
@@ -73,7 +73,7 @@ class MotivusWbApiStack(core.Stack):
 
         cluster = aws_ecs.Cluster(self, f'{title}-cluster', vpc=vpc, cluster_name=f'{title}-cluster')
 
-        registry = aws_ecs.EcrImage(repository=repository, tag='latest')
+        registry = aws_ecs.EcrImage(repository=repository, tag_or_digest='latest')
 
         service = aws_ecs_patterns.ApplicationLoadBalancedFargateService(
             self,

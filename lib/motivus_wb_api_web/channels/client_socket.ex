@@ -3,8 +3,8 @@ defmodule MotivusWbApiWeb.ClientSocket do
   alias MotivusWbApi.Users
 
   ## Channels
-  channel "room:client?", MotivusWbApiWeb.ClientChannel
-  channel "room:client:*", MotivusWbApiWeb.ClientChannel
+  channel "room:client?", MotivusWbApiWeb.Channels.Client
+  channel "room:client:*", MotivusWbApiWeb.Channels.Client
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
   # verification, you can put default assigns into

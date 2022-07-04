@@ -107,12 +107,13 @@ defmodule MotivusWbApi.Stats do
   end
 
   def get_cluster_stats() do
-    processing_count = MotivusWbApi.QueueProcessing.list() |> length()
+    processing_count =
+      MotivusWbApi.ProcessingRegistry.list(:public_processing_registry) |> length()
 
     %{
-      threads_available: MotivusWbApi.QueueNodes.list() |> length(),
+      threads_available: MotivusWbApi.ThreadPool.list(:public_thread_pool) |> length(),
       threads_processing: processing_count,
-      tasks_available: MotivusWbApi.QueueTasks.list() |> length(),
+      tasks_available: MotivusWbApi.TaskPool.list(:public_task_pool) |> length(),
       tasks_processing: processing_count
     }
   end

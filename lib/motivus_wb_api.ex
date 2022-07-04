@@ -1,7 +1,7 @@
 defmodule MotivusWbApi do
-  alias MotivusWbApi.QueueNodes
-  alias MotivusWbApi.QueueTasks
-  alias MotivusWbApi.QueueProcessing
+  alias MotivusWbApi.ThreadPool
+  alias MotivusWbApi.TaskPool
+  alias MotivusWbApi.ProcessingRegistry
 
   @moduledoc """
   MotivusWbApi keeps the contexts that define your domain
@@ -11,17 +11,17 @@ defmodule MotivusWbApi do
   if it comes from the database, an external API or others.
   """
   def nodes_queue_total do
-    total = length(QueueNodes.list(QueueNodes))
+    total = length(ThreadPool.list(:public_thread_pool))
     :telemetry.execute([:nodes, :queue], %{total: total}, %{})
   end
 
   def tasks_queue_total do
-    total = length(QueueTasks.list(QueueTasks))
+    total = length(TaskPool.list(:public_task_pool))
     :telemetry.execute([:tasks, :queue], %{total: total}, %{})
   end
 
   def processing_queue_total do
-    total = length(QueueProcessing.list(QueueProcessing))
+    total = length(ProcessingRegistry.list(:public_processing_registry))
     :telemetry.execute([:processing, :queue], %{total: total}, %{})
   end
 
@@ -30,8 +30,8 @@ defmodule MotivusWbApi do
   end
 
   def get_worker_users_total() do
-    (Map.keys(QueueProcessing.by_worker_user()) ++
-       Map.keys(QueueNodes.by_user()))
+    (Map.keys(ProcessingRegistry.by_worker_user(:public_processing_registry)) ++
+       Map.keys(ThreadPool.by_user(:public_thread_pool)))
     |> Enum.uniq()
     |> length()
   end
