@@ -1,8 +1,11 @@
 defmodule MotivusWbApiWeb.UserSocket do
   use Phoenix.Socket
+  alias Guardian.Phoenix.Socket
+  alias MotivusWbApi.Users.Guardian
 
   ## Channels
   channel "room:worker:*", MotivusWbApiWeb.Channels.Worker
+  channel "room:trusted_worker:*", MotivusWbApiWeb.Channels.Worker
   channel "room:private:*", MotivusWbApiWeb.PrivateChannel
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -17,18 +20,17 @@ defmodule MotivusWbApiWeb.UserSocket do
   # performing token verification on connect.
   @impl true
   def connect(%{"token" => token}, socket, _connect_info) do
-    with {:ok, authenticated_socket} <-
-           Guardian.Phoenix.Socket.authenticate(socket, MotivusWbApi.Users.Guardian, token),
+    with {:ok, auth_socket} <- Socket.authenticate(socket, Guardian, token),
          token_user <-
-           authenticated_socket.assigns.guardian_default_resource do
-      authenticated_socket =
+           auth_socket.assigns.guardian_default_resource do
+      auth_socket =
         assign(
-          authenticated_socket,
+          auth_socket,
           :user,
           token_user
         )
 
-      {:ok, authenticated_socket}
+      {:ok, auth_socket}
     else
       _ -> :error
     end

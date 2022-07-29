@@ -13,6 +13,7 @@ defmodule MotivusWbApi.Users.User do
     field :uuid, Ecto.UUID
     field :ranking, :integer
     field :black_listed, :boolean, default: false
+    field :is_trusted_worker, :boolean, default: false
 
     timestamps()
   end
@@ -28,9 +29,11 @@ defmodule MotivusWbApi.Users.User do
       :uuid,
       :is_guest,
       :last_sign_in,
-      :black_listed
+      :black_listed,
+      :is_trusted_worker
     ])
-    |> validate_required([:name, :mail, :uuid, :is_guest])
+    |> unique_constraint([:mail])
+    |> validate_required([:name, :uuid, :is_guest])
   end
 
   def external_provider_changeset(user, attrs) do

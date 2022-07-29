@@ -55,7 +55,8 @@ defmodule MotivusWbApiWeb.AuthController do
         is_guest: true,
         name: "guest",
         mail: "nomail",
-        last_sign_in: DateTime.utc_now()
+        last_sign_in: DateTime.utc_now(),
+        is_trusted_worker: false
       })
 
     token =

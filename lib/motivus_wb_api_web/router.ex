@@ -46,9 +46,9 @@ defmodule MotivusWbApiWeb.Router do
 
     get "/user", Users.UserController, :get
 
-    resources "/users", Users.UserController, as: :users_user, except: [:index] do
-      resources "/application_tokens", ApplicationTokenController, except: [:new, :edit]
-    end
+    # resources "/users", Users.UserController, as: :users_user, except: [:index] do
+    #   resources "/application_tokens", ApplicationTokenController, except: [:new, :edit]
+    # end
 
     resources "/tasks", Processing.TaskController, as: :processing_task
   end

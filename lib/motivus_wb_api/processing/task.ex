@@ -52,8 +52,7 @@ defmodule MotivusWbApi.Processing.Task do
       :date_out,
       :attempts,
       :flops,
-      :processing_base_time,
-      :application_token_id
+      :processing_base_time
     ])
   end
 end
