@@ -57,6 +57,14 @@ defmodule MotivusWbApiWeb.ChannelCase do
         %{socket: socket, channel_id: channel_id}
       end
 
+      def connect_worker(:trusted) do
+        user = user_fixture(%{is_trusted_worker: true})
+        {:ok, token, _} = Guardian.encode_and_sign(user)
+
+        {:ok, socket} = MotivusWbApiWeb.UserSocket |> connect(%{"token" => token}, %{})
+        %{socket: socket, user: user}
+      end
+
       def connect_worker() do
         user = user_fixture()
         {:ok, token, _} = Guardian.encode_and_sign(user)
@@ -66,9 +74,9 @@ defmodule MotivusWbApiWeb.ChannelCase do
       end
 
       def join_private_worker_channel do
-        %{socket: socket, user: user} = connect_worker()
+        %{socket: socket, user: user} = connect_worker(:trusted)
         channel_id = channel_fixture(user.id)
-        topic = "room:trusted_worker:#{channel_id}"
+        topic = "room:worker:#{channel_id}"
 
         {:ok, _, socket} =
           socket

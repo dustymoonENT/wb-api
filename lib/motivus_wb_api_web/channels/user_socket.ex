@@ -5,7 +5,6 @@ defmodule MotivusWbApiWeb.UserSocket do
 
   ## Channels
   channel "room:worker:*", MotivusWbApiWeb.Channels.Worker
-  channel "room:trusted_worker:*", MotivusWbApiWeb.Channels.Worker
   channel "room:private:*", MotivusWbApiWeb.PrivateChannel
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -28,6 +27,13 @@ defmodule MotivusWbApiWeb.UserSocket do
           auth_socket,
           :user,
           token_user
+        )
+        |> assign(
+          :scope,
+          case token_user.is_trusted_worker do
+            true -> :private
+            _ -> :public
+          end
         )
 
       {:ok, auth_socket}

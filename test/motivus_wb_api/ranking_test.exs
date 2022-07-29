@@ -110,7 +110,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2010-04-17T14:00:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user1",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -128,7 +128,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2010-04-17T14:00:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user2",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -139,7 +139,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2010-04-17T14:00:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user3",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -257,7 +257,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2010-04-17T14:00:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user1",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -275,7 +275,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2010-04-17T14:00:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user2",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -286,7 +286,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2010-04-17T14:00:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user3",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -297,7 +297,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2010-04-17T14:00:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user4",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662",
@@ -434,7 +434,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2021-01-28T14:30:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -527,7 +527,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2021-01-28T14:30:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -627,7 +627,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2021-01-28T14:30:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"
@@ -659,7 +659,7 @@ defmodule MotivusWbApi.RankingTest do
           avatar: "some avatar",
           is_guest: true,
           last_sign_in: "2021-01-28T14:30:00Z",
-          mail: "some mail",
+          mail: nil,
           name: "user",
           provider: "some provider",
           uuid: "7488a646-e31f-11e4-aace-600308960662"

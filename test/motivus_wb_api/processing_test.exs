@@ -51,7 +51,7 @@ defmodule MotivusWbApi.ProcessingTest do
     }
 
     def task_fixture(attrs \\ %{}) do
-      user = Fixtures.fixture(:user)
+      user = Fixtures.fixture(:user, %{})
       application_token = Fixtures.fixture(:application_token, user.id)
 
       {:ok, task} =
@@ -74,7 +74,7 @@ defmodule MotivusWbApi.ProcessingTest do
     end
 
     test "create_task/1 with valid data creates a task" do
-      user = Fixtures.fixture(:user)
+      user = Fixtures.fixture(:user, %{})
       application_token = Fixtures.fixture(:application_token, user.id)
 
       assert {:ok, %Task{} = task} =
