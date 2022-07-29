@@ -7,7 +7,8 @@ defmodule MotivusWbApiWeb.PageController do
   end
 
   def tasks_queue_total(conn, _params) do
-    total = length(TaskPool.list(TaskPool))
-    json(conn, %{data: %{tasks_queue_total: total}})
+    public = length(TaskPool.list(:public_task_pool))
+    private = length(TaskPool.list(:private_task_pool))
+    json(conn, %{data: %{tasks_queue_total: %{public: public, private: private}}})
   end
 end
