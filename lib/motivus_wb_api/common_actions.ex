@@ -10,7 +10,14 @@ defmodule MotivusWbApi.CommonActions do
   alias MotivusWbApi.ThreadPool.Thread
   alias MotivusWbApiWeb.Channels.Worker.Result
 
-  @redacted_task_data [:client_channel_id, :client_id, :task_id, :application_token_id, :ref]
+  @redacted_task_data [
+    :client_channel_id,
+    :client_id,
+    :task_id,
+    :application_token_id,
+    :ref,
+    :__struct__
+  ]
 
   def task_from_definition(%TaskDefinition{} = task_def),
     do: %Processing.Task{

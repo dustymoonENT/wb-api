@@ -72,12 +72,14 @@ defmodule MotivusWbApiWeb.Channels.Client do
   end
 
   def terminate(_reason, socket) do
-    PubSub.unsubscribe(MotivusWbApi.PubSub, "client:" <> socket.assigns.channel_id)
+    with %{channel_id: channel_id} <- socket.assigns do
+      PubSub.unsubscribe(MotivusWbApi.PubSub, "client:" <> channel_id)
 
-    PubSub.broadcast(
-      MotivusWbApi.PubSub,
-      "tasks:public",
-      {"CLIENT_CHANNEL_CLOSED", %{channel_id: socket.assigns.channel_id}}
-    )
+      PubSub.broadcast(
+        MotivusWbApi.PubSub,
+        "tasks:public",
+        {"CLIENT_CHANNEL_CLOSED", %{channel_id: channel_id}}
+      )
+    end
   end
 end

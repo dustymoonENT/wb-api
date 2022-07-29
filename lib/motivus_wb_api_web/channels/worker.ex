@@ -9,14 +9,16 @@ defmodule MotivusWbApiWeb.Channels.Worker do
   alias MotivusWbApi.ThreadPool.Thread
   alias MotivusWbApiWeb.Channels.Worker.Result
 
-  def join("room:worker:" <> channel_id, _message, %{assigns: %{scope: :private}} = socket) do
+  def join("room:worker:" <> channel_id, _message, %{assigns: %{scope: "private"}} = socket) do
+    PubSub.subscribe(MotivusWbApi.PubSub, "node:" <> channel_id)
+
     PubSub.broadcast(
       MotivusWbApi.PubSub,
       "nodes:private",
       {"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}
     )
 
-    {:ok, socket |> assign(:scope, "private") |> assign(:channel_id, channel_id)}
+    {:ok, socket |> assign(:channel_id, channel_id)}
   end
 
   def join("room:worker:" <> channel_id, _message, socket) do
@@ -28,7 +30,7 @@ defmodule MotivusWbApiWeb.Channels.Worker do
       {"WORKER_CHANNEL_OPENED", %{channel_id: channel_id}}
     )
 
-    {:ok, socket |> assign(:scope, "public") |> assign(:channel_id, channel_id)}
+    {:ok, socket |> assign(:channel_id, channel_id)}
   end
 
   def join("room:" <> _private_room_id, _params, _socket), do: {:error, %{reason: "unauthorized"}}

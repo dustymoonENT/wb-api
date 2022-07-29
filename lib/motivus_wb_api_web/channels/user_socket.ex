@@ -31,8 +31,8 @@ defmodule MotivusWbApiWeb.UserSocket do
         |> assign(
           :scope,
           case token_user.is_trusted_worker do
-            true -> :private
-            _ -> :public
+            true -> "private"
+            _ -> "public"
           end
         )
 
