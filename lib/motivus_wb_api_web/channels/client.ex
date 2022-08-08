@@ -3,8 +3,7 @@ defmodule MotivusWbApiWeb.Channels.Client do
   alias Phoenix.PubSub
   alias MotivusWbApi.TaskPool.TaskDefinition
 
-  @redacted_task_data [
-    :client_channel_id,
+  @redacted_legacy_task_data [
     :client_id,
     :task_id,
     :application_token_id,
@@ -62,7 +61,7 @@ defmodule MotivusWbApiWeb.Channels.Client do
 
     case pubsub_channel do
       "tasks:legacy" ->
-        MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", task_def |> Map.drop(@redacted_task_data))
+        MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", task_def |> Map.drop(@redacted_legacy_task_data))
 
       _ ->
         PubSub.broadcast(MotivusWbApi.PubSub, pubsub_channel, {"NEW_TASK_DEFINITION", task_def})
