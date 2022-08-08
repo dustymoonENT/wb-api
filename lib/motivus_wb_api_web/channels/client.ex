@@ -47,12 +47,19 @@ defmodule MotivusWbApiWeb.Channels.Client do
         case type do
           "work" -> "public"
           "trusted_work" -> "private"
+          "trusted_work_legacy" -> "legacy"
           _ -> ""
         end
 
-    PubSub.broadcast(MotivusWbApi.PubSub, pubsub_channel, {"NEW_TASK_DEFINITION", task_def})
+    case pubsub_channel do
+      "tasks:legacy" ->
+        MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", task_def)
 
-    # MotivusWbApiWeb.Endpoint.broadcast!("room:private:api", "input", payload)
+      _ ->
+        PubSub.broadcast(MotivusWbApi.PubSub, pubsub_channel, {"NEW_TASK_DEFINITION", task_def})
+    end
+
+    # 
 
     {:noreply, socket}
   end
@@ -78,6 +85,12 @@ defmodule MotivusWbApiWeb.Channels.Client do
       PubSub.broadcast(
         MotivusWbApi.PubSub,
         "tasks:public",
+        {"CLIENT_CHANNEL_CLOSED", %{channel_id: channel_id}}
+      )
+
+      PubSub.broadcast(
+        MotivusWbApi.PubSub,
+        "tasks:private",
         {"CLIENT_CHANNEL_CLOSED", %{channel_id: channel_id}}
       )
     end
