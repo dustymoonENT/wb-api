@@ -17,9 +17,8 @@ services:
         extra_hosts:
             - "host.docker.internal:host-gateway"
         command: ["./run.sh"]
-        tty: true
     db:
-        image: postgres:12
+        image: postgres:12-alpine
         ports:
             - "5433:5432"
         environment:

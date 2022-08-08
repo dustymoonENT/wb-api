@@ -18,6 +18,7 @@ defmodule MotivusWbApi.Processing.Task do
     field :is_valid, :boolean
     field :client_id, :string
     field :application_token_id, :id
+    field :security_level, :string
 
     timestamps()
   end
@@ -40,7 +41,8 @@ defmodule MotivusWbApi.Processing.Task do
       :result,
       :is_valid,
       :client_id,
-      :application_token_id
+      :application_token_id,
+      :security_level
     ])
     |> validate_required([
       :type,
@@ -50,8 +52,7 @@ defmodule MotivusWbApi.Processing.Task do
       :date_out,
       :attempts,
       :flops,
-      :processing_base_time,
-      :application_token_id
+      :processing_base_time
     ])
   end
 end

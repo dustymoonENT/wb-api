@@ -22,8 +22,11 @@ config :motivus_wb_api, MotivusWbApi.Repo,
   queue_target: 30000,
   queue_interval: 30000
 
-secret_key_base =
-  System.get_env("SECRET_KEY_BASE") #||
+# queue_interval: 30000,
+# ssl: true
+
+# ||
+secret_key_base = System.get_env("SECRET_KEY_BASE")
 #    raise """
 #    environment variable SECRET_KEY_BASE is missing.
 #    You can generate one by calling: mix phx.gen.secret

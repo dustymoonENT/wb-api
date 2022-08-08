@@ -54,8 +54,9 @@ defmodule MotivusWbApiWeb.AuthController do
         uuid: Ecto.UUID.bingenerate(),
         is_guest: true,
         name: "guest",
-        mail: "nomail",
-        last_sign_in: DateTime.utc_now()
+        mail: nil,
+        last_sign_in: DateTime.utc_now(),
+        is_trusted_worker: false
       })
 
     token =

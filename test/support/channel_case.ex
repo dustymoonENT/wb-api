@@ -43,18 +43,26 @@ defmodule MotivusWbApiWeb.ChannelCase do
 
         {:ok, %{uuid: uuid}, socket} =
           socket
-          |> subscribe_and_join(MotivusWbApiWeb.ClientChannel, "room:client?")
+          |> subscribe_and_join(MotivusWbApiWeb.Channels.Client, "room:client?")
 
         channel_id = "#{uuid}:#{UUID.uuid4()}"
 
         {:ok, _, socket} =
           socket
           |> subscribe_and_join(
-            MotivusWbApiWeb.ClientChannel,
+            MotivusWbApiWeb.Channels.Client,
             "room:client:" <> channel_id
           )
 
         %{socket: socket, channel_id: channel_id}
+      end
+
+      def connect_worker(:trusted) do
+        user = user_fixture(%{is_trusted_worker: true})
+        {:ok, token, _} = Guardian.encode_and_sign(user)
+
+        {:ok, socket} = MotivusWbApiWeb.UserSocket |> connect(%{"token" => token}, %{})
+        %{socket: socket, user: user}
       end
 
       def connect_worker() do
@@ -65,6 +73,18 @@ defmodule MotivusWbApiWeb.ChannelCase do
         %{socket: socket, user: user}
       end
 
+      def join_private_worker_channel do
+        %{socket: socket, user: user} = connect_worker(:trusted)
+        channel_id = channel_fixture(user.id)
+        topic = "room:worker:#{channel_id}"
+
+        {:ok, _, socket} =
+          socket
+          |> subscribe_and_join(MotivusWbApiWeb.Channels.Worker, topic)
+
+        %{socket: socket, user: user, channel_id: channel_id, topic: topic}
+      end
+
       def join_worker_channel do
         %{socket: socket, user: user} = connect_worker()
         channel_id = channel_fixture(user.id)
@@ -72,7 +92,7 @@ defmodule MotivusWbApiWeb.ChannelCase do
 
         {:ok, _, socket} =
           socket
-          |> subscribe_and_join(MotivusWbApiWeb.WorkerChannel, topic)
+          |> subscribe_and_join(MotivusWbApiWeb.Channels.Worker, topic)
 
         %{socket: socket, user: user, channel_id: channel_id, topic: topic}
       end

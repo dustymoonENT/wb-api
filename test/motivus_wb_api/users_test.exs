@@ -10,10 +10,12 @@ defmodule MotivusWbApi.UsersTest do
       avatar: "some avatar",
       is_guest: true,
       last_sign_in: "2010-04-17T14:00:00Z",
-      mail: "some mail",
+      mail: nil,
+      # mail: "some mail",
       name: "some name",
       provider: "some provider",
-      uuid: "7488a646-e31f-11e4-aace-600308960662"
+      uuid: "7488a646-e31f-11e4-aace-600308960662",
+      is_trusted_worker: false
     }
     @update_attrs %{
       avatar: "some updated avatar",
@@ -22,7 +24,8 @@ defmodule MotivusWbApi.UsersTest do
       mail: "some updated mail",
       name: "some updated name",
       provider: "some updated provider",
-      uuid: "7488a646-e31f-11e4-aace-600308960668"
+      uuid: "7488a646-e31f-11e4-aace-600308960668",
+      is_trusted_worker: true
     }
     @invalid_attrs %{
       avatar: nil,
@@ -31,7 +34,8 @@ defmodule MotivusWbApi.UsersTest do
       mail: nil,
       name: nil,
       provider: nil,
-      uuid: nil
+      uuid: nil,
+      is_trusted_worker: nil
     }
 
     def user_fixture(attrs \\ %{}) do
@@ -58,10 +62,20 @@ defmodule MotivusWbApi.UsersTest do
       assert user.avatar == "some avatar"
       assert user.is_guest == true
       assert user.last_sign_in == DateTime.from_naive!(~N[2010-04-17T14:00:00Z], "Etc/UTC")
-      assert user.mail == "some mail"
+      assert user.mail == nil
       assert user.name == "some name"
       assert user.provider == "some provider"
       assert user.uuid == "7488a646-e31f-11e4-aace-600308960662"
+      assert user.is_trusted_worker == false
+    end
+
+    test "create_user/1 unique email" do
+      assert {:ok, _} = Users.create_user(@valid_attrs)
+      assert {:ok, _} = Users.create_user(@valid_attrs)
+      assert {:ok, _} = Users.create_user(%{mail: "mail"} |> Enum.into(@valid_attrs))
+      assert {:error, chset} = Users.create_user(%{mail: "mail"} |> Enum.into(@valid_attrs))
+
+      assert "has already been taken" in errors_on(chset).mail
     end
 
     test "create_user/1 with invalid data returns error changeset" do
@@ -78,6 +92,7 @@ defmodule MotivusWbApi.UsersTest do
       assert user.name == "some updated name"
       assert user.provider == "some updated provider"
       assert user.uuid == "7488a646-e31f-11e4-aace-600308960668"
+      assert user.is_trusted_worker == true
     end
 
     test "update_user/2 with invalid data returns error changeset" do

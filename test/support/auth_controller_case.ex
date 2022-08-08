@@ -3,7 +3,7 @@ defmodule MotivusWbApi.AuthControllerCase do
   alias MotivusWbApi.Fixtures
 
   def with_auth(%{conn: conn}) do
-    user = Fixtures.fixture(:user)
+    user = Fixtures.fixture(:user, %{})
 
     {:ok, token, _} = Guardian.encode_and_sign(MotivusWbApi.Users.Guardian, user)
 

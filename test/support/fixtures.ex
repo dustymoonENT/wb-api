@@ -4,22 +4,25 @@ defmodule MotivusWbApi.Fixtures do
   alias MotivusWbApi.Users
   alias MotivusWbApi.Processing
 
-  def fixture(:user) do
+  def fixture(:user, attrs) do
     with {:ok, user} <-
-           Users.create_user(%{
-             avatar: "some avatar",
-             is_guest: true,
-             last_sign_in: "2010-04-17T14:00:00Z",
-             mail: "some mail",
-             name: "some name",
-             provider: "some provider",
-             uuid: UUID.uuid4()
-           }) do
+           Users.create_user(
+             attrs
+             |> Enum.into(%{
+               avatar: "some avatar",
+               is_guest: true,
+               last_sign_in: "2010-04-17T14:00:00Z",
+               mail: nil,
+               name: "some name",
+               provider: "some provider",
+               uuid: UUID.uuid4()
+             })
+           ) do
       user
     end
   end
 
-  def user_fixture(_attrs \\ %{}), do: fixture(:user)
+  def user_fixture(attrs \\ %{}), do: fixture(:user, attrs)
 
   def fixture(:application_token, user_id) do
     {:ok, application_token} =
@@ -39,7 +42,7 @@ defmodule MotivusWbApi.Fixtures do
     user =
       case attrs do
         %{user_id: user_id} -> Users.get_user!(user_id)
-        _ -> fixture(:user)
+        _ -> fixture(:user, %{})
       end
 
     {:ok, application_token} =
@@ -54,7 +57,7 @@ defmodule MotivusWbApi.Fixtures do
     user =
       case attrs do
         %{user_id: user_id} -> Users.get_user!(user_id)
-        _ -> fixture(:user)
+        _ -> fixture(:user, %{})
       end
 
     application_token = fixture(:application_token, user.id)
