@@ -62,7 +62,6 @@ defmodule MotivusWbApiWeb.Endpoint do
   end
 
   plug MotivusWbApi.MetricsExporter
-  MotivusWbApi.Metrics.TasksQueueInstrumenter.setup()
   plug CORSPlug
   plug MotivusWbApiWeb.Router
 

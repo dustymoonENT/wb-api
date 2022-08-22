@@ -18,13 +18,13 @@ defmodule MotivusWbApi.TaskPool do
 
   def push(pid, %Task{} = task) do
     reply = GenServer.cast(pid, {:push, task})
-    MotivusWbApi.Metrics.TasksQueueInstrumenter.set_size(length(list(pid)))
+    MotivusWbApi.Metrics.TasksQueueInstrumenter.set_size(pid)
     reply
   end
 
   def pop(pid) do
     reply = GenServer.call(pid, :pop)
-    MotivusWbApi.Metrics.TasksQueueInstrumenter.set_size(length(list(pid)))
+    MotivusWbApi.Metrics.TasksQueueInstrumenter.set_size(pid)
     reply
   end
 
