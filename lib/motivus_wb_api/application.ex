@@ -93,6 +93,7 @@ defmodule MotivusWbApi.Application do
 
   def start(_type, _args) do
     Confex.resolve_env!(:motivus_wb_api)
+    MotivusWbApi.MetricsExporter.setup()
 
     children =
       [
