@@ -21,7 +21,7 @@ defmodule MotivusWbApiWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-    get "/metrics/tasks", PageController, :tasks_queue_total
+    #get "/metrics/tasks", PageController, :tasks_queue_total
   end
 
   scope "/auth", MotivusWbApiWeb do
