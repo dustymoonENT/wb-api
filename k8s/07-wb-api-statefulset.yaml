@@ -1,0 +1,68 @@
+# az postgres flexible-server create -g aks_test_clu_group -n wb-db --public-access all -l eastus --sku Standard_B1ms --tier Burstable
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: wb-api-statefulset
+  namespace: wb-api
+  labels:
+    app: wb-api-statefulset
+spec:
+  replicas: 1
+  serviceName: wb-api
+  selector:
+    matchLabels:
+      app: wb-api
+  template:
+    metadata:
+      labels:
+        app: wb-api
+    spec:
+      containers:
+        - name: wb-api
+          image: southamerica-west1-docker.pkg.dev/motivus-257216/motivus-repo/wb-api:latest
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "4"
+              memory: 8Gi
+          env:
+            - name: MIX_ENV
+              value: prod
+            - name: GITHUB_CLIENT_ID
+              value: 1e5579c9dc68b656e93e
+            - name: GITHUB_CLIENT_SECRET
+              value: 92da92ad3e9f76d764397fea6782d61e3c36b07a
+            - name: GOOGLE_CLIENT_ID
+              value: "302251324124-bb6mcnq0t6m57gqgl2v6i46akd3eo3b6.apps.googleusercontent.com"
+            - name: GOOGLE_CLIENT_SECRET
+              value: _oWp8E64OyzuMT_vAF7AF00t
+            - name: FACEBOOK_CLIENT_ID
+              value: "474681506508873"
+            - name: FACEBOOK_CLIENT_SECRET
+              value: 7cf59ab10dbdf26f8467bf7705f9d235
+            - name: SPA_REDIRECT_URI
+              value: https://motivus.cl/auth
+            - name: SPA_ORIGIN
+              value: https://motivus.cl
+            - name: DB_HOST
+              value: "35.222.217.184"
+            - name: DB_USER
+              value: postgres
+            - name: DB_PASSWORD
+              value: U`mvn|=}vk^@AS^z
+            - name: DB_NAME
+              value: motivus_wb_api_prod
+            - name: AWS_ACCESS_KEY_ID
+              value: AKIAXTPV4Y3SRUXFRWB6
+            - name: AWS_SECRET_ACCESS_KEY
+              value: 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
+            - name: EXTERNAL_USER_PROVIDER_URI
+              value: https://marketplace.api.motivus.cl/api/account/user
+            - name: SECRET_KEY_BASE
+              value: vxckXOAccYmKJCaYZVF95X1f+9jEQw/25qpKQrWgOQ2qC4eGKft6W1zyWsNGmOko

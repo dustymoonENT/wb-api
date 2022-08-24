@@ -1,0 +1,13 @@
+# Create ConfigMap postgres-secret for the postgres app
+# Define default database name, user, and password
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-secret-wb
+  namespace: wb-api
+  labels:
+    app: postgres-wb
+data:
+  POSTGRES_DB: motivus_wb_api_dev
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres

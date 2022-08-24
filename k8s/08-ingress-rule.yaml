@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: wb-api
+  name: wb-api-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - host: waterbear.api.motivus.cl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wb-api
+                port:
+                  number: 80

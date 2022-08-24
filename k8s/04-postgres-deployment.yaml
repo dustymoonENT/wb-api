@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment # Create a deployment
+metadata:
+  name: postgres-wb # Set the name of the deployment
+  namespace: wb-api
+spec:
+  replicas: 1 # Set 3 deployment replicas
+  selector:
+    matchLabels:
+      app: postgres-wb
+  template:
+    metadata:
+      labels:
+        app: postgres-wb
+    spec:
+      containers:
+        - name: postgres-wb
+          image: postgres:12.10 # Docker image
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432 # Exposing the container port 5432 for PostgreSQL client connections.
+          envFrom:
+            - configMapRef:
+                name: postgres-secret-wb # Using the ConfigMap postgres-secret
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdata
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: postgres-volume-claim-wb
