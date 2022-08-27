@@ -3,6 +3,8 @@ kind: Config
 metadata:
   name: motivus-wb-api
 build:
+  local:
+    tryImportMissing: true
   artifacts:
   - image: motivus/wb-api
     docker:

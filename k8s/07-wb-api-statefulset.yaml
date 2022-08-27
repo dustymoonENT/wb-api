@@ -20,17 +20,17 @@ spec:
     spec:
       containers:
         - name: wb-api
-          image: southamerica-west1-docker.pkg.dev/motivus-257216/motivus-repo/wb-api:latest
-          imagePullPolicy: "Always"
+          image: motivus/wb-api:latest
+          imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 80
           resources:
             limits:
-              cpu: "4"
-              memory: 8Gi
+              cpu: "500m"
+              memory: 1Gi
             requests:
-              cpu: "4"
-              memory: 8Gi
+              cpu: "500m"
+              memory: 1Gi
           env:
             - name: MIX_ENV
               value: prod
@@ -51,13 +51,13 @@ spec:
             - name: SPA_ORIGIN
               value: https://motivus.cl
             - name: DB_HOST
-              value: "35.222.217.184"
+              value: postgres-wb
             - name: DB_USER
               value: postgres
             - name: DB_PASSWORD
-              value: U`mvn|=}vk^@AS^z
+              value: postgres
             - name: DB_NAME
-              value: motivus_wb_api_prod
+              value: motivus_wb_api_dev
             - name: AWS_ACCESS_KEY_ID
               value: AKIAXTPV4Y3SRUXFRWB6
             - name: AWS_SECRET_ACCESS_KEY

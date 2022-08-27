@@ -21,7 +21,7 @@ RUN mix deps.compile
 
 COPY --chown=elixir:elixir . .
 
-RUN mix compile
+#RUN mix compile
 
 EXPOSE 80
 

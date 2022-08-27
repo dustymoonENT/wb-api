@@ -8,4 +8,4 @@ RUN mix local.rebar --force
 RUN wget -q https://github.com/phoenixframework/archives/raw/master/phx_new.ez && mix archive.install --force phx_new.ez
 
 EXPOSE 4000
-
+CMD ["./run.sh"]
