@@ -13,4 +13,4 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: /opt/data-nas/minikube # Sets PV's host path
+    path: /opt/data-nas/minikube/wb-api-db # Sets PV's host path

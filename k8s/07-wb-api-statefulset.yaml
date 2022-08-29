@@ -63,6 +63,6 @@ spec:
             - name: AWS_SECRET_ACCESS_KEY
               value: 6DjHOXZCSe2UGbGTlt/SVPS0BjU25U0D+DxU6eZU
             - name: EXTERNAL_USER_PROVIDER_URI
-              value: http://marketplace.api.motivus.cl/api/account/user
+              value: http://marketplace.marketplace/api/account/user
             - name: SECRET_KEY_BASE
               value: vxckXOAccYmKJCaYZVF95X1f+9jEQw/25qpKQrWgOQ2qC4eGKft6W1zyWsNGmOko
