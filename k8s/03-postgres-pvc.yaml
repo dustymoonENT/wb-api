@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim # Create PVC
+metadata:
+  name: postgres-volume-claim-wb # Sets PVC's name
+  namespace: wb-api
+  labels:
+    app: postgres-wb # Defines app to create PVC for
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi # Sets PVC's size

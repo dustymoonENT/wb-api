@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  namespace: wb-api
+  name: wb-managed-cert
+spec:
+  domains:
+    - waterbear.api.motivus.cl

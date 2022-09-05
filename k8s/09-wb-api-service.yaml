@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service # Create service
+metadata:
+  name: wb-api # Sets the service name
+  namespace: wb-api
+  annotations:
+    cloud.google.com/backend-config: '{"default": "wb-api-backend-config"}'
+  labels:
+    app: wb-api # Defines app to create service for
+spec:
+  type: NodePort # Sets the service type
+  ports:
+    - port: 80 # Sets the port to run the wb-api application
+  selector:
+    app: wb-api

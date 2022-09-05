@@ -28,8 +28,9 @@ defmodule MotivusWbApi.MixProject do
         :ueberauth_google,
         :ueberauth_facebook,
         :confex,
-        :retry
-      ]
+        :retry,
+	:prometheus_plugs
+      ],
     ]
   end
 
@@ -65,7 +66,9 @@ defmodule MotivusWbApi.MixProject do
       {:mojito, "~> 0.7.10"},
       {:mock, "~> 0.3.0", only: :test},
       {:uuid, "~> 1.1"},
-      {:retry, "~> 0.15"}
+      {:retry, "~> 0.15"},
+      {:prometheus_ex, "~> 3.0.5"},
+      {:prometheus_plugs, "~> 1.1.1"}
       # {:telemetry_metrics_prometheus, "~> 0.6"},
     ]
   end
