@@ -26,12 +26,19 @@ defmodule MotivusWbApi do
   end
 
   def worker_users_total do
-    :telemetry.execute([:worker, :users], %{total: get_worker_users_total()}, %{})
+    :telemetry.execute([:worker, :users], %{total: get_worker_users_total(:private)}, %{})
+  end
+
+  def get_worker_users_total(:private) do
+    (Map.keys(ProcessingRegistry.by_worker_user(:private_processing_registry)) ++
+       Map.keys(ThreadPool.by_user(:private_thread_pool)))
+    |> Enum.uniq()
+    |> length()
   end
 
   def get_worker_users_total() do
-    (Map.keys(ProcessingRegistry.by_worker_user(:private_processing_registry)) ++
-       Map.keys(ThreadPool.by_user(:private_thread_pool)))
+    (Map.keys(ProcessingRegistry.by_worker_user(:public_processing_registry)) ++
+       Map.keys(ThreadPool.by_user(:public_thread_pool)))
     |> Enum.uniq()
     |> length()
   end
