@@ -4,7 +4,6 @@ defmodule MotivusWbApi.Application do
   @moduledoc false
 
   use Application
-  alias Telemetry.Metrics
 
   def task_worker_stack(id) do
     task_pool = String.to_atom(id <> "_task_pool")
@@ -94,7 +93,7 @@ defmodule MotivusWbApi.Application do
   def start(_type, _args) do
     Confex.resolve_env!(:motivus_wb_api)
     MotivusWbApi.MetricsExporter.setup()
-    MotivusWbApi.Metrics.TasksQueueInstrumenter.setup()
+    MotivusWbApi.Metrics.WorkerTaskInstrumenter.setup()
 
     children =
       [
@@ -107,8 +106,8 @@ defmodule MotivusWbApi.Application do
         Supervisor.child_spec({MotivusWbApi.CronAbstraction, cron_config_1_ranking()},
           id: cron_config_1_ranking()[:id]
         ),
-        {TelemetryMetricsCloudwatch,
-         [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
+        # {TelemetryMetricsCloudwatch,
+        #  [metrics: metrics(), push_interval: 10_000, namespace: "motivus_wb_api_#{Mix.env()}"]},
         # Start the Telemetry supervisor
         MotivusWbApiWeb.Telemetry
       ] ++
@@ -144,12 +143,12 @@ defmodule MotivusWbApi.Application do
     }
   end
 
-  defp metrics do
-    [
-      Metrics.last_value("nodes.queue.total"),
-      Metrics.last_value("tasks.queue.total"),
-      Metrics.last_value("processing.queue.total"),
-      Metrics.last_value("worker.users.total")
-    ]
-  end
+  # defp metrics do
+  #   [
+  #     Metrics.last_value("nodes.queue.total"),
+  #     Metrics.last_value("tasks.queue.total"),
+  #     Metrics.last_value("processing.queue.total"),
+  #     Metrics.last_value("worker.users.total")
+  #   ]
+  # end
 end

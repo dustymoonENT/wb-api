@@ -11,6 +11,8 @@ defmodule MotivusWbApi.ThreadPool do
   use GenServer
   alias MotivusWbApi.ThreadPool.Thread
 
+  import MotivusWbApi.Metrics.WorkerTaskInstrumenter, only: [update_metric_task: 1]
+
   def start_link(opts) do
     GenServer.start_link(__MODULE__, [], opts)
   end
@@ -59,6 +61,7 @@ defmodule MotivusWbApi.ThreadPool do
 
   @impl true
   def init(stack) do
+    update_metric_task(stack |> length)
     {:ok, stack}
   end
 
@@ -66,6 +69,7 @@ defmodule MotivusWbApi.ThreadPool do
   def handle_call(:pop, _from, threads) do
     try do
       [head | tail] = threads
+      update_metric_task(tail |> length)
       {:reply, head, tail}
     rescue
       MatchError -> {:reply, :error, []}
@@ -79,6 +83,7 @@ defmodule MotivusWbApi.ThreadPool do
 
   @impl true
   def handle_call(:clear, _from, _threads) do
+    update_metric_task(0)
     {:reply, [], []}
   end
 
@@ -98,9 +103,11 @@ defmodule MotivusWbApi.ThreadPool do
   def handle_cast({:push, thread}, threads) do
     case length(threads) do
       0 ->
+        update_metric_task(1)
         {:noreply, [thread]}
 
-      _ ->
+      l ->
+        update_metric_task(l + 1)
         {:noreply, threads ++ [thread]}
     end
   end
@@ -109,20 +116,27 @@ defmodule MotivusWbApi.ThreadPool do
   def handle_cast({:push_top, thread}, threads) do
     case length(threads) do
       0 ->
+        update_metric_task(1)
         {:noreply, [thread]}
 
-      _ ->
+      l ->
+        update_metric_task(l + 1)
         {:noreply, [thread] ++ threads}
     end
   end
 
   @impl true
   def handle_cast({:drop, id}, threads) do
-    {:noreply, Enum.reject(threads, fn t -> t.channel_id == id end)}
+    threads = Enum.reject(threads, fn t -> t.channel_id == id end)
+    update_metric_task(threads |> length)
+
+    {:noreply, threads}
   end
 
   @impl true
   def handle_cast({:drop, channel_id, tid}, threads) do
-    {:noreply, Enum.reject(threads, fn t -> t.channel_id == channel_id and t.tid == tid end)}
+    threads = Enum.reject(threads, fn t -> t.channel_id == channel_id and t.tid == tid end)
+    update_metric_task(threads |> length)
+    {:noreply, threads}
   end
 end

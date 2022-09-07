@@ -2,6 +2,8 @@ defmodule MotivusWbApi.ProcessingRegistry do
   use GenServer
   alias MotivusWbApi.TaskPool.Task
 
+  import MotivusWbApi.Metrics.WorkerTaskInstrumenter, only: [update_metric_task: 1]
+
   def start_link(opts) do
     GenServer.start_link(__MODULE__, %{}, opts)
   end
@@ -43,10 +45,15 @@ defmodule MotivusWbApi.ProcessingRegistry do
     GenServer.call(pid, :by_worker_user)
   end
 
+  @spec to_list(map()) :: [map()]
+  defp to_list(map),
+    do: map |> Enum.map(fn {_node_id, threads} -> threads end) |> Enum.flat_map(fn t -> t end)
+
   # Callbacks
 
   @impl true
   def init(map \\ %{}) do
+    update_metric_task(map |> to_list)
     {:ok, map}
   end
 
@@ -54,9 +61,7 @@ defmodule MotivusWbApi.ProcessingRegistry do
   def handle_call(action, _from, map) do
     case action do
       :list ->
-        flat_map =
-          map |> Enum.map(fn {_node_id, threads} -> threads end) |> Enum.flat_map(fn t -> t end)
-
+        flat_map = to_list(map)
         {:reply, flat_map, map}
 
       :by_worker_user ->
@@ -71,8 +76,14 @@ defmodule MotivusWbApi.ProcessingRegistry do
 
       {:drop, key} ->
         case Map.has_key?(map, key) do
-          true -> {:reply, Map.fetch(map, key), Map.drop(map, [key])}
-          false -> {:reply, {:error, "No key"}, map}
+          true ->
+            reply = Map.fetch(map, key)
+            map = Map.drop(map, [key])
+            update_metric_task(map |> to_list)
+            {:reply, reply, map}
+
+          false ->
+            {:reply, {:error, "No key"}, map}
         end
 
       {:drop, channel_id, tid} ->
@@ -81,8 +92,13 @@ defmodule MotivusWbApi.ProcessingRegistry do
         new_tasks = Map.drop(tasks, [tid])
 
         case Map.has_key?(tasks, tid) do
-          true -> {:reply, task, Map.put(map, channel_id, new_tasks)}
-          false -> {:reply, {:error, "No channel_id"}, map}
+          true ->
+            map = Map.put(map, channel_id, new_tasks)
+            update_metric_task(map |> to_list)
+            {:reply, task, map}
+
+          false ->
+            {:reply, {:error, "No channel_id"}, map}
         end
 
       {:drop_by, key, value} ->
@@ -108,6 +124,8 @@ defmodule MotivusWbApi.ProcessingRegistry do
             end
           )
 
+        update_metric_task(new_state |> to_list)
+
         {:reply, Map.get(partition, true, []), new_state}
 
       :clear ->
@@ -119,6 +137,10 @@ defmodule MotivusWbApi.ProcessingRegistry do
   def handle_cast({:put, node_id, tid, task}, map) do
     tasks = Map.get(map, node_id) || %{}
     new_value = Map.put(tasks, tid, task)
-    {:noreply, Map.put(map, node_id, new_value)}
+
+    map = Map.put(map, node_id, new_value)
+    update_metric_task(map |> to_list)
+
+    {:noreply, map}
   end
 end
