@@ -67,8 +67,8 @@ defmodule MotivusWbApi.MixProject do
       {:uuid, "~> 1.1"},
       {:retry, "~> 0.15"},
       {:prometheus_ex, "~> 3.0.5"},
-      {:prometheus_plugs, "~> 1.1.1"},
-      {:telemetry_metrics_prometheus, "~> 0.6"}
+      {:prometheus_plugs, "~> 1.1.1"}
+      # {:telemetry_metrics_prometheus, "~> 0.6"}
     ]
   end
 
