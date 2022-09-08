@@ -174,11 +174,11 @@ defmodule MotivusWbApi.CommonActions do
     task
   end
 
-  def update_task_result(%Task{} = task, %Result{} = result) do
+  def update_task_result(%Task{} = task, %Result{} = _result) do
     Repo.get_by!(Processing.Task, id: task.task_id)
     |> Ecto.Changeset.change(%{
-      date_out: DateTime.truncate(DateTime.utc_now(), :second),
-      result: result.body
+      date_out: DateTime.truncate(DateTime.utc_now(), :second)
+      # result: result.body
     })
     |> Repo.update()
 

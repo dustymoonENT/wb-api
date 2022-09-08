@@ -65,6 +65,7 @@ config :cors_plug,
 
 config :prometheus, MotivusWbApi.Metrics.PhoenixInstrumenter,
   controller_call_labels: [:controller, :action],
+  channel_join_labels: [:channel, :topic, :transport],
   duration_buckets: [
     10,
     25,
