@@ -92,8 +92,19 @@ defmodule MotivusWbApi.Application do
 
   def start(_type, _args) do
     Confex.resolve_env!(:motivus_wb_api)
-    MotivusWbApi.MetricsExporter.setup()
     MotivusWbApi.Metrics.WorkerTaskInstrumenter.setup()
+    MotivusWbApi.Metrics.PhoenixInstrumenter.setup()
+    MotivusWbApi.Metrics.PipelineInstrumenter.setup()
+    MotivusWbApi.Metrics.RepoInstrumenter.setup()
+    MotivusWbApi.PrometheusExporter.setup()
+
+    :ok =
+      :telemetry.attach(
+        "prometheus-ecto",
+        [:motivus_wb_api, :repo, :query],
+        &MotivusWbApi.Metrics.RepoInstrumenter.handle_event/4,
+        %{}
+      )
 
     children =
       [

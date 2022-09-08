@@ -61,8 +61,9 @@ defmodule MotivusWbApiWeb.Endpoint do
     |> Enum.map(fn {_, origin} -> origin end)
   end
 
-  plug MotivusWbApi.MetricsExporter
   plug CORSPlug
-  plug MotivusWbApiWeb.Router
 
+  plug MotivusWbApi.PrometheusExporter
+  plug MotivusWbApi.Metrics.PipelineInstrumenter
+  plug MotivusWbApiWeb.Router
 end

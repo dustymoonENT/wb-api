@@ -33,14 +33,14 @@ defmodule MotivusWbApi.Metrics.WorkerTaskInstrumenter do
     )
   end
 
-  @spec set_size(atom(), non_neg_integer() | []) :: no_return()
+  @spec set_size(atom(), non_neg_integer() | list()) :: no_return()
   def set_size(name, value) when is_integer(value) do
     Gauge.set([name: name], value)
   end
 
   def set_size(name, value) when is_list(value), do: set_size(name, value |> length)
 
-  @spec update_metric_task(non_neg_integer() | []) :: {:ok, pid()}
+  @spec update_metric_task(non_neg_integer() | list()) :: {:ok, pid()}
   def update_metric_task(value),
     do:
       Task.start(__MODULE__, :set_size, [

@@ -83,7 +83,7 @@ defmodule MotivusWbApi.TaskPool do
   @impl true
   def handle_cast({:push, %Task{} = task}, tasks) do
     tasks = [task | tasks]
-    update_metric_task(tasks)
+    update_metric_task(tasks |> length)
     {:noreply, tasks}
   end
 end

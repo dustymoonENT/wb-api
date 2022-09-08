@@ -29,7 +29,10 @@ defmodule MotivusWbApi.MixProject do
         :ueberauth_facebook,
         :confex,
         :retry,
-        :prometheus_plugs
+        :prometheus_plugs,
+        :prometheus_ex,
+        :prometheus_phoenix,
+        :prometheus_ecto
       ]
     ]
   end
@@ -67,7 +70,10 @@ defmodule MotivusWbApi.MixProject do
       {:uuid, "~> 1.1"},
       {:retry, "~> 0.15"},
       {:prometheus_ex, "~> 3.0.5"},
-      {:prometheus_plugs, "~> 1.1.1"}
+      {:prometheus_plugs, "~> 1.1.1"},
+      {:prometheus_phoenix, "~> 1.3.0"},
+      {:prometheus_ecto, "~> 1.4.3"},
+      {:dialyxir, "~> 1.1.0", only: :dev, runtime: false}
       # {:telemetry_metrics_prometheus, "~> 0.6"}
     ]
   end
