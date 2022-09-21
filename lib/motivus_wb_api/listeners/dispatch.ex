@@ -1,7 +1,12 @@
 defmodule MotivusWbApi.Listeners.Dispatch do
+  @moduledoc """
+  Listens for dispatch events.
+
+  This module is responsible for delivering tasks to workers and keep track of the assignment.
+  """
   use GenServer
   alias Phoenix.PubSub
-  import MotivusWbApi.CommonActions
+  import MotivusWbApi.Processing.Actions
 
   def start_link(context) do
     GenServer.start_link(__MODULE__, context)

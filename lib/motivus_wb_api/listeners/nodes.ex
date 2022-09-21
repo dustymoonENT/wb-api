@@ -1,9 +1,19 @@
 defmodule MotivusWbApi.Listeners.Node do
+  @moduledoc """
+  Listens for node activity.
+
+  This module is responsible for reacting to events of the workers in the cluster, like new threads available and dropped workers.
+
+  Some of the concepts used here are:
+  - *Worker*: A machine that can provide computing resources.
+  - *Thread*: A single unit of processing. A worker can provide many threads.
+  - *Channel*: The communication medium between the cluster and the worker.
+  """
   use GenServer
   alias Phoenix.PubSub
   alias MotivusWbApi.ThreadPool.Thread
 
-  import MotivusWbApi.CommonActions
+  import MotivusWbApi.Processing.Actions
 
   def start_link(context) do
     GenServer.start_link(__MODULE__, context)

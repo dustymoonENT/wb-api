@@ -2,6 +2,8 @@ defmodule MotivusWbApi.Processing.Task do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{}
+
   schema "tasks" do
     field :attempts, :integer
     field :date_in, :utc_datetime

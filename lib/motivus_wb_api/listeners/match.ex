@@ -1,6 +1,9 @@
 defmodule MotivusWbApi.Listeners.Match do
+  @moduledoc """
+  Listens for events on matching tasks to threads.
+  """
   use GenServer
-  import MotivusWbApi.CommonActions
+  import MotivusWbApi.Processing.Actions
 
   def start_link(context) do
     GenServer.start_link(__MODULE__, context)

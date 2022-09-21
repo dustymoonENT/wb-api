@@ -1,4 +1,5 @@
 defmodule MotivusWbApi.Users.ApplicationToken do
+  @deprecated "Application Tokens are moved now to Marketplace implementation"
   use Ecto.Schema
   import Ecto.Changeset
 

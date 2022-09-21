@@ -1,10 +1,15 @@
 defmodule MotivusWbApi.Listeners.Task do
+  @moduledoc """
+  Listens for task events.
+
+  The listener is responsible for keeping track of the tasks and react when a task is queued for completion, unable to finish and cancelled by the client.
+  """
   use GenServer
   alias Phoenix.PubSub
   alias MotivusWbApi.TaskPool.TaskDefinition
   alias MotivusWbApi.TaskPool.Task
 
-  import MotivusWbApi.CommonActions
+  import MotivusWbApi.Processing.Actions
 
   def start_link(context) do
     GenServer.start_link(__MODULE__, context)

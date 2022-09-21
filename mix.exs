@@ -10,7 +10,16 @@ defmodule MotivusWbApi.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+
+      # Docs
+      name: "Motivus Engine",
+      source_url: "https://github.com/m0tivus/motivus-wb-api",
+      homepage_url: "https://motivus.cl",
+      docs: [
+        # The main page in the docs
+        main: "MotivusWbApi.TaskWorkerSupervisor"
+      ]
     ]
   end
 
@@ -73,8 +82,9 @@ defmodule MotivusWbApi.MixProject do
       {:prometheus_plugs, "~> 1.1.1"},
       {:prometheus_phoenix, "~> 1.3.0"},
       {:prometheus_ecto, "~> 1.4.3"},
-      {:dialyxir, "~> 1.1.0", only: :dev, runtime: false}
-      # {:telemetry_metrics_prometheus, "~> 0.6"}
+      {:dialyxir, "~> 1.1.0", only: :dev, runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:ex_doc, "0.27.3", only: :dev, runtime: false}
     ]
   end
 

@@ -1,6 +1,11 @@
 defmodule MotivusWbApi.Listeners.Validation do
+  @moduledoc """
+  Listens for task validity events.
+
+  A client can manifest if a task result is valid or not, this module is responsible for this interaction.
+  """
   use GenServer
-  import MotivusWbApi.CommonActions
+  import MotivusWbApi.Processing.Actions
 
   def start_link(context) do
     GenServer.start_link(__MODULE__, context)

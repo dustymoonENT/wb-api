@@ -1,8 +1,13 @@
 defmodule MotivusWbApi.Listeners.Completed do
+  @moduledoc """
+  Listens for task completion events.
+
+  This module is responsible for delivering results back to the client and keep track of task completion.
+  """
   use GenServer
   alias MotivusWbApiWeb.Channels.Worker.Result
   alias MotivusWbApi.ThreadPool.Thread
-  import MotivusWbApi.CommonActions
+  import MotivusWbApi.Processing.Actions
 
   def start_link(context) do
     GenServer.start_link(__MODULE__, context)
