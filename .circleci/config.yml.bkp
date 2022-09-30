@@ -1,0 +1,75 @@
+# Elixir CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-elixir/ for more details
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@1.4.1
+  aws-ecr: circleci/aws-ecr@6.12.2
+
+jobs:
+  test:
+    docker:
+      # specify the version here
+      - image: circleci/elixir:1.10.4
+        environment: # environment variables for primary container
+          MIX_ENV: test
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      - image: circleci/postgres:12.4
+        environment: # environment variables for database
+          POSTGRES_USER: postgres
+          POSTGRES_DB: motivus_wb_api_test
+          POSTGRES_PASSWORD: postgres
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: mix local.hex --force  # install Hex locally (without prompt)
+      - run: mix local.rebar --force  # fetch a copy of rebar (without prompt)
+      # specify any bash command here prefixed with `run: `
+      - run: mix deps.get
+      - run: # special utility that stalls main process until DB is ready
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run: mix ecto.setup
+      - run: mix test
+  cdk-deploy:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: sudo apt-get update
+      - run: sudo apt install -y nodejs npm
+      - run: sudo npm install -g aws-cdk@2.27.0
+      - run: CI="" cd deployment && pip install -r requirements.txt && cdk bootstrap && cdk deploy --progress events --ci --require-approval never
+      - aws-ecr/build-and-push-image:
+          repo: motivus-wb-api
+          skip-when-tags-exist: false
+          tag: 'latest'
+  ecs-update-service:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          profile-name: default
+      - run: aws ecs update-service --cluster motivus-wb-api-cluster --service motivus-wb-api-service --force-new-deployment
+
+workflows:
+  main:
+    jobs:
+      - test
+      - cdk-deploy:
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - test
+      - ecs-update-service:
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - cdk-deploy
