@@ -4,8 +4,10 @@
 version: 2.1
 
 orbs:
-  aws-cli: circleci/aws-cli@1.4.1
-  aws-ecr: circleci/aws-ecr@6.12.2
+  python: circleci/python@0.2.1
+  gcp-gke: circleci/gcp-gke@0.2.0
+  gcr: circleci/gcp-gcr@0.15.0
+  gcp-cli: circleci/gcp-cli@2.4.1
 
 jobs:
   test:
@@ -17,7 +19,7 @@ jobs:
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
-      - image: circleci/postgres:12.4
+      - image: circleci/postgres:12.9
         environment: # environment variables for database
           POSTGRES_USER: postgres
           POSTGRES_DB: motivus_wb_api_test
@@ -25,8 +27,8 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: mix local.hex --force  # install Hex locally (without prompt)
-      - run: mix local.rebar --force  # fetch a copy of rebar (without prompt)
+      - run: mix local.hex --force # install Hex locally (without prompt)
+      - run: mix local.rebar --force # fetch a copy of rebar (without prompt)
       # specify any bash command here prefixed with `run: `
       - run: mix deps.get
       - run: # special utility that stalls main process until DB is ready
@@ -34,42 +36,97 @@ jobs:
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run: mix ecto.setup
       - run: mix test
-  cdk-deploy:
-    executor: aws-cli/default
+
+  deploy:
+    machine:
+      docker_layer_caching: false
+    parameters:
+      service-name:
+        default: ci_marketplace
+        description: Service name used to deploy to kubernetes
+        type: string
+      namespace:
+        default: marketplace
+        description: Kubernetes namespace
+        type: string
+      cluster-name:
+        default: motivus-cluster
+        description: Kubernetes cluster name
+        type: string
+      cluster-context:
+        default: motivus-cluster
+        description: Kubernetes cluster context
+        type: string
+      environment:
+        default: prod
+        description: Deployment environment (i.e. Skaffold profile)
+        type: string
+      dockerhub_user:
+        default: DOCKER_LOGIN
+        description: The name of the env var containing dockerhub user for authenticated pulls
+        type: string
+      dockerhub_password:
+        default: DOCKER_PASSWORD
+        description: The name of the env var containing dockerhub password for authenticated pulls
+        type: string
     steps:
       - checkout
-      - setup_remote_docker
-      - run: sudo apt-get update
-      - run: sudo apt install -y nodejs npm
-      - run: sudo npm install -g aws-cdk@2.27.0
-      - run: CI="" cd deployment && pip install -r requirements.txt && cdk bootstrap && cdk deploy --progress events --ci --require-approval never
-      - aws-ecr/build-and-push-image:
-          repo: motivus-wb-api
-          skip-when-tags-exist: false
-          tag: 'latest'
-  ecs-update-service:
-    executor: aws-cli/default
-    steps:
-      - checkout
-      - aws-cli/setup:
-          profile-name: default
-      - run: aws ecs update-service --cluster motivus-wb-api-cluster --service motivus-wb-api-service --force-new-deployment
+      #- pull_submodules
+      # - docker/check:
+      #     docker-username: << parameters.dockerhub_user >>
+      #     docker-password: << parameters.dockerhub_password >>
+      - gcp-gke/install
+      - gcp-gke/init
+      - gcr/gcr-auth:
+          registry-url: southamerica-west1-docker.pkg.dev
+      - run:
+          name: login docker registry
+          command: gcloud auth configure-docker southamerica-west1-docker.pkg.dev
+      - run:
+          name: Install Kustomize
+          command: curl -Lo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v3.2.3/kustomize_kustomize.v3.2.3_linux_amd64 && chmod +x kustomize && sudo mv kustomize /usr/local/bin
+      - run:
+          name: Install Skaffold
+          command: curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.39.2/skaffold-linux-amd64 && chmod +x skaffold && sudo mv skaffold /usr/local/bin
+      - run:
+          name: Authorise GKE
+          command: gcloud container clusters get-credentials << parameters.cluster-name >> --region $GOOGLE_REGION
+      - run:
+          name: Set cluster details
+          command: kubectl config set-context << parameters.cluster-context >> --namespace=<< parameters.namespace >>
+      # - run:
+      #     name: Run pre-deployment jobs (will build)
+      #     command: skaffold run -f ./skaffold.yaml -p << parameters.environment >>-pre-deployment
+      # - run:
+      #     name: Wait for migrations job to succeed
+      #     command: kubectl wait --for=condition=complete --timeout=300s job/<< parameters.service-name >>-migrations --namespace=<< parameters.namespace >>
+      # - run:
+      #     name: Wait for collectstatic job to succeed
+      #     command: kubectl wait --for=condition=complete --timeout=300s job/<< parameters.service-name >>-collectstatic --namespace=<< parameters.namespace >>
+      - run:
+          name: Enable Docker deamon
+          command: sudo ./docker_enable.sh
+      - run:
+          name: Auth Docker
+          command: docker-credential-gcr configure-docker --registries=southamerica-west1-docker.pkg.dev
+      - run:
+          name: Auth Docker token
+          command: docker-credential-gcr config --token-source="gcloud"
+      - run:
+          name: Rollout updated deployment
+          command: skaffold run -f ./skaffold.yaml -p << parameters.environment >>
+      # - run:
+      #     name: Wait for rollout of deployment to succeed
+      #     command: kubectl rollout status deployment/<< parameters.service-name >>-django
 
 workflows:
   main:
     jobs:
-      - test
-      - cdk-deploy:
+      #- test
+      - deploy:
           filters:
             branches:
               only:
-                - main
-          requires:
-            - test
-      - ecs-update-service:
-          filters:
-            branches:
-              only:
-                - main
-          requires:
-            - cdk-deploy
+                - sc-1851/skaffold
+          #requires:
+          #- test

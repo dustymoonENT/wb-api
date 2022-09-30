@@ -9,18 +9,35 @@ profiles:
         useDockerCLI: false
         useBuildkit: false
       artifacts:
-      - image: motivus/wb-api
-        docker:
-          dockerfile: Dockerfile
+        - image: motivus/wb-api
+          docker:
+            dockerfile: Dockerfile
     deploy:
       kubectl:
         manifests:
-        - k8s/00-namespace.yaml
-        - k8s/01-postgres-configmap.yaml
-        - k8s/02-postgres-volume.yaml
-        - k8s/03-postgres-pvc.yaml
-        - k8s/04-postgres-deployment.yaml
-        - k8s/05-postgres-service.yaml
-        - k8s/07-wb-api-statefulset.yaml
-        - k8s/08-ingress-rule.yaml
-        - k8s/09-wb-api-service.yaml
+          - k8s/00-namespace.yaml
+          - k8s/01-postgres-configmap.yaml
+          - k8s/02-postgres-volume.yaml
+          - k8s/03-postgres-pvc.yaml
+          - k8s/04-postgres-deployment.yaml
+          - k8s/05-postgres-service.yaml
+          - k8s/07-wb-api-statefulset.yaml
+          - k8s/08-ingress-rule.yaml
+          - k8s/09-wb-api-service.yaml
+  - name: prod
+    build:
+      local:
+        useDockerCLI: false
+        useBuildkit: false
+      artifacts:
+        - image: southamerica-west1-docker.pkg.dev/motivus-257216/motivus-repo/marketplace-api
+          docker:
+            dockerfile: Dockerfile
+    deploy:
+      kubectl:
+        manifests:
+          - k8s/prod/00-namespace.yaml
+          - k8s/prod/06-wb-api-certificate.yaml
+          - k8s/prod/07-wb-api-statefulset.yaml
+          - k8s/prod/08-ingress-rule.yaml
+          - k8s/prod/09-wb-api-service.yaml
