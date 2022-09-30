@@ -122,11 +122,11 @@ jobs:
 workflows:
   main:
     jobs:
-      #- test
+      - test
       - deploy:
           filters:
             branches:
               only:
-                - sc-1851/skaffold
-          #requires:
-          #- test
+                - main
+          requires:
+            - test
