@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: wb-api
+  name: wb-api-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: motivus-proxy-wb
+    networking.gke.io/managed-certificates: wb-managed-cert
+    kubernetes.io/ingress.class: "gce"
+spec:
+  rules:
+    - host: waterbear.api.motivus.cl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wb-api
+                port:
+                  number: 80
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  namespace: wb-api
+  name: wb-api-backend-config
+spec:
+  timeoutSec: 2000000000
