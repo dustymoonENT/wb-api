@@ -30,7 +30,7 @@ profiles:
         useDockerCLI: false
         useBuildkit: false
       artifacts:
-        - image: southamerica-west1-docker.pkg.dev/motivus-257216/motivus-repo/marketplace-api
+        - image: southamerica-west1-docker.pkg.dev/motivus-257216/motivus-repo/wb-api
           docker:
             dockerfile: Dockerfile
     deploy:
