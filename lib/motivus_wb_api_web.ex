@@ -24,6 +24,7 @@ defmodule MotivusWbApiWeb do
       import Plug.Conn
       import MotivusWbApiWeb.Gettext
       alias MotivusWbApiWeb.Router.Helpers, as: Routes
+      import Phoenix.LiveView.Controller
     end
   end
 
@@ -39,6 +40,7 @@ defmodule MotivusWbApiWeb do
 
       # Include shared imports and aliases for views
       unquote(view_helpers())
+      import Phoenix.LiveView.Helpers
     end
   end
 
@@ -48,6 +50,7 @@ defmodule MotivusWbApiWeb do
 
       import Plug.Conn
       import Phoenix.Controller
+      import Phoenix.LiveView.Router
     end
   end
 

@@ -41,7 +41,8 @@ defmodule MotivusWbApi.MixProject do
         :prometheus_plugs,
         :prometheus_ex,
         :prometheus_phoenix,
-        :prometheus_ecto
+        :prometheus_ecto,
+        :os_mon
       ]
     ]
   end
@@ -84,7 +85,8 @@ defmodule MotivusWbApi.MixProject do
       {:prometheus_ecto, "~> 1.4.3"},
       {:dialyxir, "~> 1.1.0", only: :dev, runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:ex_doc, "0.27.3", only: :dev, runtime: false}
+      {:ex_doc, "0.27.3", only: :dev, runtime: false},
+      {:phoenix_live_view, "~> 0.15"}
     ]
   end
 
