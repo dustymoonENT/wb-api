@@ -46,7 +46,7 @@ end
 
 print_user_token = fn %{user: user, token: token} -> IO.inspect(token, label: user.name) end
 
-if Mix.env() in [:prod] do
+if Mix.env() in [:dev] do
   trusted_workers = [
     {"gcp@motivus.cl", "Google Cloud Platform workers"},
     {"azure@motivus.cl", "Azure workers"},
